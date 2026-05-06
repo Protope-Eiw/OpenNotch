@@ -1,6 +1,7 @@
 import Combine
 import Foundation
 import Darwin
+import IOKit.ps
 
 @MainActor
 final class SystemMonitorViewModel: ObservableObject {
@@ -8,6 +9,8 @@ final class SystemMonitorViewModel: ObservableObject {
     @Published private(set) var memoryUsage: Double = 0
     @Published private(set) var uploadSpeed: Double = 0
     @Published private(set) var downloadSpeed: Double = 0
+    @Published private(set) var batteryLevel: Int = 0
+    @Published private(set) var isCharging: Bool = false
 
     private var monitorTask: Task<Void, Never>?
     private var previousNetworkStats: NetworkStats?
@@ -37,6 +40,19 @@ final class SystemMonitorViewModel: ObservableObject {
         cpuUsage = readCPUUsage()
         memoryUsage = readMemoryUsage()
         updateNetworkSpeed()
+        readBattery()
+    }
+
+    private func readBattery() {
+        let info = IOPSCopyPowerSourcesInfo().takeRetainedValue()
+        let list = IOPSCopyPowerSourcesList(info).takeRetainedValue() as [CFTypeRef]
+        for source in list {
+            guard let desc = IOPSGetPowerSourceDescription(info, source)
+                    .takeUnretainedValue() as? [String: Any] else { continue }
+            batteryLevel = desc[kIOPSCurrentCapacityKey] as? Int ?? batteryLevel
+            isCharging   = desc[kIOPSIsChargingKey]      as? Bool ?? isCharging
+            return
+        }
     }
 
     private func readCPUUsage() -> Double {
