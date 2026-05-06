@@ -48,6 +48,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func applicationDidFinishLaunching(_ notification: Notification) {
+        NSRunningApplication.runningApplications(withBundleIdentifier: Bundle.main.bundleIdentifier ?? "")
+            .filter { $0 != .current }
+            .forEach { $0.forceTerminate() }
+
         applyActivationPolicy(
             showsDockIcon: isRunningUITests || settingsViewModel.application.isDockIconVisible
         )
@@ -84,6 +88,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         if !isRunningUITests {
             notchEventCoordinator.checkFirstLaunch()
+            container.systemMonitorViewModel.startMonitoring()
         }
 
         lockScreenManager.startMonitoring()
@@ -98,6 +103,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         timerViewModel.stopMonitoring()
         screenRecordingViewModel.stopMonitoring()
         hardwareHUDMonitor.stopMonitoring()
+        container.systemMonitorViewModel.stopMonitoring()
         if !isRunningUITests {
             lockScreenPanelManager.invalidate()
             lockScreenLiveActivityWindowManager.invalidate()

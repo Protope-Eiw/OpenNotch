@@ -17,6 +17,7 @@ enum GeneralSettingsStorage {
         static let appLanguage = "settings.general.language.app"
         static let notchAnimationPreset = "settings.general.notchAnimationPreset"
         static let hideNotchInFullscreenEnabled = "settings.general.hideNotchInFullscreen"
+        static let dashboardOpenMode = "settings.general.dashboardOpenMode"
         static let notchTapToExpandEnabled = "settings.notch.gestures.tapToExpand"
         static let notchExpandInteraction = "settings.notch.gestures.expandInteraction"
         static let notchPressHoldDuration = "settings.notch.gestures.pressHoldDuration"
@@ -112,6 +113,7 @@ enum GeneralSettingsStorage {
         Keys.appLanguage: DynamicNotchLanguage.system.rawValue,
         Keys.notchAnimationPreset: NotchAnimationPreset.balanced.rawValue,
         Keys.hideNotchInFullscreenEnabled: false,
+        Keys.dashboardOpenMode: DashboardOpenMode.hover.rawValue,
         Keys.notchTapToExpandEnabled: true,
         Keys.notchExpandInteraction: NotchExpandInteraction.pressAndHold.rawValue,
         Keys.notchPressHoldDuration: 0.25,

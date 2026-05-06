@@ -36,7 +36,8 @@ extension AppDelegate {
                 nowPlayingViewModel: nowPlayingViewModel,
                 timerViewModel: timerViewModel,
                 screenRecordingViewModel: screenRecordingViewModel,
-                lockScreenManager: lockScreenManager
+                lockScreenManager: lockScreenManager,
+                systemMonitorViewModel: container.systemMonitorViewModel
             )
         )
 

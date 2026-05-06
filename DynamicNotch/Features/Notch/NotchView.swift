@@ -19,9 +19,19 @@ struct NotchView: View {
     @ObservedObject var timerViewModel: TimerViewModel
     @ObservedObject var screenRecordingViewModel: ScreenRecordingViewModel
     @ObservedObject var lockScreenManager: LockScreenManager
-    
+    @ObservedObject var systemMonitorViewModel: SystemMonitorViewModel
+
+    @State private var dashboardOpen = false
+    @State private var dashboardTab: DashboardTab = .system
+    @State private var pillHovered = false
+    @State private var notchHovered = false
+    @State private var dashboardHoverTask: Task<Void, Never>? = nil
+    private let pillExpandExtra: CGFloat = 80
+
     var body: some View {
         ZStack(alignment: .top) {
+            pillStrip.offset(y: 1)
+
             notchBody
                 .environment(\.notchScale, notchViewModel.notchModel.scale)
                 .background(
@@ -54,13 +64,13 @@ struct NotchView: View {
                                 guard settingsViewModel.mediaAndFiles.dragAndDropActivityMode.showsAirDrop else {
                                     return false
                                 }
-                                
+
                                 return airDropController.handlePasteboardDrop(pasteboard)
                             case .tray:
                                 guard settingsViewModel.mediaAndFiles.dragAndDropActivityMode.showsTray else {
                                     return false
                                 }
-                                
+
                                 return airDropController.handleTrayDrop(pasteboard)
                             }
                         }
@@ -81,6 +91,153 @@ struct NotchView: View {
 }
 
 private extension NotchView {
+    var baseWidth:  CGFloat { notchViewModel.notchModel.baseWidth  > 0 ? notchViewModel.notchModel.baseWidth  : 170 }
+    var baseHeight: CGFloat { notchViewModel.notchModel.baseHeight > 0 ? notchViewModel.notchModel.baseHeight : 37  }
+
+    // Sizing — update leftIntrinsicWidth or rightIntrinsicWidth to add more content
+    var ringSize:       CGFloat { baseHeight - 6 }
+    var outerPad:       CGFloat { 10 }
+    var notchClearance: CGFloat { ceil(notchViewModel.interactiveCornerRadius.top) + 3 }
+    var leftIntrinsicWidth:  CGFloat { outerPad + 65 }   // two-line speed text ~65pt wide
+    var rightIntrinsicWidth: CGFloat { notchClearance + ringSize + 8 + ringSize + outerPad }
+    var sideWidth: CGFloat { max(leftIntrinsicWidth, rightIntrinsicWidth) }
+    var activeSideWidth: CGFloat { dashboardOpen ? sideWidth + pillExpandExtra : sideWidth }
+
+    // One unified black strip: [left content | notch bridge | right content]
+    // The notch body renders on top — the bridge section is invisible (black on black).
+    var pillStrip: some View {
+        let notchBridgeWidth = max(0,
+            notchViewModel.presentedNotchSize.width - 2 * notchViewModel.interactiveCornerRadius.top
+        )
+        return VStack(spacing: 0) {
+            HStack(spacing: 0) {
+                // Left: two-line speed text, colour-coded by rate
+                HStack(spacing: 0) {
+                    Color.clear.frame(width: outerPad)
+                    VStack(alignment: .leading, spacing: 1) {
+                        HStack(spacing: 3) {
+                            Image(systemName: "arrowtriangle.up.fill")
+                                .font(.system(size: 6))
+                                .foregroundStyle(.white.opacity(0.5))
+                            Text(systemMonitorViewModel.formattedSpeed(systemMonitorViewModel.uploadSpeed))
+                                .foregroundStyle(speedColor(systemMonitorViewModel.uploadSpeed))
+                        }
+                        HStack(spacing: 3) {
+                            Image(systemName: "arrowtriangle.down.fill")
+                                .font(.system(size: 6))
+                                .foregroundStyle(.white.opacity(0.5))
+                            Text(systemMonitorViewModel.formattedSpeed(systemMonitorViewModel.downloadSpeed))
+                                .foregroundStyle(speedColor(systemMonitorViewModel.downloadSpeed))
+                        }
+                    }
+                    .font(.system(size: 10, weight: .medium, design: .monospaced))
+                    Spacer(minLength: 0)
+                }
+                .frame(width: activeSideWidth, height: baseHeight)
+                .contentShape(Rectangle())
+                .onTapGesture { toggleDashboard() }
+
+                // Bridge: hidden under the notch — notch body handles its own tap
+                Color.clear.frame(width: notchBridgeWidth, height: baseHeight)
+
+                // Right: CPU + MEM rings
+                HStack(spacing: 0) {
+                    Color.clear.frame(width: notchClearance)
+                    ProgressRing(
+                        progress: systemMonitorViewModel.cpuUsage,
+                        color: pillColor(systemMonitorViewModel.cpuUsage, warn: 50, danger: 80),
+                        label: "CPU"
+                    )
+                    .frame(width: ringSize, height: ringSize)
+                    Color.clear.frame(width: 8)
+                    ProgressRing(
+                        progress: systemMonitorViewModel.memoryUsage,
+                        color: pillColor(systemMonitorViewModel.memoryUsage, warn: 70, danger: 85),
+                        label: "MEM"
+                    )
+                    .frame(width: ringSize, height: ringSize)
+                    Color.clear.frame(width: outerPad)
+                }
+                .frame(width: activeSideWidth, height: baseHeight)
+                .contentShape(Rectangle())
+                .onTapGesture { toggleDashboard() }
+            }
+
+            if dashboardOpen {
+                DashboardPanelView(
+                    systemMonitorViewModel: systemMonitorViewModel,
+                    selectedTab: $dashboardTab
+                )
+                .frame(height: 180)
+                .transition(.opacity)
+            }
+        }
+        .background(Color.black)
+        .clipShape(UnevenRoundedRectangle(
+            topLeadingRadius: 0,
+            bottomLeadingRadius: dashboardOpen ? 16 : 9,
+            bottomTrailingRadius: dashboardOpen ? 16 : 9,
+            topTrailingRadius: 0
+        ))
+        .contentShape(Rectangle())
+        .onHover { hovering in
+            pillHovered = hovering
+            handleHoverChange()
+        }
+    }
+
+    private func toggleDashboard() {
+        dashboardHoverTask?.cancel()
+        dashboardHoverTask = nil
+        let animation: Animation = dashboardOpen
+            ? .spring(response: 0.45, dampingFraction: 1.0)
+            : .spring(response: 0.42, dampingFraction: 0.8)
+        withAnimation(animation) {
+            dashboardOpen.toggle()
+        }
+    }
+
+    private func handleHoverChange() {
+        let hovered = pillHovered || notchHovered
+        dashboardHoverTask?.cancel()
+
+        if !hovered {
+            dashboardHoverTask = Task { @MainActor in
+                try? await Task.sleep(for: .milliseconds(120))
+                guard !Task.isCancelled else { return }
+                withAnimation(.spring(response: 0.45, dampingFraction: 1.0)) {
+                    dashboardOpen = false
+                }
+            }
+            return
+        }
+
+        guard settingsViewModel.application.dashboardOpenMode == .hover else { return }
+
+        dashboardHoverTask = Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(200))
+            guard !Task.isCancelled else { return }
+            withAnimation(.spring(response: 0.42, dampingFraction: 0.8)) {
+                dashboardOpen = true
+            }
+        }
+    }
+
+    func pillColor(_ v: Double, warn: Double, danger: Double) -> Color {
+        v >= danger ? .red : v >= warn ? .orange : .green.opacity(0.9)
+    }
+
+    // Speed colour: green(idle) → cyan → blue → orange → red(saturated)
+    func speedColor(_ bytesPerSec: Double) -> Color {
+        switch bytesPerSec {
+        case ..<100_000:          return .white.opacity(0.6)   // < 100 KB/s  idle
+        case ..<1_000_000:        return .green                // < 1 MB/s
+        case ..<5_000_000:        return .cyan                 // < 5 MB/s
+        case ..<20_000_000:       return .yellow               // < 20 MB/s
+        default:                  return .orange               // ≥ 20 MB/s  heavy
+        }
+    }
+
     @ViewBuilder
     var notchBody: some View {
         notchSurface
@@ -121,6 +278,11 @@ private extension NotchView {
             .environment(\.colorScheme, .dark)
             .animation(notchViewModel.animations.strokeVisibility, value: settingsViewModel.isShowNotchStrokeEnabled)
             .animation(notchViewModel.animations.notchVisibility, value: notchViewModel.showNotch)
+            .simultaneousGesture(TapGesture().onEnded { toggleDashboard() })
+            .onHover { hovering in
+                notchHovered = hovering
+                handleHoverChange()
+            }
     }
     
     var shouldEnableNotchSwipeGestures: Bool {
@@ -257,5 +419,178 @@ private struct NotchEventHandlersView: View {
             .onReceive(lockScreenManager.$event.compactMap { $0 }) { event in
                 notchEventCoordinator.handleLockScreenEvent(event)
             }
+    }
+}
+
+private struct ProgressRing: View {
+    let progress: Double
+    let color: Color
+    let label: String
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .stroke(Color.white.opacity(0.15), lineWidth: 2)
+            Circle()
+                .trim(from: 0, to: min(progress / 100, 1))
+                .stroke(color, style: StrokeStyle(lineWidth: 2, lineCap: .round))
+                .rotationEffect(.degrees(-90))
+                .animation(.easeInOut(duration: 0.4), value: progress)
+            VStack(spacing: 0) {
+                Text("\(Int(progress))")
+                    .font(.system(size: 7.5, weight: .semibold, design: .monospaced))
+                    .foregroundStyle(.white)
+                Text(label)
+                    .font(.system(size: 5, weight: .medium))
+                    .foregroundStyle(.white.opacity(0.6))
+            }
+        }
+    }
+}
+
+// MARK: - Dashboard
+
+private enum DashboardTab: String, CaseIterable {
+    case system   = "System"
+    case calendar = "Calendar"
+    case launcher = "Launcher"
+
+    var icon: String {
+        switch self {
+        case .system:   return "cpu"
+        case .calendar: return "calendar"
+        case .launcher: return "square.grid.2x2"
+        }
+    }
+}
+
+private struct DashboardPanelView: View {
+    @ObservedObject var systemMonitorViewModel: SystemMonitorViewModel
+    @Binding var selectedTab: DashboardTab
+
+    var body: some View {
+        VStack(spacing: 0) {
+            tabBar
+            Color.white.opacity(0.1).frame(height: 0.5)
+            tabContent
+        }
+    }
+
+    private var tabBar: some View {
+        HStack(spacing: 0) {
+            ForEach(DashboardTab.allCases, id: \.self) { tab in
+                Button {
+                    withAnimation(.easeInOut(duration: 0.18)) { selectedTab = tab }
+                } label: {
+                    HStack(spacing: 5) {
+                        Image(systemName: tab.icon).font(.system(size: 11))
+                        Text(tab.rawValue)
+                            .font(.system(size: 11, weight: selectedTab == tab ? .semibold : .regular))
+                    }
+                    .foregroundStyle(selectedTab == tab ? .white : .white.opacity(0.35))
+                    .padding(.vertical, 7)
+                    .frame(maxWidth: .infinity)
+                    .background(selectedTab == tab ? Color.white.opacity(0.1) : .clear)
+                    .animation(.easeInOut(duration: 0.15), value: selectedTab)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var tabContent: some View {
+        switch selectedTab {
+        case .system:
+            systemView.transition(.opacity)
+        case .calendar:
+            placeholder("Calendar")
+        case .launcher:
+            placeholder("App Launcher")
+        }
+    }
+
+    private var systemView: some View {
+        VStack(spacing: 9) {
+            StatBar(
+                label: "CPU",
+                fraction: systemMonitorViewModel.cpuUsage / 100,
+                valueText: "\(Int(systemMonitorViewModel.cpuUsage))%",
+                color: usageColor(systemMonitorViewModel.cpuUsage, warn: 50, danger: 80)
+            )
+            StatBar(
+                label: "MEM",
+                fraction: systemMonitorViewModel.memoryUsage / 100,
+                valueText: "\(Int(systemMonitorViewModel.memoryUsage))%",
+                color: usageColor(systemMonitorViewModel.memoryUsage, warn: 70, danger: 85)
+            )
+            StatBar(
+                label: "NET↑",
+                fraction: min(systemMonitorViewModel.uploadSpeed / 20_000_000, 1),
+                valueText: systemMonitorViewModel.formattedSpeed(systemMonitorViewModel.uploadSpeed),
+                color: netSpeedColor(systemMonitorViewModel.uploadSpeed)
+            )
+            StatBar(
+                label: "NET↓",
+                fraction: min(systemMonitorViewModel.downloadSpeed / 20_000_000, 1),
+                valueText: systemMonitorViewModel.formattedSpeed(systemMonitorViewModel.downloadSpeed),
+                color: netSpeedColor(systemMonitorViewModel.downloadSpeed)
+            )
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 14)
+        .frame(maxWidth: .infinity)
+    }
+
+    private func placeholder(_ label: String) -> some View {
+        Text(label + " — coming soon")
+            .font(.system(size: 12))
+            .foregroundStyle(.white.opacity(0.3))
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private func usageColor(_ v: Double, warn: Double, danger: Double) -> Color {
+        v >= danger ? .red : v >= warn ? .orange : .green.opacity(0.9)
+    }
+
+    private func netSpeedColor(_ bps: Double) -> Color {
+        switch bps {
+        case ..<100_000:    return .white.opacity(0.5)
+        case ..<1_000_000:  return .green
+        case ..<5_000_000:  return .cyan
+        case ..<20_000_000: return .yellow
+        default:            return .orange
+        }
+    }
+}
+
+private struct StatBar: View {
+    let label: String
+    let fraction: Double
+    let valueText: String
+    let color: Color
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Text(label)
+                .font(.system(size: 10, weight: .medium, design: .monospaced))
+                .foregroundStyle(.white.opacity(0.45))
+                .frame(width: 40, alignment: .leading)
+
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(Color.white.opacity(0.1))
+                    Capsule().fill(color)
+                        .frame(width: max(4, geo.size.width * CGFloat(min(fraction, 1))))
+                        .animation(.easeInOut(duration: 0.4), value: fraction)
+                }
+            }
+            .frame(height: 4)
+
+            Text(valueText)
+                .font(.system(size: 10, weight: .semibold, design: .monospaced))
+                .foregroundStyle(.white)
+                .frame(width: 48, alignment: .trailing)
+        }
     }
 }

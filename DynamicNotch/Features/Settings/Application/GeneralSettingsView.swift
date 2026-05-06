@@ -177,6 +177,18 @@ struct GeneralSettingsView: View {
                 isOn: $applicationSettings.isNotchHiddenInFullscreenEnabled,
                 accessibilityIdentifier: "settings.general.hideNotchInFullscreen"
             )
+
+            Divider()
+                .opacity(0.6)
+
+            SettingsMenuRow(
+                title: "Dashboard trigger",
+                description: "Choose whether the system monitor panel opens when you hover over the notch area, or only when you click it.",
+                options: Array(DashboardOpenMode.allCases),
+                optionTitle: { $0.title },
+                accessibilityIdentifier: "settings.general.dashboardOpenMode",
+                selection: $applicationSettings.dashboardOpenMode
+            )
         }
     }
 

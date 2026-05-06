@@ -138,6 +138,12 @@ final class ApplicationSettingsStore: SettingsStoreBase, NotchSettingsProviding 
         }
     }
 
+    @Published var dashboardOpenMode: DashboardOpenMode {
+        didSet {
+            persist(dashboardOpenMode.rawValue, for: GeneralSettingsStorage.Keys.dashboardOpenMode)
+        }
+    }
+
     @Published var notchPressHoldDuration: TimeInterval {
         didSet {
             let clampedValue = Self.clampNotchPressHoldDuration(notchPressHoldDuration)
@@ -277,6 +283,9 @@ final class ApplicationSettingsStore: SettingsStoreBase, NotchSettingsProviding 
         self.notchExpandInteraction = NotchExpandInteraction.resolved(
             defaults.string(forKey: GeneralSettingsStorage.Keys.notchExpandInteraction)
         )
+        self.dashboardOpenMode = DashboardOpenMode.resolved(
+            defaults.string(forKey: GeneralSettingsStorage.Keys.dashboardOpenMode)
+        )
         self.notchPressHoldDuration = Self.clampNotchPressHoldDuration(
             defaults.object(forKey: GeneralSettingsStorage.Keys.notchPressHoldDuration) as? Double ??
             Self.defaultNotchPressHoldDuration
@@ -328,6 +337,9 @@ final class ApplicationSettingsStore: SettingsStoreBase, NotchSettingsProviding 
         )
         isNotchHiddenInFullscreenEnabled = defaultBool(
             for: GeneralSettingsStorage.Keys.hideNotchInFullscreenEnabled
+        )
+        dashboardOpenMode = DashboardOpenMode.resolved(
+            defaultString(for: GeneralSettingsStorage.Keys.dashboardOpenMode)
         )
     }
 

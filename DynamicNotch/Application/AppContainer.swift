@@ -17,6 +17,7 @@ final class AppContainer {
     let screenRecordingViewModel: ScreenRecordingViewModel
     let lockScreenManager: LockScreenManager
     let clockTimerController: any ClockTimerControlling
+    let systemMonitorViewModel = SystemMonitorViewModel()
 
     lazy var hardwareHUDMonitor: HardwareHUDMonitor = {
         let monitor = HardwareHUDMonitor()
@@ -49,6 +50,7 @@ final class AppContainer {
         timerViewModel: timerViewModel,
         lockScreenManager: lockScreenManager
     )
+
 
     lazy var lockScreenPanelManager = LockScreenPanelManager(
         nowPlayingViewModel: nowPlayingViewModel,
