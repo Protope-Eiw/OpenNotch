@@ -37,8 +37,12 @@ struct NotchView: View {
     @StateObject private var pomodoroViewModel = PomodoroViewModel()
     @AppStorage("settings.notchBar.leftWidgets")  private var leftWidgetsRaw  = NotchBarWidget.networkSpeed.rawValue
     @AppStorage("settings.notchBar.rightWidgets") private var rightWidgetsRaw = "cpu,memory"
+    @AppStorage("settings.notchBar.hideWidgets")  private var hideWidgets     = false
     @AppStorage("settings.general.dashboardLastTab")    private var dashboardLastTab    = DashboardTab.system.rawValue
     @AppStorage("settings.general.dashboardDefaultTab") private var dashboardDefaultTab = "last"
+    // Separate show/hide state so widgets only reappear after the notch finishes collapsing
+    @State private var showSideWidgets = true
+    @State private var sideWidgetTask: Task<Void, Never>? = nil
     // Calibrated to match BoringNotch: window=640pt, each side = (640-156)/2 - sideWidth ≈ 152
     private let pillExpandExtra: CGFloat = 152
 
@@ -104,8 +108,33 @@ struct NotchView: View {
         .onChange(of: dashboardOpen) { _, isOpen in
             if isOpen {
                 applyDashboardTabPolicy()
+                // Dashboard opening — show side strip immediately (tab indicators live there)
+                sideWidgetTask?.cancel()
+                sideWidgetTask = nil
+                showSideWidgets = true
             } else {
                 dashboardLastTab = dashboardTab.rawValue
+            }
+        }
+        .onChange(of: notchExpandedDownward) { _, expanding in
+            sideWidgetTask?.cancel()
+            sideWidgetTask = nil
+            if expanding {
+                // Notch expanding downward — hide side widgets fast
+                withAnimation(.easeIn(duration: 0.12).delay(0.04)) {
+                    showSideWidgets = false
+                }
+            } else {
+                // Notch just started collapsing — wait for the spring to fully settle,
+                // then show side widgets.
+                let delay = sideWidgetRevealDelay
+                sideWidgetTask = Task { @MainActor in
+                    try? await Task.sleep(for: .seconds(delay))
+                    guard !Task.isCancelled else { return }
+                    withAnimation(.spring(response: 0.42, dampingFraction: 0.85)) {
+                        showSideWidgets = true
+                    }
+                }
             }
         }
     }
@@ -123,6 +152,8 @@ private extension NotchView {
     var rightIntrinsicWidth: CGFloat { notchClearance + ringSize + 8 + ringSize + outerPad }
     var sideWidth: CGFloat { max(leftIntrinsicWidth, rightIntrinsicWidth) }
     var activeSideWidth: CGFloat { dashboardOpen ? sideWidth + pillExpandExtra : sideWidth }
+    // Collapses to 0 when side widgets are hidden (notch expanding downward) or settings toggle is off.
+    var notchExpandedSideWidth: CGFloat { (!showSideWidgets || (hideWidgets && !dashboardOpen)) ? 0 : activeSideWidth }
     // Apps tab expands height to ~3× the standard panel (173 × 3 ≈ 519)
     var dashboardPanelHeight: CGFloat { dashboardTab == .apps ? 519 : 173 }
 
@@ -132,12 +163,19 @@ private extension NotchView {
         !dashboardOpen && notchViewModel.presentedNotchSize.height > baseHeight
     }
 
-    // Direction-aware animation: easeIn (fast exit, tiny lead delay) when hiding,
-    // spring with a longer delay (wait for notch to start collapsing) when showing.
-    private var sideWidgetAnimation: Animation {
-        notchExpandedDownward
-            ? .easeIn(duration: 0.12).delay(0.04)
-            : .spring(response: 0.42, dampingFraction: 0.80).delay(0.15)
+    // How long to wait after notchExpandedDownward flips to false before showing side widgets.
+    // contentHide spring with dampingFraction=0.7 settles to <1% at ~1.05 * response;
+    // add 0.15s buffer so the notch looks fully collapsed before widgets appear.
+    private var sideWidgetRevealDelay: TimeInterval {
+        let response: Double
+        switch settingsViewModel.application.notchAnimationPreset {
+        case .snappy:   response = 0.41
+        case .fast:     response = 0.44
+        case .balanced: response = 0.47
+        case .slow:     response = 0.50
+        case .relaxed:  response = 0.53
+        }
+        return response * 1.05 + 0.15
     }
 
     private var enabledDashboardTabs: [DashboardTab] {
@@ -169,7 +207,7 @@ private extension NotchView {
             ? .spring(response: 0.22, dampingFraction: 0.8)
             : .spring(response: 0.38, dampingFraction: 0.7)
 
-        let totalWidth = 2 * activeSideWidth + notchBridgeWidth
+        let totalWidth = 2 * notchExpandedSideWidth + notchBridgeWidth
 
         return VStack(spacing: 0) {
             HStack(spacing: 0) {
@@ -250,9 +288,17 @@ private extension NotchView {
                     }
                     Spacer(minLength: 0)
                 }
-                .frame(width: activeSideWidth, height: baseHeight)
+                .opacity(showSideWidgets ? 1 : 0)
+                .scaleEffect(showSideWidgets ? 1 : 0.90, anchor: .leading)
+                .blur(radius: showSideWidgets ? 0 : 2)
+                .animation(.spring(response: 0.42, dampingFraction: 0.88), value: hideWidgets)
+                .frame(width: notchExpandedSideWidth, height: baseHeight)
+                .animation(.spring(response: 0.42, dampingFraction: 0.88), value: hideWidgets)
                 .contentShape(Rectangle())
-                .onTapGesture { toggleDashboard() }
+                .onTapGesture {
+                    guard settingsViewModel.application.dashboardOpenMode != .hover else { return }
+                    toggleDashboard()
+                }
 
                 // Bridge: hidden under the notch — notch body handles its own tap
                 Color.clear.frame(width: notchBridgeWidth, height: baseHeight)
@@ -313,11 +359,18 @@ private extension NotchView {
                     }
                     .animation(spring, value: dashboardOpen)
                     .animation(spring, value: dashboardTab == .apps)
+                    .opacity(showSideWidgets ? 1 : 0)
+                    .scaleEffect(showSideWidgets ? 1 : 0.90, anchor: .trailing)
+                    .blur(radius: showSideWidgets ? 0 : 2)
                     Color.clear.frame(width: outerPad)
                 }
-                .frame(width: activeSideWidth, height: baseHeight)
+                .frame(width: notchExpandedSideWidth, height: baseHeight)
+                .animation(.spring(response: 0.42, dampingFraction: 0.88), value: hideWidgets)
                 .contentShape(Rectangle())
-                .onTapGesture { toggleDashboard() }
+                .onTapGesture {
+                    guard settingsViewModel.application.dashboardOpenMode != .hover else { return }
+                    toggleDashboard()
+                }
             }
 
             if dashboardOpen {
@@ -375,6 +428,7 @@ private extension NotchView {
         dashboardHoverTask?.cancel()
 
         if !hovered {
+            guard settingsViewModel.application.dashboardOpenMode == .hover else { return }
             dashboardHoverTask = Task { @MainActor in
                 try? await Task.sleep(for: .milliseconds(120))
                 guard !Task.isCancelled else { return }
@@ -541,6 +595,7 @@ private extension NotchView {
                 DragGesture(minimumDistance: 0)
                     .onChanged { _ in
                         guard !notchTapFired else { return }
+                        guard settingsViewModel.application.dashboardOpenMode != .hover else { return }
                         notchTapFired = true
                         toggleDashboard()
                     }
@@ -840,11 +895,14 @@ private struct DashboardPanelView: View {
                 MusicPlayerView(
                     snapshot: snapshot,
                     artwork: nowPlayingViewModel.artworkImage,
-                    onPlayPause: { nowPlayingViewModel.togglePlayPause() },
-                    onPrev:      { nowPlayingViewModel.previousTrack() },
-                    onNext:      { nowPlayingViewModel.nextTrack() },
-                    onShuffle:   { nowPlayingViewModel.toggleShuffle() },
-                    onRepeat:    { nowPlayingViewModel.toggleRepeat() }
+                    onPlayPause:   { nowPlayingViewModel.togglePlayPause() },
+                    onPrev:        { nowPlayingViewModel.previousTrack() },
+                    onNext:        { nowPlayingViewModel.nextTrack() },
+                    onShuffle:     { nowPlayingViewModel.toggleShuffle() },
+                    onRepeat:      { nowPlayingViewModel.toggleRepeat() },
+                    onSeek:        { nowPlayingViewModel.seek(to: $0) },
+                    onSkipBack:    { nowPlayingViewModel.skip(seconds: -15) },
+                    onSkipForward: { nowPlayingViewModel.skip(seconds: 15) }
                 )
             } else {
                 VStack(spacing: 8) {
@@ -857,6 +915,12 @@ private struct DashboardPanelView: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
+        }
+        .onAppear {
+            nowPlayingViewModel.setDetailedPresentationActive(true, source: "dashboard.music")
+        }
+        .onDisappear {
+            nowPlayingViewModel.setDetailedPresentationActive(false, source: "dashboard.music")
         }
     }
 
@@ -1468,120 +1532,191 @@ private struct MusicPlayerView: View {
     let onNext: () -> Void
     let onShuffle: () -> Void
     let onRepeat: () -> Void
+    let onSeek: (TimeInterval) -> Void
+    let onSkipBack: () -> Void
+    let onSkipForward: () -> Void
+
+    @AppStorage("settings.music.showSkipButtons") private var showSkipButtons = true
+    @AppStorage("settings.music.showVisualizer")  private var showVisualizer  = true
 
     @State private var scrubProgress: Double? = nil
+    @State private var isDragging = false
 
     var body: some View {
         TimelineView(.periodic(from: .now, by: snapshot.isPlaying ? 0.5 : 60)) { context in
             let elapsed = snapshot.elapsedTime(at: context.date)
             let progress = snapshot.duration > 0 ? elapsed / snapshot.duration : 0
-            content(progress: scrubProgress ?? progress)
+            content(elapsed: elapsed, progress: scrubProgress ?? progress)
         }
     }
 
-    private func content(progress: Double) -> some View {
-        HStack(spacing: 12) {
+    private func content(elapsed: TimeInterval, progress: Double) -> some View {
+        HStack(spacing: 14) {
             artworkView
-            VStack(alignment: .leading, spacing: 6) {
-                metadataRow
-                progressBar(progress: progress)
-                controlsRow
+
+            VStack(alignment: .leading, spacing: 0) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(snapshot.title.isEmpty ? "Unknown" : snapshot.title)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
+                    HStack(spacing: 6) {
+                        Text(snapshot.artist.isEmpty ? "–" : snapshot.artist)
+                            .font(.system(size: 11))
+                            .foregroundStyle(.white.opacity(0.45))
+                            .lineLimit(1)
+                        if showVisualizer {
+                            AudioSpectrumView(isPlaying: snapshot.isPlaying)
+                                .frame(width: 16, height: 10)
+                                .opacity(snapshot.isPlaying ? 1 : 0.3)
+                                .animation(.easeInOut(duration: 0.3), value: snapshot.isPlaying)
+                        }
+                    }
+                }
+
+                Spacer(minLength: 6)
+
+                VStack(spacing: 5) {
+                    progressBar(progress: progress)
+                    HStack {
+                        Text(timeString(elapsed))
+                        Spacer()
+                        Text(timeString(snapshot.duration))
+                    }
+                    .font(.system(size: 10, design: .monospaced))
+                    .foregroundStyle(.white.opacity(0.35))
+                }
+
+                Spacer(minLength: 8)
+
+                HStack(spacing: showSkipButtons ? 14 : 32) {
+                    if showSkipButtons {
+                        Button(action: onSkipBack) {
+                            Image(systemName: "gobackward.15")
+                                .font(.system(size: 13))
+                                .foregroundStyle(.white.opacity(0.7))
+                        }
+                        .buttonStyle(.plain)
+                    }
+
+                    Button(action: onPrev) {
+                        Image(systemName: "backward.fill")
+                            .font(.system(size: 16))
+                            .foregroundStyle(.white)
+                    }
+                    .buttonStyle(.plain)
+
+                    Button(action: onPlayPause) {
+                        Image(systemName: snapshot.isPlaying ? "pause.fill" : "play.fill")
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundStyle(.white)
+                            .frame(width: 22)
+                    }
+                    .buttonStyle(.plain)
+
+                    Button(action: onNext) {
+                        Image(systemName: "forward.fill")
+                            .font(.system(size: 16))
+                            .foregroundStyle(.white)
+                    }
+                    .buttonStyle(.plain)
+
+                    if showSkipButtons {
+                        Button(action: onSkipForward) {
+                            Image(systemName: "goforward.15")
+                                .font(.system(size: 13))
+                                .foregroundStyle(.white.opacity(0.7))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .frame(maxWidth: .infinity)
             }
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
+    // 封面：播放时发光光晕 + 全尺寸；暂停时缩小 + 暗色蒙层
     private var artworkView: some View {
-        Group {
+        ZStack {
+            // 光晕层：封面旋转模糊，播放时可见
             if let img = artwork {
                 Image(nsImage: img)
                     .resizable()
-                    .aspectRatio(contentMode: .fill)
-            } else {
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.white.opacity(0.07))
-                    .overlay {
-                        Image(systemName: "music.note")
-                            .font(.system(size: 18))
-                            .foregroundStyle(.white.opacity(0.25))
-                    }
+                    .aspectRatio(1, contentMode: .fit)
+                    .frame(maxHeight: .infinity)
+                    .scaleEffect(x: 1.4, y: 1.5)
+                    .rotationEffect(.degrees(92))
+                    .blur(radius: 22)
+                    .opacity(snapshot.isPlaying ? 0.55 : 0)
+                    .animation(.easeInOut(duration: 0.45), value: snapshot.isPlaying)
             }
+
+            // 主封面
+            Group {
+                if let img = artwork {
+                    Image(nsImage: img)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                } else {
+                    Color.white.opacity(0.07)
+                        .overlay {
+                            Image(systemName: "music.note")
+                                .font(.system(size: 22))
+                                .foregroundStyle(.white.opacity(0.25))
+                        }
+                }
+            }
+            .aspectRatio(1, contentMode: .fit)
+            .frame(maxHeight: .infinity)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .scaleEffect(snapshot.isPlaying ? 1.0 : 0.87)
+            .animation(.spring(response: 0.4, dampingFraction: 0.75), value: snapshot.isPlaying)
+
+            // 暂停时的暗色蒙层
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.black.opacity(snapshot.isPlaying ? 0 : 0.5))
+                .aspectRatio(1, contentMode: .fit)
+                .frame(maxHeight: .infinity)
+                .animation(.easeInOut(duration: 0.3), value: snapshot.isPlaying)
         }
-        .frame(width: 68, height: 68)
-        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .aspectRatio(1, contentMode: .fit)
+        .frame(maxHeight: .infinity)
     }
 
-    private var metadataRow: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(snapshot.title.isEmpty ? "Unknown" : snapshot.title)
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(.white)
-                .lineLimit(1)
-            Text(snapshot.artist.isEmpty ? "\u{2014}" : snapshot.artist)
-                .font(.system(size: 11))
-                .foregroundStyle(.white.opacity(0.5))
-                .lineLimit(1)
-        }
-    }
-
+    // 进度条：拖拽时变高，松手触发 seek
     private func progressBar(progress: Double) -> some View {
         GeometryReader { geo in
             ZStack(alignment: .leading) {
-                Capsule().fill(Color.white.opacity(0.12))
-                Capsule().fill(Color.white.opacity(0.65))
+                Capsule().fill(Color.white.opacity(0.15))
+                Capsule().fill(Color.white.opacity(isDragging ? 1.0 : 0.8))
                     .frame(width: max(4, geo.size.width * CGFloat(min(progress, 1))))
             }
+            .frame(height: isDragging ? 7 : 4)
+            .animation(.spring(response: 0.25, dampingFraction: 0.7), value: isDragging)
+            .contentShape(Rectangle().size(CGSize(width: geo.size.width, height: 20)))
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { val in
+                        withAnimation { isDragging = true }
+                        scrubProgress = max(0, min(1, Double(val.location.x / geo.size.width)))
+                    }
+                    .onEnded { val in
+                        let p = max(0, min(1, Double(val.location.x / geo.size.width)))
+                        onSeek(p * snapshot.duration)
+                        scrubProgress = nil
+                        withAnimation { isDragging = false }
+                    }
+            )
         }
-        .frame(height: 3)
-        .gesture(
-            DragGesture(minimumDistance: 0)
-                .onChanged { val in
-                    scrubProgress = Double(val.location.x / val.translation.width.magnitude.advanced(by: val.location.x))
-                }
-                .onEnded { val in scrubProgress = nil }
-        )
+        .frame(height: 10)
     }
 
-    private var controlsRow: some View {
-        HStack(spacing: 18) {
-            Button(action: onShuffle) {
-                Image(systemName: "shuffle")
-                    .font(.system(size: 11))
-                    .foregroundStyle(snapshot.isShuffled ? .white : .white.opacity(0.3))
-            }
-            .buttonStyle(.plain)
-
-            Button(action: onPrev) {
-                Image(systemName: "backward.fill")
-                    .font(.system(size: 13))
-                    .foregroundStyle(.white)
-            }
-            .buttonStyle(.plain)
-
-            Button(action: onPlayPause) {
-                Image(systemName: snapshot.isPlaying ? "pause.fill" : "play.fill")
-                    .font(.system(size: 17, weight: .bold))
-                    .foregroundStyle(.white)
-                    .frame(width: 20)
-            }
-            .buttonStyle(.plain)
-
-            Button(action: onNext) {
-                Image(systemName: "forward.fill")
-                    .font(.system(size: 13))
-                    .foregroundStyle(.white)
-            }
-            .buttonStyle(.plain)
-
-            Button(action: onRepeat) {
-                Image(systemName: snapshot.repeatMode == .one ? "repeat.1" : "repeat")
-                    .font(.system(size: 11))
-                    .foregroundStyle(snapshot.repeatMode != .off ? .white : .white.opacity(0.3))
-            }
-            .buttonStyle(.plain)
-        }
+    private func timeString(_ t: TimeInterval) -> String {
+        let t = max(0, t)
+        return String(format: "%d:%02d", Int(t) / 60, Int(t) % 60)
     }
 }
 

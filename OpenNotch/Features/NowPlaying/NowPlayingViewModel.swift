@@ -374,7 +374,7 @@ private extension NowPlayingViewModel {
         case nil:
             if newSnapshot == nil || previousArtworkData == nil {
                 cancelPendingArtworkPresentation()
-                artworkImage = nil
+                artworkImage = appIconFallback(for: newSnapshot)
                 artworkPalette = .fallback
             }
         }
@@ -471,6 +471,16 @@ private extension NowPlayingViewModel {
         cancelPendingArtworkPresentation()
         artworkImage = NSImage(data: artworkData)
         artworkPalette = NowPlayingArtworkPaletteExtractor.extract(from: artworkData)
+    }
+
+    func appIconFallback(for snapshot: NowPlayingSnapshot?) -> NSImage? {
+        guard let bundleID = snapshot?.playbackSource?.preferredBundleIdentifier,
+              let appURL = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID) else {
+            return nil
+        }
+        let icon = NSWorkspace.shared.icon(forFile: appURL.path)
+        icon.size = NSSize(width: 256, height: 256)
+        return icon
     }
 }
 

@@ -3,12 +3,35 @@ import SwiftUI
 struct InterfaceSettingsView: View {
     @ObservedObject var applicationSettings: ApplicationSettingsStore
 
-    @AppStorage("settings.overview.showApps")       private var showApps       = true
-    @AppStorage("settings.overview.showTimeDate")   private var showTimeDate   = true
-    @AppStorage("settings.overview.showSystemInfo") private var showSystemInfo = true
-    @AppStorage("settings.overview.showPomodoro")   private var showPomodoro   = true
-    @AppStorage("settings.overview.showWeather")    private var showWeather    = true
-    @AppStorage("settings.overview.hideAppNames")   private var hideAppNames   = false
+    @AppStorage("settings.overview.showApps")           private var showApps           = true
+    @AppStorage("settings.overview.showTimeDate")       private var showTimeDate       = true
+    @AppStorage("settings.overview.showSystemInfo")     private var showSystemInfo     = true
+    @AppStorage("settings.overview.showPomodoro")       private var showPomodoro       = true
+    @AppStorage("settings.overview.showWeather")        private var showWeather        = true
+    @AppStorage("settings.overview.hideAppNames")       private var hideAppNames       = false
+    @AppStorage("settings.general.dashboardDefaultTab") private var dashboardDefaultTab = "last"
+    @AppStorage("settings.music.showSkipButtons")       private var showSkipButtons    = true
+    @AppStorage("settings.music.showVisualizer")        private var showVisualizer     = true
+
+    private var enabledTabs: [DashboardTab] {
+        DashboardTab.allCases.filter { !applicationSettings.dashboardDisabledTabs.contains($0.rawValue) }
+    }
+
+    private var defaultTabOptions: [String] {
+        ["last"] + enabledTabs.map(\.rawValue)
+    }
+
+    private func defaultTabOptionTitle(_ value: String) -> LocalizedStringKey {
+        if value == "last" { return "记住上次" }
+        switch DashboardTab(rawValue: value) {
+        case .overview: return "概览"
+        case .music:    return "音乐"
+        case .system:   return "系统状态"
+        case .calendar: return "日历"
+        case .apps:     return "应用启动器"
+        case nil:       return LocalizedStringKey(value)
+        }
+    }
 
     var body: some View {
         SettingsPageScrollView {
@@ -31,6 +54,17 @@ struct InterfaceSettingsView: View {
 
             Divider().opacity(0.6)
 
+            SettingsMenuRow(
+                title: "默认标签",
+                description: "打开仪表盘时显示的标签页。",
+                options: defaultTabOptions,
+                optionTitle: { defaultTabOptionTitle($0) },
+                accessibilityIdentifier: "settings.general.dashboardDefaultTab",
+                selection: $dashboardDefaultTab
+            )
+
+            Divider().opacity(0.6)
+
             Text("可见标签")
                 .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(.primary)
@@ -49,6 +83,9 @@ struct InterfaceSettingsView: View {
                             applicationSettings.dashboardDisabledTabs.remove(tab.rawValue)
                         } else {
                             applicationSettings.dashboardDisabledTabs.insert(tab.rawValue)
+                            if dashboardDefaultTab == tab.rawValue {
+                                dashboardDefaultTab = "last"
+                            }
                         }
                     }
                 )
@@ -66,8 +103,35 @@ struct InterfaceSettingsView: View {
                 if tab == .overview, tabEnabled.wrappedValue {
                     overviewSubSettings
                 }
+                if tab == .music, tabEnabled.wrappedValue {
+                    musicSubSettings
+                }
             }
         }
+    }
+
+    // MARK: - Music sub-settings
+
+    private var musicSubSettings: some View {
+        VStack(spacing: 0) {
+            Divider().opacity(0.4).padding(.leading, 43)
+            SubToggleRow(
+                title: "快进/快退 15 秒",
+                isOn: $showSkipButtons,
+                accessibilityIdentifier: "settings.music.showSkipButtons"
+            )
+
+            Divider().opacity(0.4).padding(.leading, 43)
+            SubToggleRow(
+                title: "音频频谱可视化",
+                isOn: $showVisualizer,
+                accessibilityIdentifier: "settings.music.showVisualizer"
+            )
+        }
+        .background(Color.primary.opacity(0.03))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .padding(.leading, 16)
+        .padding(.top, 2)
     }
 
     // MARK: - Overview sub-settings (shown when Overview tab is enabled)
@@ -180,7 +244,7 @@ private struct SubToggleRow: View {
                 Text(title)
                 Spacer()
             }
-            .frame(minHeight: 30)
+            .frame(minHeight: 40)
         }
         .toggleStyle(CustomToggleStyle())
         .modifier(SettingsAccessibilityModifier(identifier: accessibilityIdentifier))
