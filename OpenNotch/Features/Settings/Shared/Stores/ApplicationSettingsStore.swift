@@ -150,6 +150,12 @@ final class ApplicationSettingsStore: SettingsStoreBase, NotchSettingsProviding 
         }
     }
 
+    @Published var overviewPomodoroDuration: Int {
+        didSet {
+            persist(overviewPomodoroDuration, for: GeneralSettingsStorage.Keys.overviewPomodoroDuration)
+        }
+    }
+
     @Published var notchPressHoldDuration: TimeInterval {
         didSet {
             let clampedValue = Self.clampNotchPressHoldDuration(notchPressHoldDuration)
@@ -295,6 +301,7 @@ final class ApplicationSettingsStore: SettingsStoreBase, NotchSettingsProviding 
         self.dashboardDisabledTabs = Set(
             defaults.stringArray(forKey: GeneralSettingsStorage.Keys.dashboardDisabledTabs) ?? []
         )
+        self.overviewPomodoroDuration = defaults.object(forKey: GeneralSettingsStorage.Keys.overviewPomodoroDuration) as? Int ?? 25
         self.notchPressHoldDuration = Self.clampNotchPressHoldDuration(
             defaults.object(forKey: GeneralSettingsStorage.Keys.notchPressHoldDuration) as? Double ??
             Self.defaultNotchPressHoldDuration

@@ -31,9 +31,9 @@ struct NotchSettingsView: View {
         SettingsCard(title: "Notch Bar Display") {
             // Left side — multi select (up to 2, FIFO)
             VStack(alignment: .leading, spacing: 6) {
-                Text("Left side")
+                Text("左侧")
                     .font(.system(size: 12, weight: .medium))
-                Text("Select up to 2 widgets. Adding a third removes the first.")
+                Text("最多选 2 个，添加第三个时自动移除最早的。可全不选。")
                     .font(.system(size: 11))
                     .foregroundStyle(.secondary)
             }
@@ -41,36 +41,36 @@ struct NotchSettingsView: View {
                 ForEach(NotchBarWidget.allCases, id: \.self) { widget in
                     let active = leftWidgetsRaw.split(separator: ",").compactMap { NotchBarWidget(rawValue: String($0)) }
                     let selected = active.contains(widget)
+                    let networkSpeedActive = active.contains(.networkSpeed)
+                    let isDisabled = networkSpeedActive && widget != .networkSpeed
                     Button {
                         var list = active
                         if selected {
                             list.removeAll { $0 == widget }
+                        } else if widget == .networkSpeed {
+                            list = [.networkSpeed]
                         } else {
-                            if widget == .networkSpeed {
-                                list = [.networkSpeed]
-                            } else {
-                                list.removeAll { $0 == .networkSpeed }
-                                list.append(widget)
-                                if list.count > 2 { list.removeFirst() }
-                            }
+                            list.append(widget)
+                            if list.count > 2 { list.removeFirst() }
                         }
-                        if list.isEmpty { list = [.networkSpeed] }
                         leftWidgetsRaw = list.map(\.rawValue).joined(separator: ",")
                     } label: {
                         widgetPreview(widget, selected: selected, multiSelect: true)
+                            .opacity(isDisabled ? 0.35 : 1)
                     }
                     .buttonStyle(.plain)
+                    .disabled(isDisabled)
                 }
             }
             .padding(.bottom, 4)
 
             Divider().opacity(0.6)
 
-            // Right side — multi select (up to 2, FIFO)
+            // 右侧 — 最多选 2 个，可全不选
             VStack(alignment: .leading, spacing: 6) {
-                Text("Right side")
+                Text("右侧")
                     .font(.system(size: 12, weight: .medium))
-                Text("Select up to 2 widgets. Adding a third removes the first.")
+                Text("最多选 2 个，添加第三个时自动移除最早的。可全不选。")
                     .font(.system(size: 11))
                     .foregroundStyle(.secondary)
             }
@@ -79,25 +79,25 @@ struct NotchSettingsView: View {
                 ForEach(NotchBarWidget.allCases, id: \.self) { widget in
                     let active = rightWidgetsRaw.split(separator: ",").compactMap { NotchBarWidget(rawValue: String($0)) }
                     let selected = active.contains(widget)
+                    let networkSpeedActive = active.contains(.networkSpeed)
+                    let isDisabled = networkSpeedActive && widget != .networkSpeed
                     Button {
                         var list = active
                         if selected {
                             list.removeAll { $0 == widget }
+                        } else if widget == .networkSpeed {
+                            list = [.networkSpeed]
                         } else {
-                            if widget == .networkSpeed {
-                                list = [.networkSpeed]
-                            } else {
-                                list.removeAll { $0 == .networkSpeed }
-                                list.append(widget)
-                                if list.count > 2 { list.removeFirst() }
-                            }
+                            list.append(widget)
+                            if list.count > 2 { list.removeFirst() }
                         }
-                        if list.isEmpty { list = [.cpu] }
                         rightWidgetsRaw = list.map(\.rawValue).joined(separator: ",")
                     } label: {
                         widgetPreview(widget, selected: selected, multiSelect: true)
+                            .opacity(isDisabled ? 0.35 : 1)
                     }
                     .buttonStyle(.plain)
+                    .disabled(isDisabled)
                 }
             }
             .padding(.bottom, 4)
@@ -117,13 +117,13 @@ struct NotchSettingsView: View {
                         VStack(alignment: .leading, spacing: 2) {
                             HStack(spacing: 3) {
                                 Image(systemName: "arrowtriangle.up.fill").font(.system(size: 5))
-                                    .foregroundStyle(.white.opacity(0.5))
+                                    .foregroundStyle(.blue)
                                 Text("1.2 MB").font(.system(size: 8, design: .monospaced))
-                                    .foregroundStyle(.mint)
+                                    .foregroundStyle(.blue)
                             }
                             HStack(spacing: 3) {
                                 Image(systemName: "arrowtriangle.down.fill").font(.system(size: 5))
-                                    .foregroundStyle(.white.opacity(0.5))
+                                    .foregroundStyle(.green)
                                 Text("3.8 MB").font(.system(size: 8, design: .monospaced))
                                     .foregroundStyle(.green)
                             }

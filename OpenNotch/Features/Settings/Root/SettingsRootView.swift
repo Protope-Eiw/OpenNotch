@@ -22,7 +22,6 @@ struct SettingsRootView: View {
     private let viewModel: SettingsRootViewModel
     @State private var selectedSection: SettingsRootViewModel.Section
     @State private var pendingResetSection: SettingsRootViewModel.Section?
-    @State private var showDonation = false
     @StateObject private var permissionController = SettingsPermissionController()
 
     init(
@@ -98,14 +97,13 @@ struct SettingsRootView: View {
 
     private var iconSidebar: some View {
         VStack(spacing: 0) {
-            Spacer(minLength: 16)
-
             VStack(spacing: 4) {
-                ForEach(SettingsRootViewModel.Section.allCases) { section in
+                ForEach(SettingsRootViewModel.Section.allCases.filter { $0 != .donation }) { section in
                     sidebarIconButton(for: section)
                 }
             }
             .padding(.horizontal, 10)
+            .padding(.top, 16)
 
             Spacer()
 
@@ -114,18 +112,16 @@ struct SettingsRootView: View {
                 .padding(.bottom, 4)
 
             Button {
-                showDonation.toggle()
+                selectedSection = .donation
+                viewModel.persistSelection(.donation)
             } label: {
-                Image(systemName: showDonation ? "heart.fill" : "heart")
+                Image(systemName: selectedSection == .donation ? "heart.fill" : "heart")
                     .font(.system(size: 16, weight: .medium))
-                    .foregroundStyle(showDonation ? .pink : Color.secondary)
+                    .foregroundStyle(selectedSection == .donation ? .pink : Color.secondary)
                     .frame(width: 40, height: 40)
             }
             .buttonStyle(.plain)
             .padding(.bottom, 10)
-            .popover(isPresented: $showDonation, arrowEdge: .trailing) {
-                DonationView()
-            }
         }
         .frame(width: SettingsWindowLayout.sidebarWidth)
         .background(Color(nsColor: .controlBackgroundColor))
@@ -176,7 +172,7 @@ struct SettingsRootView: View {
         HStack(alignment: .center, spacing: 0) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(localized(selectedSection.titleKey, fallback: selectedSection.fallbackTitle))
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(.system(size: selectedSection == .donation ? 20 : 15, weight: .semibold))
                 Text(localized(selectedSection.subtitleKey, fallback: selectedSection.fallbackSubtitle))
                     .font(.system(size: 11))
                     .foregroundStyle(.secondary)
@@ -254,6 +250,9 @@ struct SettingsRootView: View {
                 settings: settingsViewModel.lockScreen,
                 applicationSettings: settingsViewModel.application
             )
+
+        case .donation:
+            DonationView()
 
         #if DEBUG
         case .debug:

@@ -22,6 +22,7 @@ extension SettingsRootViewModel {
         case connectivity
         case system
         case lockScreen
+        case donation
         #if DEBUG
         case debug
         #endif
@@ -197,6 +198,19 @@ private enum SettingsSectionCatalog {
                 imageName: nil,
                 tint: .gray,
                 resetGroup: .lockScreen
+            )
+
+        case .donation:
+            return .init(
+                titleKey: "settings.section.donation.title",
+                fallbackTitle: "支持 OpenNotch",
+                subtitleKey: "settings.section.donation.subtitle",
+                fallbackSubtitle: "",
+                searchKeywords: ["donate", "support", "coffee", "wechat", "微信", "捐赠"],
+                systemImage: "heart.fill",
+                imageName: nil,
+                tint: .pink,
+                resetGroup: nil
             )
 
         #if DEBUG

@@ -1,6 +1,9 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "" : {
+
+    },
     "---" : {
       "localizations" : {
         "en" : {
@@ -58,6 +61,16 @@
         }
       }
     },
+    "%@ / %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ / %2$@"
+          }
+        }
+      }
+    },
     "%@ is unavailable. Falling back to %@." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -93,6 +106,9 @@
     "%lld" : {
 
     },
+    "%lld 分钟" : {
+
+    },
     "%lld%%" : {
       "localizations" : {
         "en" : {
@@ -120,6 +136,9 @@
           }
         }
       }
+    },
+    "%lldm" : {
+
     },
     "↑%@" : {
 
@@ -215,6 +234,9 @@
         }
       }
     },
+    "1.2 MB" : {
+
+    },
     "3:34" : {
       "localizations" : {
         "en" : {
@@ -270,6 +292,9 @@
           }
         }
       }
+    },
+    "3.8 MB" : {
+
     },
     "20%" : {
       "localizations" : {
@@ -1839,6 +1864,7 @@
       }
     },
     "Check update" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2944,9 +2970,6 @@
         }
       }
     },
-    "Choose whether the dashboard opens on hover or click." : {
-
-    },
     "Choose whether the hotspot activity stays minimal or shows more status." : {
       "localizations" : {
         "en" : {
@@ -3119,9 +3142,6 @@
           }
         }
       }
-    },
-    "Choose which tabs appear in the dashboard. At least one tab must remain enabled." : {
-
     },
     "Choose which target appears while files are dragged over the notch." : {
       "localizations" : {
@@ -3872,9 +3892,6 @@
 
     },
     "CPU, memory, disk, network, and battery stats." : {
-
-    },
-    "Dashboard" : {
 
     },
     "Debug Ensemble" : {
@@ -7033,6 +7050,9 @@
         }
       }
     },
+    "Notch Bar Display" : {
+
+    },
     "Notch height" : {
       "localizations" : {
         "en" : {
@@ -7437,6 +7457,7 @@
       }
     },
     "Open the DynamicNotch website" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -7463,9 +7484,6 @@
           }
         }
       }
-    },
-    "Open trigger" : {
-
     },
     "Orange" : {
       "extractionState" : "stale",
@@ -7495,6 +7513,9 @@
           }
         }
       }
+    },
+    "Overview" : {
+
     },
     "Paused playback" : {
       "localizations" : {
@@ -8126,6 +8147,9 @@
     "Quick launcher for pinned apps." : {
 
     },
+    "Quick overview with pinned apps, time, and system info." : {
+
+    },
     "Quit" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -8241,6 +8265,7 @@
       }
     },
     "Replace the keyboard backlight HUD with DynamicNotch HUD." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -8268,7 +8293,11 @@
         }
       }
     },
+    "Replace the keyboard backlight HUD with OpenNotch HUD." : {
+
+    },
     "Replace the system brightness HUD with DynamicNotch HUD." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -8296,7 +8325,11 @@
         }
       }
     },
+    "Replace the system brightness HUD with OpenNotch HUD." : {
+
+    },
     "Replace the system volume HUD with DynamicNotch HUD." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -8323,6 +8356,9 @@
           }
         }
       }
+    },
+    "Replace the system volume HUD with OpenNotch HUD." : {
+
     },
     "Reset" : {
       "localizations" : {
@@ -16184,9 +16220,6 @@
         }
       }
     },
-    "Visible tabs" : {
-
-    },
     "Volume" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -16758,6 +16791,99 @@
           }
         }
       }
+    },
+    "专注 %lld 分钟" : {
+
+    },
+    "专注中" : {
+
+    },
+    "从快速启动移除" : {
+
+    },
+    "仪表盘" : {
+
+    },
+    "休息中" : {
+
+    },
+    "最多选 2 个，添加第三个时自动移除最早的。可全不选。" : {
+
+    },
+    "即将支持" : {
+
+    },
+    "可见标签" : {
+
+    },
+    "右侧" : {
+
+    },
+    "喜欢就请我喝杯咖啡，完全随意☕️" : {
+
+    },
+    "在概览网格中显示的应用。" : {
+
+    },
+    "天气" : {
+
+    },
+    "完成" : {
+
+    },
+    "工作时长" : {
+
+    },
+    "左侧" : {
+
+    },
+    "已固定 %lld / 12 个应用" : {
+
+    },
+    "应用快速启动" : {
+
+    },
+    "开始" : {
+
+    },
+    "快速启动应用" : {
+
+    },
+    "所有应用都已添加" : {
+
+    },
+    "打开方式" : {
+
+    },
+    "搜索应用" : {
+
+    },
+    "时间与日期" : {
+
+    },
+    "未找到匹配应用" : {
+
+    },
+    "添加" : {
+
+    },
+    "点击 + 添加应用" : {
+
+    },
+    "番茄计时器" : {
+
+    },
+    "系统信息" : {
+
+    },
+    "获取天气中…" : {
+
+    },
+    "选择应用" : {
+
+    },
+    "隐藏应用名称" : {
+
     }
   },
   "version" : "1.1"

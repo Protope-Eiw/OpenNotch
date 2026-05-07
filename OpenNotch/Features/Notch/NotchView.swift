@@ -34,6 +34,10 @@ struct NotchView: View {
     @State private var dragSourceIndex: Int = 0
     @State private var dragTargetIndex: Int = 0
     @State private var appSearchText = ""
+    @StateObject private var pomodoroViewModel = PomodoroViewModel()
+    @AppStorage("settings.notchBar.leftWidgets")  private var leftWidgetsRaw  = NotchBarWidget.networkSpeed.rawValue
+    @AppStorage("settings.notchBar.rightWidgets") private var rightWidgetsRaw = "cpu,memory"
+    @AppStorage("settings.general.dashboardLastTab") private var dashboardLastTab = DashboardTab.system.rawValue
     // Calibrated to match BoringNotch: window=640pt, each side = (640-156)/2 - sideWidth ≈ 152
     private let pillExpandExtra: CGFloat = 152
 
@@ -96,6 +100,13 @@ struct NotchView: View {
                 }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .onChange(of: dashboardOpen) { _, isOpen in
+            if isOpen {
+                applyDashboardTabPolicy()
+            } else {
+                dashboardLastTab = dashboardTab.rawValue
+            }
+        }
     }
 }
 
@@ -150,23 +161,7 @@ private extension NotchView {
                 // Left: speed arrows ↔ tab indicators (same notch-bar level)
                 HStack(spacing: 0) {
                     Color.clear.frame(width: outerPad)
-                    VStack(alignment: .leading, spacing: 1) {
-                        HStack(spacing: 3) {
-                            Image(systemName: "arrowtriangle.up.fill")
-                                .font(.system(size: 6))
-                                .foregroundStyle(.white.opacity(0.5))
-                            Text(systemMonitorViewModel.formattedSpeed(systemMonitorViewModel.uploadSpeed))
-                                .foregroundStyle(speedColor(systemMonitorViewModel.uploadSpeed))
-                        }
-                        HStack(spacing: 3) {
-                            Image(systemName: "arrowtriangle.down.fill")
-                                .font(.system(size: 6))
-                                .foregroundStyle(.white.opacity(0.5))
-                            Text(systemMonitorViewModel.formattedSpeed(systemMonitorViewModel.downloadSpeed))
-                                .foregroundStyle(speedColor(systemMonitorViewModel.downloadSpeed))
-                        }
-                    }
-                    .font(.system(size: 10, weight: .medium, design: .monospaced))
+                    pillLeftWidgetView
                     .opacity(dashboardOpen ? 0 : 1)
                     .scaleEffect(dashboardOpen ? 0.72 : 1, anchor: .leading)
                     .allowsHitTesting(!dashboardOpen)
@@ -252,20 +247,7 @@ private extension NotchView {
                     Color.clear.frame(width: notchClearance)
                     Spacer(minLength: 0)
                     ZStack(alignment: .trailing) {
-                        HStack(spacing: 8) {
-                            ProgressRing(
-                                progress: systemMonitorViewModel.cpuUsage,
-                                color: pillColor(systemMonitorViewModel.cpuUsage, warn: 50, danger: 80),
-                                label: "CPU"
-                            )
-                            .frame(width: ringSize, height: ringSize)
-                            ProgressRing(
-                                progress: systemMonitorViewModel.memoryUsage,
-                                color: pillColor(systemMonitorViewModel.memoryUsage, warn: 70, danger: 85),
-                                label: "MEM"
-                            )
-                            .frame(width: ringSize, height: ringSize)
-                        }
+                        pillRightWidgetView
                         .opacity(dashboardOpen ? 0 : 1)
                         .scaleEffect(dashboardOpen ? 0.72 : 1, anchor: .trailing)
                         .allowsHitTesting(!dashboardOpen)
@@ -327,6 +309,7 @@ private extension NotchView {
                 DashboardPanelView(
                     systemMonitorViewModel: systemMonitorViewModel,
                     nowPlayingViewModel: nowPlayingViewModel,
+                    pomodoroViewModel: pomodoroViewModel,
                     selectedTab: $dashboardTab,
                     appSearchText: $appSearchText,
                     enabledTabs: enabledDashboardTabs
@@ -410,6 +393,88 @@ private extension NotchView {
         case ..<5_000_000:        return .green
         case ..<20_000_000:       return .yellow
         default:                  return .orange
+        }
+    }
+
+    @ViewBuilder
+    private var pillLeftWidgetView: some View {
+        let widgets = leftWidgetsRaw.split(separator: ",").compactMap { NotchBarWidget(rawValue: String($0)) }
+        if pomodoroViewModel.state != .idle {
+            HStack(spacing: 4) {
+                Image(systemName: pomodoroViewModel.phase == .work ? "flame.fill" : "cup.and.heat.waves.fill")
+                    .font(.system(size: 8))
+                    .foregroundStyle(pomodoroViewModel.phase == .work ? .orange : .mint)
+                Text(pomodoroViewModel.timeString)
+                    .font(.system(size: 10, weight: .semibold, design: .monospaced))
+                    .foregroundStyle(pomodoroViewModel.phase == .work ? Color.orange : Color.mint)
+            }
+        } else if widgets.isEmpty {
+            Color.clear.frame(width: 65, height: 1)
+        } else {
+            HStack(spacing: 6) {
+                ForEach(Array(widgets.prefix(2)), id: \.self) { pillRingView(for: $0) }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var pillRightWidgetView: some View {
+        let widgets = rightWidgetsRaw.split(separator: ",").compactMap { NotchBarWidget(rawValue: String($0)) }
+        if widgets.isEmpty {
+            Color.clear.frame(width: CGFloat(ringSize * 2 + 8), height: 1)
+        } else {
+            HStack(spacing: 8) {
+                ForEach(Array(widgets.prefix(2)), id: \.self) { pillRingView(for: $0) }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func pillRingView(for widget: NotchBarWidget) -> some View {
+        switch widget {
+        case .networkSpeed:
+            VStack(alignment: .leading, spacing: 1) {
+                HStack(spacing: 3) {
+                    Image(systemName: "arrowtriangle.up.fill")
+                        .font(.system(size: 6))
+                        .foregroundStyle(.blue)
+                    Text(systemMonitorViewModel.formattedSpeed(systemMonitorViewModel.uploadSpeed))
+                        .foregroundStyle(.blue)
+                }
+                HStack(spacing: 3) {
+                    Image(systemName: "arrowtriangle.down.fill")
+                        .font(.system(size: 6))
+                        .foregroundStyle(.green)
+                    Text(systemMonitorViewModel.formattedSpeed(systemMonitorViewModel.downloadSpeed))
+                        .foregroundStyle(.green)
+                }
+            }
+            .font(.system(size: 10, weight: .medium, design: .monospaced))
+        case .cpu:
+            ProgressRing(progress: systemMonitorViewModel.cpuUsage,
+                         color: pillColor(systemMonitorViewModel.cpuUsage, warn: 50, danger: 80),
+                         label: "CPU")
+                .frame(width: ringSize, height: ringSize)
+        case .memory:
+            ProgressRing(progress: systemMonitorViewModel.memoryUsage,
+                         color: pillColor(systemMonitorViewModel.memoryUsage, warn: 70, danger: 85),
+                         label: "MEM")
+                .frame(width: ringSize, height: ringSize)
+        case .disk:
+            ProgressRing(progress: systemMonitorViewModel.diskUsage,
+                         color: pillColor(systemMonitorViewModel.diskUsage, warn: 80, danger: 90),
+                         label: "DSK")
+                .frame(width: ringSize, height: ringSize)
+        }
+    }
+
+    private func applyDashboardTabPolicy() {
+        let savedTab = DashboardTab(rawValue: dashboardLastTab) ?? .system
+        let available = enabledDashboardTabs
+        if available.contains(savedTab) {
+            dashboardTab = savedTab
+        } else if let first = available.first {
+            dashboardTab = first
         }
     }
 
@@ -610,6 +675,7 @@ private struct ProgressRing: View {
     let color: Color
     let label: String
     var valueText: String? = nil
+    var showInternalText: Bool = true
 
     var body: some View {
         ZStack {
@@ -620,14 +686,16 @@ private struct ProgressRing: View {
                 .stroke(color, style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
                 .rotationEffect(.degrees(-90))
                 .animation(.easeInOut(duration: 0.4), value: progress)
-            VStack(spacing: 1) {
-                Text(valueText ?? "\(Int(progress))")
-                    .font(.system(size: 9, weight: .semibold, design: .monospaced))
-                    .foregroundStyle(.white)
-                if !label.isEmpty {
-                    Text(label)
-                        .font(.system(size: 6, weight: .medium))
-                        .foregroundStyle(.white.opacity(0.55))
+            if showInternalText {
+                VStack(spacing: 1) {
+                    Text(valueText ?? "\(Int(progress))")
+                        .font(.system(size: 9, weight: .semibold, design: .monospaced))
+                        .foregroundStyle(.white)
+                    if !label.isEmpty {
+                        Text(label)
+                            .font(.system(size: 6, weight: .medium))
+                            .foregroundStyle(.white.opacity(0.55))
+                    }
                 }
             }
         }
@@ -637,6 +705,7 @@ private struct ProgressRing: View {
 // MARK: - Dashboard
 
 enum DashboardTab: String, CaseIterable {
+    case overview = "overview"
     case music    = "Music"
     case system   = "System"
     case calendar = "Calendar"
@@ -644,6 +713,7 @@ enum DashboardTab: String, CaseIterable {
 
     var icon: String {
         switch self {
+        case .overview: return "house.fill"
         case .music:    return "music.note"
         case .system:   return "cpu"
         case .calendar: return "calendar"
@@ -653,6 +723,7 @@ enum DashboardTab: String, CaseIterable {
 
     var title: LocalizedStringKey {
         switch self {
+        case .overview: return "Overview"
         case .music:    return "Music"
         case .system:   return "System Status"
         case .calendar: return "Calendar"
@@ -662,6 +733,7 @@ enum DashboardTab: String, CaseIterable {
 
     var settingsDescription: LocalizedStringKey {
         switch self {
+        case .overview: return "Quick overview with pinned apps, time, and system info."
         case .music:    return "Music player with playback controls and progress bar."
         case .system:   return "CPU, memory, disk, network, and battery stats."
         case .calendar: return "Today's calendar events from your calendars."
@@ -671,6 +743,7 @@ enum DashboardTab: String, CaseIterable {
 
     var settingsColor: Color {
         switch self {
+        case .overview: return .teal
         case .music:    return .pink
         case .system:   return .blue
         case .calendar: return .orange
@@ -682,6 +755,7 @@ enum DashboardTab: String, CaseIterable {
 private struct DashboardPanelView: View {
     @ObservedObject var systemMonitorViewModel: SystemMonitorViewModel
     @ObservedObject var nowPlayingViewModel: NowPlayingViewModel
+    @ObservedObject var pomodoroViewModel: PomodoroViewModel
     @Binding var selectedTab: DashboardTab
     @Binding var appSearchText: String
     var enabledTabs: [DashboardTab]
@@ -728,6 +802,7 @@ private struct DashboardPanelView: View {
     @ViewBuilder
     private func tabPage(for tab: DashboardTab) -> some View {
         switch tab {
+        case .overview: OverviewView(systemMonitorViewModel: systemMonitorViewModel, pomodoroViewModel: pomodoroViewModel)
         case .music:    musicView
         case .system:   systemView
         case .calendar: CalendarTabView()
@@ -853,11 +928,19 @@ private struct DashboardPanelView: View {
     }
 
     private func gaugeCard(title: String, value: Double, valueText: String, color: Color) -> some View {
-        ProgressRing(progress: value, color: color, label: title, valueText: valueText)
-            .padding(10)
-            .frame(maxWidth: .infinity)
-            .background(Color.white.opacity(0.07))
-            .clipShape(RoundedRectangle(cornerRadius: 10))
+        VStack(spacing: 2) {
+            ProgressRing(progress: value, color: color, label: "", showInternalText: false)
+            Text(valueText)
+                .font(.system(size: 9, weight: .semibold, design: .monospaced))
+                .foregroundStyle(.white)
+            Text(title)
+                .font(.system(size: 7, weight: .medium))
+                .foregroundStyle(.white.opacity(0.45))
+        }
+        .padding(8)
+        .frame(maxWidth: .infinity)
+        .background(Color.white.opacity(0.07))
+        .clipShape(RoundedRectangle(cornerRadius: 10))
     }
 
     private var networkCard: some View {
@@ -914,6 +997,453 @@ private struct DashboardPanelView: View {
         }
     }
 }
+
+// MARK: - OverviewView
+
+private struct OverviewView: View {
+    @ObservedObject var systemMonitorViewModel: SystemMonitorViewModel
+    @ObservedObject var pomodoroViewModel: PomodoroViewModel
+
+    @AppStorage("settings.overview.showApps")         private var showApps       = true
+    @AppStorage("settings.overview.showTimeDate")     private var showTimeDate   = true
+    @AppStorage("settings.overview.showSystemInfo")   private var showSystemInfo = true
+    @AppStorage("settings.overview.showPomodoro")     private var showPomodoro   = true
+    @AppStorage("settings.overview.hideAppNames")     private var hideAppNames   = false
+    @AppStorage("settings.overview.showWeather")      private var showWeather    = true
+    @AppStorage("settings.overview.pomodoroDuration") private var workMinutes    = 25
+
+    @StateObject private var pinnedAppsStore = PinnedAppsStore()
+    @StateObject private var weatherService  = WeatherService()
+    @State private var now = Date()
+    @State private var showAppPicker = false
+
+    private let clock = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+
+    // 每个开启的模块横向等分，内容居中
+    var body: some View {
+        HStack(spacing: 0) {
+            if showApps {
+                appsColumn
+                if showTimeDate || showSystemInfo || showPomodoro { columnDivider }
+            }
+            if showTimeDate {
+                timeDateColumn
+                if showSystemInfo || showPomodoro { columnDivider }
+            }
+            if showSystemInfo {
+                systemInfoColumn
+                if showPomodoro { columnDivider }
+            }
+            if showPomodoro {
+                pomodoroColumn
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .onReceive(clock) { now = $0 }
+        .onReceive(NotificationCenter.default.publisher(for: .pinnedAppsDidChange)) { _ in
+            pinnedAppsStore.load()
+        }
+        .onAppear {
+            if showWeather { weatherService.requestAndFetch() }
+        }
+        .onChange(of: showWeather) { _, on in
+            if on { weatherService.requestAndFetch() }
+        }
+    }
+
+    private var columnDivider: some View {
+        Color.white.opacity(0.06).frame(width: 0.5)
+    }
+
+    // MARK: – 应用快速启动列
+
+    private var appsColumn: some View {
+        ZStack(alignment: .bottomLeading) {
+            // 主内容
+            Group {
+                if pinnedAppsStore.apps.isEmpty {
+                    VStack(spacing: 5) {
+                        Image(systemName: "square.grid.2x2")
+                            .font(.system(size: 18))
+                            .foregroundStyle(.white.opacity(0.12))
+                        Text("点击 + 添加应用")
+                            .font(.system(size: 8))
+                            .multilineTextAlignment(.center)
+                            .foregroundStyle(.white.opacity(0.2))
+                    }
+                } else {
+                    let apps = pinnedAppsStore.apps
+                    let cols = apps.count <= 4 ? 2 : apps.count <= 9 ? 3 : 4
+                    let iconW: CGFloat = hideAppNames ? 30 : 26
+                    let cellW: CGFloat = hideAppNames ? 32 : 32
+                    LazyVGrid(
+                        columns: Array(repeating: GridItem(.fixed(cellW), spacing: 4), count: cols),
+                        alignment: .center,
+                        spacing: 4
+                    ) {
+                        ForEach(apps, id: \.self) { url in
+                            Button { NSWorkspace.shared.open(url) } label: {
+                                VStack(spacing: 2) {
+                                    Image(nsImage: NSWorkspace.shared.icon(forFile: url.path))
+                                        .resizable().aspectRatio(contentMode: .fit)
+                                        .frame(width: iconW, height: iconW)
+                                    if !hideAppNames {
+                                        Text(url.deletingPathExtension().lastPathComponent)
+                                            .font(.system(size: 7))
+                                            .lineLimit(1)
+                                            .foregroundStyle(.white.opacity(0.5))
+                                            .frame(width: cellW)
+                                    }
+                                }
+                            }
+                            .buttonStyle(.plain)
+                            .contextMenu {
+                                Button(role: .destructive) {
+                                    pinnedAppsStore.remove(url)
+                                } label: {
+                                    Label("从快速启动移除", systemImage: "trash")
+                                }
+                            }
+                        }
+                    }
+                    .fixedSize()
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+            // 左下角 + 按钮
+            Button {
+                showAppPicker = true
+            } label: {
+                Image(systemName: "plus")
+                    .font(.system(size: 9, weight: .semibold))
+                    .foregroundStyle(.white.opacity(0.55))
+                    .frame(width: 18, height: 18)
+                    .background(Color.white.opacity(0.1), in: Circle())
+            }
+            .buttonStyle(.plain)
+            .padding(5)
+            .popover(isPresented: $showAppPicker, arrowEdge: .bottom) {
+                OverviewAppPickerView(store: pinnedAppsStore)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    // MARK: – 时间 / 日期 / 天气列
+
+    private var timeDateColumn: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(now, format: .dateTime.weekday(.abbreviated).month().day())
+                .font(.system(size: 11, weight: .medium))
+                .foregroundStyle(.green.opacity(0.85))
+
+            Text(now, format: .dateTime.hour().minute())
+                .font(.system(size: 36, weight: .bold, design: .rounded))
+                .foregroundStyle(Color.orange)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+
+            if showWeather {
+                if let temp = weatherService.temperature {
+                    HStack(spacing: 3) {
+                        Image(systemName: weatherService.symbolName)
+                            .font(.system(size: 10))
+                        Text(weatherService.conditionText.isEmpty
+                             ? String(format: "%.0f°", temp)
+                             : String(format: "%@ %.0f°", weatherService.conditionText, temp))
+                            .font(.system(size: 10, weight: .medium))
+                    }
+                    .foregroundStyle(Color.orange.opacity(0.8))
+                } else {
+                    HStack(spacing: 3) {
+                        Image(systemName: "location.slash").font(.system(size: 9))
+                        Text("获取天气中…").font(.system(size: 9))
+                    }
+                    .foregroundStyle(.white.opacity(0.2))
+                }
+            }
+        }
+        .padding(.horizontal, 10)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+    }
+
+    // MARK: – 系统信息列
+
+    private var systemInfoColumn: some View {
+        VStack(spacing: 6) {
+            HStack(spacing: 14) {
+                statBlock("\(Int(systemMonitorViewModel.cpuUsage))%",  "CPU",
+                          usageColor(systemMonitorViewModel.cpuUsage,  warn: 50, danger: 80))
+                statBlock("\(Int(systemMonitorViewModel.memoryUsage))%", "RAM",
+                          usageColor(systemMonitorViewModel.memoryUsage, warn: 70, danger: 85))
+                statBlock("\(Int(systemMonitorViewModel.diskUsage))%",  "DISK",
+                          usageColor(systemMonitorViewModel.diskUsage,  warn: 80, danger: 90))
+            }
+            HStack(spacing: 3) {
+                Image(systemName: "internaldrive").font(.system(size: 9))
+                Text("\(systemMonitorViewModel.diskUsedText) / \(systemMonitorViewModel.diskTotalText)")
+                    .font(.system(size: 9, weight: .medium, design: .monospaced))
+            }
+            .foregroundStyle(.white.opacity(0.3))
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private func statBlock(_ value: String, _ label: String, _ color: Color) -> some View {
+        VStack(spacing: 1) {
+            Text(value)
+                .font(.system(size: 14, weight: .bold, design: .monospaced))
+                .foregroundStyle(color)
+            Text(label)
+                .font(.system(size: 8, weight: .medium))
+                .foregroundStyle(.white.opacity(0.4))
+        }
+    }
+
+    private func usageColor(_ v: Double, warn: Double, danger: Double) -> Color {
+        v >= danger ? .red : v >= warn ? .orange : .green.opacity(0.9)
+    }
+
+    // MARK: – 番茄计时器列
+
+    private var pomodoroColumn: some View {
+        VStack(spacing: 8) {
+            Image(systemName: pomodoroViewModel.state == .idle ? "timer"
+                  : pomodoroViewModel.phase == .work ? "flame.fill" : "cup.and.heat.waves.fill")
+                .font(.system(size: 20))
+                .foregroundStyle(pomodoroViewModel.state == .idle ? .white.opacity(0.25)
+                               : pomodoroViewModel.phase == .work ? .orange : .mint)
+
+            if pomodoroViewModel.state == .idle {
+                // 时长调节
+                HStack(spacing: 8) {
+                    Button {
+                        if workMinutes > 1 { workMinutes -= 1; pomodoroViewModel.updateWorkMinutes(workMinutes) }
+                    } label: { Image(systemName: "minus").font(.system(size: 11, weight: .medium)) }
+                    .buttonStyle(.plain).foregroundStyle(.white.opacity(0.4))
+
+                    Text("\(workMinutes)m")
+                        .font(.system(size: 13, weight: .semibold, design: .monospaced))
+                        .foregroundStyle(.white.opacity(0.7))
+                        .frame(minWidth: 32, alignment: .center)
+
+                    Button {
+                        if workMinutes < 120 { workMinutes += 1; pomodoroViewModel.updateWorkMinutes(workMinutes) }
+                    } label: { Image(systemName: "plus").font(.system(size: 11, weight: .medium)) }
+                    .buttonStyle(.plain).foregroundStyle(.white.opacity(0.4))
+                }
+
+                Button { pomodoroViewModel.toggleRunning() } label: {
+                    Text("开始")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 16).padding(.vertical, 4)
+                        .background(Color.orange.opacity(0.75))
+                        .clipShape(Capsule())
+                }
+                .buttonStyle(.plain)
+
+            } else {
+                Text(pomodoroViewModel.timeString)
+                    .font(.system(size: 22, weight: .bold, design: .monospaced))
+                    .foregroundStyle(pomodoroViewModel.phase == .work ? .orange : .mint)
+
+                Text(pomodoroViewModel.phase == .work ? "专注中" : "休息中")
+                    .font(.system(size: 9))
+                    .foregroundStyle(.white.opacity(0.4))
+
+                HStack(spacing: 14) {
+                    Button { pomodoroViewModel.toggleRunning() } label: {
+                        Image(systemName: pomodoroViewModel.state == .running ? "pause.fill" : "play.fill")
+                            .font(.system(size: 14))
+                    }
+                    .buttonStyle(.plain).foregroundStyle(.white.opacity(0.6))
+
+                    Button { pomodoroViewModel.reset() } label: {
+                        Image(systemName: "xmark.circle").font(.system(size: 14))
+                    }
+                    .buttonStyle(.plain).foregroundStyle(.white.opacity(0.3))
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+// MARK: - OverviewAppPickerView
+
+private struct OverviewAppPickerView: View {
+    @ObservedObject var store: PinnedAppsStore
+    @StateObject private var allApps = AppLauncherStore()
+    @State private var searchText = ""
+
+    private var available: [URL] {
+        let pinned = Set(store.apps.map(\.path))
+        let base = allApps.apps.filter { !pinned.contains($0.path) }
+        guard !searchText.isEmpty else { return base }
+        let q = searchText.lowercased()
+        return base.filter { $0.deletingPathExtension().lastPathComponent.lowercased().contains(q) }
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            // 搜索栏
+            HStack(spacing: 6) {
+                Image(systemName: "magnifyingglass")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+                TextField("搜索应用", text: $searchText)
+                    .textFieldStyle(.plain)
+                    .font(.system(size: 12))
+                if !searchText.isEmpty {
+                    Button { searchText = "" } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 11))
+                            .foregroundStyle(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+
+            Divider()
+
+            if allApps.isLoading {
+                ProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .frame(height: 200)
+            } else if available.isEmpty {
+                VStack(spacing: 8) {
+                    Image(systemName: searchText.isEmpty ? "checkmark.circle" : "magnifyingglass")
+                        .font(.system(size: 28))
+                        .foregroundStyle(.secondary)
+                    Text(searchText.isEmpty ? "所有应用都已添加" : "未找到匹配应用")
+                        .font(.system(size: 12))
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity)
+                .frame(height: 200)
+            } else {
+                ScrollView(.vertical, showsIndicators: false) {
+                    LazyVGrid(
+                        columns: [GridItem(.adaptive(minimum: 64), spacing: 8)],
+                        spacing: 10
+                    ) {
+                        ForEach(available, id: \.self) { url in
+                            Button {
+                                store.add(url)
+                            } label: {
+                                VStack(spacing: 4) {
+                                    Image(nsImage: NSWorkspace.shared.icon(forFile: url.path))
+                                        .resizable().aspectRatio(contentMode: .fit)
+                                        .frame(width: 36, height: 36)
+                                    Text(url.deletingPathExtension().lastPathComponent)
+                                        .font(.system(size: 9))
+                                        .lineLimit(2)
+                                        .multilineTextAlignment(.center)
+                                        .foregroundStyle(.primary)
+                                        .frame(width: 58)
+                                }
+                                .padding(.vertical, 6)
+                                .frame(maxWidth: .infinity)
+                                .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding(10)
+                }
+                .frame(height: 240)
+            }
+
+            Divider()
+
+            HStack {
+                Text("已固定 \(store.apps.count) / 12 个应用")
+                    .font(.system(size: 10))
+                    .foregroundStyle(.secondary)
+                Spacer()
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+        }
+        .frame(width: 300)
+        .onAppear { allApps.loadIfNeeded() }
+    }
+}
+
+// MARK: - PomodoroInlineView
+
+private struct PomodoroInlineView: View {
+    enum PomodoroState { case idle, work, rest }
+
+    @AppStorage("settings.overview.pomodoroDuration") private var workMinutes = 25
+    @State private var state: PomodoroState = .idle
+    @State private var remaining: Int = 0
+    @State private var timerTask: Task<Void, Never>? = nil
+
+    private var displayTime: String {
+        let m = remaining / 60, s = remaining % 60
+        return String(format: "%02d:%02d", m, s)
+    }
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: state == .idle ? "timer" : state == .work ? "flame.fill" : "cup.and.heat.waves.fill")
+                .font(.system(size: 10))
+                .foregroundStyle(state == .work ? .orange : state == .rest ? .mint : .white.opacity(0.4))
+            if state == .idle {
+                Text("专注 \(workMinutes) 分钟")
+                    .font(.system(size: 10))
+                    .foregroundStyle(.white.opacity(0.45))
+                Spacer()
+                Button { start() } label: {
+                    Text("开始")
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundStyle(.orange)
+                }
+                .buttonStyle(.plain)
+            } else {
+                Text(displayTime)
+                    .font(.system(size: 12, weight: .semibold, design: .monospaced))
+                    .foregroundStyle(state == .work ? .orange : .mint)
+                Text(state == .work ? "专注中" : "休息中")
+                    .font(.system(size: 9))
+                    .foregroundStyle(.white.opacity(0.4))
+                Spacer()
+                Button { stop() } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 9))
+                        .foregroundStyle(.white.opacity(0.4))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
+    private func start() {
+        remaining = workMinutes * 60
+        state = .work
+        timerTask?.cancel()
+        timerTask = Task {
+            while !Task.isCancelled, remaining > 0 {
+                try? await Task.sleep(for: .seconds(1))
+                if !Task.isCancelled { remaining -= 1 }
+            }
+            if !Task.isCancelled { state = .idle }
+        }
+    }
+
+    private func stop() {
+        timerTask?.cancel()
+        timerTask = nil
+        state = .idle
+    }
+}
+
+// MARK: - StatBar
 
 private struct StatBar: View {
     let label: String
@@ -1271,7 +1801,7 @@ private struct AppIconButton: View {
 }
 
 @MainActor
-private final class AppLauncherStore: ObservableObject {
+final class AppLauncherStore: ObservableObject {
     @Published private(set) var apps: [URL] = []
     @Published private(set) var isLoading = false
 
@@ -1395,6 +1925,78 @@ private struct SwipeEventMonitor: NSViewRepresentable {
                 return nil
             }
             return event
+        }
+    }
+}
+
+// MARK: - PomodoroViewModel
+
+@MainActor
+final class PomodoroViewModel: ObservableObject {
+    enum PomodoroState { case idle, running, paused }
+    enum PomodoroPhase { case work, shortBreak }
+
+    @Published private(set) var state: PomodoroState = .idle
+    @Published private(set) var phase: PomodoroPhase = .work
+    @Published private(set) var timeRemaining: Int = 25 * 60
+
+    private var countdownTask: Task<Void, Never>?
+    private var _workMinutes: Int = 25
+
+    var timeString: String { String(format: "%02d:%02d", timeRemaining / 60, timeRemaining % 60) }
+
+    init() {
+        let stored = UserDefaults.standard.integer(forKey: "settings.overview.pomodoroDuration")
+        _workMinutes = stored > 0 ? stored : 25
+        timeRemaining = _workMinutes * 60
+    }
+
+    func updateWorkMinutes(_ minutes: Int) {
+        _workMinutes = minutes
+        if state == .idle { timeRemaining = _workMinutes * 60 }
+    }
+
+    func toggleRunning() {
+        switch state {
+        case .idle:
+            timeRemaining = _workMinutes * 60
+            state = .running
+            startCountdown()
+        case .running:
+            state = .paused
+            countdownTask?.cancel()
+        case .paused:
+            state = .running
+            startCountdown()
+        }
+    }
+
+    func reset() {
+        countdownTask?.cancel()
+        countdownTask = nil
+        state = .idle
+        phase = .work
+        timeRemaining = _workMinutes * 60
+    }
+
+    private func startCountdown() {
+        countdownTask?.cancel()
+        countdownTask = Task { @MainActor in
+            while !Task.isCancelled, timeRemaining > 0 {
+                try? await Task.sleep(for: .seconds(1))
+                guard !Task.isCancelled else { return }
+                timeRemaining -= 1
+            }
+            guard !Task.isCancelled else { return }
+            if phase == .work {
+                phase = .shortBreak
+                timeRemaining = 5 * 60
+                startCountdown()
+            } else {
+                phase = .work
+                state = .idle
+                timeRemaining = _workMinutes * 60
+            }
         }
     }
 }
