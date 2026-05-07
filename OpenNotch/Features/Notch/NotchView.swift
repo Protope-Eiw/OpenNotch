@@ -37,7 +37,8 @@ struct NotchView: View {
     @StateObject private var pomodoroViewModel = PomodoroViewModel()
     @AppStorage("settings.notchBar.leftWidgets")  private var leftWidgetsRaw  = NotchBarWidget.networkSpeed.rawValue
     @AppStorage("settings.notchBar.rightWidgets") private var rightWidgetsRaw = "cpu,memory"
-    @AppStorage("settings.general.dashboardLastTab") private var dashboardLastTab = DashboardTab.system.rawValue
+    @AppStorage("settings.general.dashboardLastTab")    private var dashboardLastTab    = DashboardTab.system.rawValue
+    @AppStorage("settings.general.dashboardDefaultTab") private var dashboardDefaultTab = "last"
     // Calibrated to match BoringNotch: window=640pt, each side = (640-156)/2 - sideWidth ≈ 152
     private let pillExpandExtra: CGFloat = 152
 
@@ -124,6 +125,20 @@ private extension NotchView {
     var activeSideWidth: CGFloat { dashboardOpen ? sideWidth + pillExpandExtra : sideWidth }
     // Apps tab expands height to ~3× the standard panel (173 × 3 ≈ 519)
     var dashboardPanelHeight: CGFloat { dashboardTab == .apps ? 519 : 173 }
+
+    // True when the notch body is taller than the base pill height (content pushing down)
+    // and the dashboard is not open (dashboard has its own animation path).
+    private var notchExpandedDownward: Bool {
+        !dashboardOpen && notchViewModel.presentedNotchSize.height > baseHeight
+    }
+
+    // Direction-aware animation: easeIn (fast exit, tiny lead delay) when hiding,
+    // spring with a longer delay (wait for notch to start collapsing) when showing.
+    private var sideWidgetAnimation: Animation {
+        notchExpandedDownward
+            ? .easeIn(duration: 0.12).delay(0.04)
+            : .spring(response: 0.42, dampingFraction: 0.80).delay(0.15)
+    }
 
     private var enabledDashboardTabs: [DashboardTab] {
         tabDisplayOrder.filter {
@@ -469,12 +484,16 @@ private extension NotchView {
     }
 
     private func applyDashboardTabPolicy() {
-        let savedTab = DashboardTab(rawValue: dashboardLastTab) ?? .system
         let available = enabledDashboardTabs
-        if available.contains(savedTab) {
-            dashboardTab = savedTab
-        } else if let first = available.first {
-            dashboardTab = first
+        guard !available.isEmpty else { return }
+
+        if dashboardDefaultTab != "last",
+           let preferred = DashboardTab(rawValue: dashboardDefaultTab),
+           available.contains(preferred) {
+            dashboardTab = preferred
+        } else {
+            let savedTab = DashboardTab(rawValue: dashboardLastTab) ?? available[0]
+            dashboardTab = available.contains(savedTab) ? savedTab : available[0]
         }
     }
 
@@ -760,12 +779,15 @@ private struct DashboardPanelView: View {
     @Binding var appSearchText: String
     var enabledTabs: [DashboardTab]
 
+    @State private var macInfo: MacSystemInfo? = nil
+
     private var selectedIndex: Int {
         enabledTabs.firstIndex(of: selectedTab) ?? 0
     }
 
     var body: some View {
         pageContent
+            .task { if macInfo == nil { macInfo = await MacSystemInfo.load() } }
             .background(
                 SwipeEventMonitor(
                     onSwipeLeft: {
@@ -841,136 +863,96 @@ private struct DashboardPanelView: View {
     // MARK: System tab
 
     private var systemView: some View {
-        VStack(spacing: 7) {
-            HStack(spacing: 7) {
-                gaugeCard(
-                    title: "CPU",
-                    value: systemMonitorViewModel.cpuUsage,
-                    valueText: "\(Int(systemMonitorViewModel.cpuUsage))%",
-                    color: usageColor(systemMonitorViewModel.cpuUsage, warn: 50, danger: 80)
-                )
-                gaugeCard(
-                    title: "MEM",
-                    value: systemMonitorViewModel.memoryUsage,
-                    valueText: "\(Int(systemMonitorViewModel.memoryUsage))%",
-                    color: usageColor(systemMonitorViewModel.memoryUsage, warn: 70, danger: 85)
-                )
-                gaugeCard(
-                    title: systemMonitorViewModel.isCharging ? "BAT\u{26A1}" : "BAT",
-                    value: Double(systemMonitorViewModel.batteryLevel),
-                    valueText: "\(systemMonitorViewModel.batteryLevel)%",
-                    color: batteryColor(systemMonitorViewModel.batteryLevel,
-                                        isCharging: systemMonitorViewModel.isCharging)
-                )
-                gaugeCard(
-                    title: "DISK",
-                    value: systemMonitorViewModel.diskUsage,
-                    valueText: systemMonitorViewModel.diskUsedText,
-                    color: usageColor(systemMonitorViewModel.diskUsage, warn: 80, danger: 90)
-                )
+        HStack(alignment: .top, spacing: 8) {
+            // 左+中：3列2行，环形卡片与速度卡片等宽
+            VStack(spacing: 7) {
+                HStack(spacing: 7) {
+                    gaugeCard(title: "CPU",
+                              value: systemMonitorViewModel.cpuUsage,
+                              valueText: "\(Int(systemMonitorViewModel.cpuUsage))%",
+                              color: usageColor(systemMonitorViewModel.cpuUsage, warn: 50, danger: 80))
+                    gaugeCard(title: "MEM",
+                              value: systemMonitorViewModel.memoryUsage,
+                              valueText: "\(Int(systemMonitorViewModel.memoryUsage))%",
+                              color: usageColor(systemMonitorViewModel.memoryUsage, warn: 70, danger: 85))
+                    speedCard(sfSymbol: "arrow.up",
+                              speed: systemMonitorViewModel.uploadSpeed,
+                              label: "Upload")
+                }
+                HStack(spacing: 7) {
+                    gaugeCard(title: "DISK",
+                              value: systemMonitorViewModel.diskUsage,
+                              valueText: "\(Int(systemMonitorViewModel.diskUsage))%",
+                              color: usageColor(systemMonitorViewModel.diskUsage, warn: 80, danger: 90))
+                    gaugeCard(title: systemMonitorViewModel.isCharging ? "BAT⚡" : "BAT",
+                              value: Double(systemMonitorViewModel.batteryLevel),
+                              valueText: "\(systemMonitorViewModel.batteryLevel)%",
+                              color: batteryColor(systemMonitorViewModel.batteryLevel,
+                                                  isCharging: systemMonitorViewModel.isCharging))
+                    speedCard(sfSymbol: "arrow.down",
+                              speed: systemMonitorViewModel.downloadSpeed,
+                              label: "Download")
+                }
             }
-            networkCard
-            infoStrip
+            .frame(maxHeight: .infinity)
+
+            // 右：机器信息，字体较大，左上对齐
+            VStack(alignment: .leading, spacing: 8) {
+                Text(macInfo?.modelName ?? "Mac")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(.white.opacity(0.9))
+                    .lineLimit(1)
+
+                macInfoRow("cpu",        macInfo?.chipName     ?? "–")
+                macInfoRow("memorychip", macInfo?.ramText      ?? "–")
+                macInfoRow("barcode",    macInfo?.serialNumber ?? "–")
+                macInfoRow("apple.logo", macInfo?.macOSVersion ?? "–")
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
-    private var infoStrip: some View {
-        HStack(spacing: 7) {
-            infoCell(
-                icon: "clock",
-                label: "Uptime",
-                value: uptimeString
-            )
-            infoCell(
-                icon: "square.stack.3d.up",
-                label: "Apps",
-                value: "\(NSWorkspace.shared.runningApplications.filter { $0.activationPolicy == .regular }.count)"
-            )
-            infoCell(
-                icon: "internaldrive",
-                label: "Free",
-                value: systemMonitorViewModel.diskTotalText
-            )
-        }
+    private func gaugeCard(title: String, value: Double, valueText: String, color: Color) -> some View {
+        ProgressRing(progress: value, color: color, label: title, valueText: valueText)
+            .padding(8)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color.white.opacity(0.07))
+            .clipShape(RoundedRectangle(cornerRadius: 10))
     }
 
-    private func infoCell(icon: String, label: String, value: String) -> some View {
+    private func speedCard(sfSymbol: String, speed: Double, label: String) -> some View {
+        VStack(spacing: 3) {
+            Image(systemName: sfSymbol)
+                .font(.system(size: 10, weight: .bold))
+                .foregroundStyle(netSpeedColor(speed))
+            Text(systemMonitorViewModel.formattedSpeed(speed))
+                .font(.system(size: 13, weight: .semibold, design: .monospaced))
+                .foregroundStyle(netSpeedColor(speed))
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+            Text(label)
+                .font(.system(size: 8))
+                .foregroundStyle(.white.opacity(0.35))
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.white.opacity(0.07))
+        .clipShape(RoundedRectangle(cornerRadius: 10))
+    }
+
+    private func macInfoRow(_ icon: String, _ text: String) -> some View {
         HStack(spacing: 6) {
             Image(systemName: icon)
                 .font(.system(size: 10))
                 .foregroundStyle(.white.opacity(0.35))
-            VStack(alignment: .leading, spacing: 1) {
-                Text(value)
-                    .font(.system(size: 11, weight: .semibold, design: .monospaced))
-                    .foregroundStyle(.white)
-                Text(label)
-                    .font(.system(size: 9))
-                    .foregroundStyle(.white.opacity(0.35))
-            }
-            Spacer(minLength: 0)
+                .frame(width: 13)
+            Text(text)
+                .font(.system(size: 12, design: .monospaced))
+                .foregroundStyle(.white.opacity(0.75))
+                .lineLimit(1)
         }
-        .padding(.horizontal, 9)
-        .padding(.vertical, 6)
-        .frame(maxWidth: .infinity)
-        .background(Color.white.opacity(0.07))
-        .clipShape(RoundedRectangle(cornerRadius: 8))
-    }
-
-    private var uptimeString: String {
-        let s = Int(ProcessInfo.processInfo.systemUptime)
-        let d = s / 86400; let h = (s % 86400) / 3600; let m = (s % 3600) / 60
-        if d > 0 { return "\(d)d \(h)h" }
-        if h > 0 { return "\(h)h \(m)m" }
-        return "\(m)m"
-    }
-
-    private func gaugeCard(title: String, value: Double, valueText: String, color: Color) -> some View {
-        VStack(spacing: 2) {
-            ProgressRing(progress: value, color: color, label: "", showInternalText: false)
-            Text(valueText)
-                .font(.system(size: 9, weight: .semibold, design: .monospaced))
-                .foregroundStyle(.white)
-            Text(title)
-                .font(.system(size: 7, weight: .medium))
-                .foregroundStyle(.white.opacity(0.45))
-        }
-        .padding(8)
-        .frame(maxWidth: .infinity)
-        .background(Color.white.opacity(0.07))
-        .clipShape(RoundedRectangle(cornerRadius: 10))
-    }
-
-    private var networkCard: some View {
-        HStack(spacing: 0) {
-            netSpeedCell(sfSymbol: "arrow.up", label: "Upload",
-                         speed: systemMonitorViewModel.uploadSpeed)
-            Color.white.opacity(0.1).frame(width: 0.5)
-            netSpeedCell(sfSymbol: "arrow.down", label: "Download",
-                         speed: systemMonitorViewModel.downloadSpeed)
-        }
-        .background(Color.white.opacity(0.07))
-        .clipShape(RoundedRectangle(cornerRadius: 10))
-    }
-
-    private func netSpeedCell(sfSymbol: String, label: String, speed: Double) -> some View {
-        VStack(spacing: 3) {
-            HStack(spacing: 5) {
-                Image(systemName: sfSymbol)
-                    .font(.system(size: 9, weight: .bold))
-                    .foregroundStyle(netSpeedColor(speed))
-                Text(systemMonitorViewModel.formattedSpeed(speed))
-                    .font(.system(size: 14, weight: .semibold, design: .monospaced))
-                    .foregroundStyle(netSpeedColor(speed))
-            }
-            Text(label)
-                .font(.system(size: 9))
-                .foregroundStyle(.white.opacity(0.35))
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 8)
     }
 
     // MARK: Helpers
