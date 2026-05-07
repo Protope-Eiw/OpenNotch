@@ -1,0 +1,493 @@
+import XCTest
+import AppKit
+import CoreAudio
+@testable import OpenNotch
+
+@MainActor
+final class NowPlayingViewModelIntegrationTests: XCTestCase {
+    func testPublishesStartedAndStoppedEventsWhenSessionLifecycleChanges() {
+        let service = FakeNowPlayingService()
+        let viewModel = NowPlayingViewModel(service: service)
+        TestLifetime.retain(viewModel)
+        viewModel.startMonitoring()
+
+        XCTAssertEqual(service.startCalls, 1)
+        XCTAssertNil(viewModel.snapshot)
+
+        let snapshot = makeNowPlayingSnapshot()
+        service.publish(snapshot)
+
+        XCTAssertEqual(viewModel.snapshot, snapshot)
+        XCTAssertEqual(viewModel.event, .started)
+        XCTAssertTrue(viewModel.hasActiveSession)
+
+        service.publish(nil)
+
+        XCTAssertEqual(viewModel.snapshot, snapshot)
+        XCTAssertEqual(viewModel.event, .started)
+        XCTAssertTrue(viewModel.hasActiveSession)
+
+        RunLoop.main.run(until: Date().addingTimeInterval(0.8))
+
+        XCTAssertNil(viewModel.snapshot)
+        XCTAssertEqual(viewModel.event, .stopped)
+        XCTAssertFalse(viewModel.hasActiveSession)
+    }
+
+    func testPlaybackControlsSendCommandsToService() {
+        let service = FakeNowPlayingService()
+        let viewModel = NowPlayingViewModel(service: service)
+        TestLifetime.retain(viewModel)
+        viewModel.startMonitoring()
+
+        viewModel.previousTrack()
+        viewModel.togglePlayPause()
+        viewModel.nextTrack()
+
+        XCTAssertEqual(
+            service.commands,
+            [.previousTrack, .togglePlayPause, .nextTrack]
+        )
+    }
+
+    func testOpenPlaybackSourceDelegatesToSourceOpener() {
+        let service = FakeNowPlayingService()
+        let source = NowPlayingPlaybackSource(
+            bundleIdentifier: "com.spotify.client",
+            parentBundleIdentifier: nil,
+            processIdentifier: 3659
+        )
+        let sourceOpener = FakePlaybackSourceOpener()
+        let viewModel = NowPlayingViewModel(
+            service: service,
+            playbackSourceOpener: sourceOpener
+        )
+        TestLifetime.retain(viewModel)
+        viewModel.startMonitoring()
+
+        service.publish(makeNowPlayingSnapshot(playbackSource: source))
+        viewModel.openPlaybackSource()
+
+        XCTAssertEqual(sourceOpener.openedSources, [source])
+        XCTAssertTrue(viewModel.canOpenPlaybackSource)
+    }
+
+    func testOpenPlaybackSourceDoesNothingWithoutSource() {
+        let service = FakeNowPlayingService()
+        let sourceOpener = FakePlaybackSourceOpener()
+        let viewModel = NowPlayingViewModel(
+            service: service,
+            playbackSourceOpener: sourceOpener
+        )
+        TestLifetime.retain(viewModel)
+        viewModel.startMonitoring()
+
+        service.publish(makeNowPlayingSnapshot(playbackSource: nil))
+        viewModel.openPlaybackSource()
+
+        XCTAssertTrue(sourceOpener.openedSources.isEmpty)
+        XCTAssertFalse(viewModel.canOpenPlaybackSource)
+    }
+
+    func testTogglePlayPauseUpdatesCurrentSnapshotImmediately() {
+        let service = FakeNowPlayingService()
+        let viewModel = NowPlayingViewModel(service: service)
+        TestLifetime.retain(viewModel)
+        viewModel.startMonitoring()
+
+        service.publish(makeNowPlayingSnapshot(elapsedTime: 42, playbackRate: 1))
+
+        viewModel.togglePlayPause()
+
+        XCTAssertEqual(service.commands, [.pause])
+        XCTAssertEqual(viewModel.snapshot?.playbackRate, 0)
+        XCTAssertFalse(viewModel.snapshot?.isPlaying ?? true)
+    }
+
+    func testTogglePlayPauseSendsExplicitPlayWhenPaused() {
+        let service = FakeNowPlayingService()
+        let viewModel = NowPlayingViewModel(service: service)
+        TestLifetime.retain(viewModel)
+        viewModel.startMonitoring()
+
+        service.publish(makeNowPlayingSnapshot(elapsedTime: 42, playbackRate: 0))
+
+        viewModel.togglePlayPause()
+
+        XCTAssertEqual(service.commands, [.play])
+        XCTAssertEqual(viewModel.snapshot?.playbackRate, 1)
+        XCTAssertTrue(viewModel.snapshot?.isPlaying ?? false)
+    }
+
+    func testPlaybackStateChangesPublishPlaybackStateEvent() {
+        let service = FakeNowPlayingService()
+        let viewModel = NowPlayingViewModel(service: service)
+        TestLifetime.retain(viewModel)
+        viewModel.startMonitoring()
+
+        service.publish(makeNowPlayingSnapshot(playbackRate: 1))
+        XCTAssertEqual(viewModel.event, .started)
+
+        service.publish(makeNowPlayingSnapshot(playbackRate: 0))
+        XCTAssertEqual(viewModel.event, .playbackStateChanged(isPlaying: false))
+
+        service.publish(makeNowPlayingSnapshot(playbackRate: 1))
+        XCTAssertEqual(viewModel.event, .playbackStateChanged(isPlaying: true))
+    }
+
+    func testSeekUpdatesCurrentSnapshotImmediately() {
+        let service = FakeNowPlayingService()
+        let viewModel = NowPlayingViewModel(service: service)
+        TestLifetime.retain(viewModel)
+        viewModel.startMonitoring()
+
+        service.publish(makeNowPlayingSnapshot(duration: 243, elapsedTime: 42, playbackRate: 1))
+
+        viewModel.seek(to: 120)
+
+        XCTAssertEqual(service.commands, [.seek(120)])
+        XCTAssertEqual(viewModel.snapshot?.elapsedTime, 120)
+        XCTAssertEqual(viewModel.snapshot?.duration, 243)
+        XCTAssertEqual(viewModel.snapshot?.playbackRate, 1)
+    }
+
+    func testAdvancedPlaybackControlsUpdateSnapshotAndSendCommands() {
+        let service = FakeNowPlayingService()
+        let viewModel = NowPlayingViewModel(service: service)
+        TestLifetime.retain(viewModel)
+        viewModel.startMonitoring()
+
+        service.publish(
+            makeNowPlayingSnapshot(
+                isShuffled: false,
+                repeatMode: .off,
+                volume: 0.25,
+                supportsVolumeControl: true
+            )
+        )
+
+        viewModel.toggleShuffle()
+        viewModel.toggleRepeat()
+        viewModel.setVolume(1.3)
+
+        XCTAssertEqual(
+            service.commands,
+            [.setShuffle(true), .setRepeatMode(.all), .setVolume(1)]
+        )
+        XCTAssertEqual(viewModel.snapshot?.isShuffled, true)
+        XCTAssertEqual(viewModel.snapshot?.repeatMode, .all)
+        XCTAssertEqual(viewModel.snapshot?.volume, 1)
+    }
+
+    func testRemoteFavoriteSendsFavoriteCommandWhenSourceSupportsIt() {
+        let service = FakeNowPlayingService()
+        let viewModel = NowPlayingViewModel(service: service)
+        TestLifetime.retain(viewModel)
+        viewModel.startMonitoring()
+
+        service.publish(
+            makeNowPlayingSnapshot(
+                isFavorite: false,
+                supportsFavorite: true
+            )
+        )
+
+        viewModel.toggleFavorite()
+
+        XCTAssertEqual(service.commands, [.setFavorite(true)])
+        XCTAssertTrue(viewModel.isCurrentTrackFavorite)
+        XCTAssertEqual(viewModel.snapshot?.isFavorite, true)
+    }
+
+    func testArtworkPaletteUpdatesFromArtworkData() {
+        let service = FakeNowPlayingService()
+        let viewModel = NowPlayingViewModel(service: service)
+        TestLifetime.retain(viewModel)
+        viewModel.startMonitoring()
+
+        service.publish(
+            makeNowPlayingSnapshot(
+                artworkData: makeArtworkData(color: NSColor(calibratedRed: 0.98, green: 0.49, blue: 0.12, alpha: 1))
+            )
+        )
+
+        let components = rgbaComponents(from: viewModel.artworkPalette.equalizerBaseColor)
+        XCTAssertGreaterThan(components.red, components.green)
+        XCTAssertGreaterThan(components.green, components.blue)
+        XCTAssertNotEqual(viewModel.artworkPalette, .fallback)
+    }
+
+    func testArtworkPersistsWhileActiveSnapshotTemporarilyLosesArtwork() {
+        let service = FakeNowPlayingService()
+        let viewModel = NowPlayingViewModel(service: service)
+        TestLifetime.retain(viewModel)
+        viewModel.startMonitoring()
+
+        service.publish(makeNowPlayingSnapshot(artworkData: makeArtworkData(color: .systemBlue)))
+        XCTAssertNotNil(viewModel.artworkImage)
+        XCTAssertNotEqual(viewModel.artworkPalette, .fallback)
+
+        service.publish(makeNowPlayingSnapshot(artworkData: nil))
+
+        XCTAssertNotNil(viewModel.artworkImage)
+        XCTAssertNotEqual(viewModel.artworkPalette, .fallback)
+    }
+
+    func testArtworkClearsWhenSessionStops() {
+        let service = FakeNowPlayingService()
+        let viewModel = NowPlayingViewModel(service: service)
+        TestLifetime.retain(viewModel)
+        viewModel.startMonitoring()
+
+        service.publish(makeNowPlayingSnapshot(artworkData: makeArtworkData(color: .systemBlue)))
+        XCTAssertNotNil(viewModel.artworkImage)
+        XCTAssertNotEqual(viewModel.artworkPalette, .fallback)
+
+        service.publish(nil)
+
+        XCTAssertNotNil(viewModel.artworkImage)
+        XCTAssertNotEqual(viewModel.artworkPalette, .fallback)
+
+        RunLoop.main.run(until: Date().addingTimeInterval(0.8))
+
+        XCTAssertNil(viewModel.artworkImage)
+        XCTAssertEqual(viewModel.artworkPalette, .fallback)
+    }
+
+    func testTrackChangeTriggersArtworkFlipAndDelaysArtworkSwap() async throws {
+        let service = FakeNowPlayingService()
+        let viewModel = NowPlayingViewModel(service: service)
+        TestLifetime.retain(viewModel)
+        viewModel.startMonitoring()
+
+        service.publish(
+            makeNowPlayingSnapshot(
+                title: "Midnight Echoes",
+                artist: "Debug Ensemble",
+                album: "Preview Mode",
+                artworkData: makeArtworkData(color: .systemRed)
+            )
+        )
+
+        let firstArtworkImage = try XCTUnwrap(viewModel.artworkImage)
+        XCTAssertEqual(viewModel.artworkFlipAngle, 0)
+
+        service.publish(nil)
+
+        XCTAssertEqual(viewModel.snapshot?.title, "Midnight Echoes")
+        XCTAssertTrue(viewModel.artworkImage === firstArtworkImage)
+
+        service.publish(
+            makeNowPlayingSnapshot(
+                title: "Second Signal",
+                artist: "Debug Ensemble",
+                album: "Preview Mode",
+                artworkData: makeArtworkData(color: .systemBlue)
+            )
+        )
+
+        XCTAssertEqual(viewModel.artworkFlipAngle, 180)
+        XCTAssertTrue(viewModel.artworkImage === firstArtworkImage)
+
+        try? await Task.sleep(nanoseconds: 550_000_000)
+        await Task.yield()
+
+        XCTAssertFalse(viewModel.artworkImage === firstArtworkImage)
+        XCTAssertNotEqual(viewModel.artworkPalette, .fallback)
+    }
+
+    func testAudioOutputRoutesLoadFromRoutingService() {
+        let service = FakeNowPlayingService()
+        let audioOutputRouting = FakeAudioOutputRoutingService(
+            routes: [
+                AudioOutputRoute(
+                    id: 1,
+                    name: "MacBook Pro Speakers",
+                    transportType: kAudioDeviceTransportTypeBuiltIn,
+                    isCurrent: true
+                ),
+                AudioOutputRoute(
+                    id: 2,
+                    name: "AirPods Pro",
+                    transportType: kAudioDeviceTransportTypeBluetooth,
+                    isCurrent: false
+                )
+            ]
+        )
+        let viewModel = NowPlayingViewModel(
+            service: service,
+            audioOutputRouting: audioOutputRouting
+        )
+        TestLifetime.retain(viewModel)
+
+        XCTAssertEqual(viewModel.audioOutputRoutes.count, 2)
+        XCTAssertEqual(viewModel.currentAudioOutputRoute?.name, "MacBook Pro Speakers")
+    }
+
+    func testSwitchAudioOutputDelegatesToRoutingServiceAndRefreshesCurrentRoute() {
+        let service = FakeNowPlayingService()
+        let audioOutputRouting = FakeAudioOutputRoutingService(
+            routes: [
+                AudioOutputRoute(
+                    id: 1,
+                    name: "MacBook Pro Speakers",
+                    transportType: kAudioDeviceTransportTypeBuiltIn,
+                    isCurrent: true
+                ),
+                AudioOutputRoute(
+                    id: 2,
+                    name: "AirPods Pro",
+                    transportType: kAudioDeviceTransportTypeBluetooth,
+                    isCurrent: false
+                )
+            ]
+        )
+        let viewModel = NowPlayingViewModel(
+            service: service,
+            audioOutputRouting: audioOutputRouting
+        )
+        TestLifetime.retain(viewModel)
+
+        let targetRoute = audioOutputRouting.routes[1]
+        viewModel.switchAudioOutput(to: targetRoute)
+
+        XCTAssertEqual(audioOutputRouting.selectedRouteIDs, [2])
+        XCTAssertEqual(viewModel.currentAudioOutputRoute?.name, "AirPods Pro")
+        XCTAssertEqual(viewModel.audioOutputRoutes.first(where: { $0.id == 2 })?.isCurrent, true)
+    }
+
+    func testDetailPollingIsEnabledOnlyWhileDetailedPresentationIsActive() {
+        let service = FakeNowPlayingService()
+        let viewModel = NowPlayingViewModel(service: service)
+        TestLifetime.retain(viewModel)
+
+        viewModel.startMonitoring()
+
+        XCTAssertTrue(service.detailPollingStates.isEmpty)
+
+        viewModel.setDetailedPresentationActive(true, source: "test.expanded")
+        viewModel.setDetailedPresentationActive(false, source: "test.expanded")
+
+        XCTAssertEqual(service.detailPollingStates, [true, false])
+    }
+
+    func testClearingPresentationActivityStateDisablesDetailPolling() {
+        let service = FakeNowPlayingService()
+        let viewModel = NowPlayingViewModel(service: service)
+        TestLifetime.retain(viewModel)
+
+        viewModel.startMonitoring()
+        viewModel.setDetailedPresentationActive(true, source: "test.expanded")
+        viewModel.clearPresentationActivityState()
+
+        XCTAssertEqual(service.detailPollingStates, [true, false])
+    }
+
+    func testFavoriteStatePersistsForTrackIdentity() {
+        let service = FakeNowPlayingService()
+        let favoritesStore = makeFavoriteStore(named: #function)
+        let viewModel = NowPlayingViewModel(
+            service: service,
+            favoritesStore: favoritesStore
+        )
+        TestLifetime.retain(viewModel)
+
+        let snapshot = makeNowPlayingSnapshot(
+            title: "Midnight Echoes",
+            artist: "Debug Ensemble",
+            album: "Preview Mode"
+        )
+        service.publish(snapshot)
+
+        XCTAssertFalse(viewModel.isCurrentTrackFavorite)
+
+        viewModel.toggleFavorite()
+        XCTAssertTrue(viewModel.isCurrentTrackFavorite)
+
+        let restoredService = FakeNowPlayingService()
+        let restoredViewModel = NowPlayingViewModel(
+            service: restoredService,
+            favoritesStore: favoritesStore
+        )
+        TestLifetime.retain(restoredViewModel)
+        restoredViewModel.startMonitoring()
+        restoredService.publish(snapshot)
+
+        XCTAssertTrue(restoredViewModel.isCurrentTrackFavorite)
+    }
+
+    func testFavoriteStateResetsForDifferentTrack() {
+        let service = FakeNowPlayingService()
+        let favoritesStore = makeFavoriteStore(named: #function)
+        let viewModel = NowPlayingViewModel(
+            service: service,
+            favoritesStore: favoritesStore
+        )
+        TestLifetime.retain(viewModel)
+
+        service.publish(
+            makeNowPlayingSnapshot(
+                title: "Midnight Echoes",
+                artist: "Debug Ensemble",
+                album: "Preview Mode"
+            )
+        )
+        viewModel.toggleFavorite()
+        XCTAssertTrue(viewModel.isCurrentTrackFavorite)
+
+        service.publish(
+            makeNowPlayingSnapshot(
+                title: "Second Signal",
+                artist: "Debug Ensemble",
+                album: "Preview Mode"
+            )
+        )
+
+        XCTAssertFalse(viewModel.isCurrentTrackFavorite)
+    }
+}
+
+private func makeArtworkData(
+    color: NSColor,
+    size: CGSize = CGSize(width: 20, height: 20)
+) -> Data {
+    let width = Int(size.width)
+    let height = Int(size.height)
+    let rep = NSBitmapImageRep(
+        bitmapDataPlanes: nil,
+        pixelsWide: width,
+        pixelsHigh: height,
+        bitsPerSample: 8,
+        samplesPerPixel: 4,
+        hasAlpha: true,
+        isPlanar: false,
+        colorSpaceName: .deviceRGB,
+        bytesPerRow: 0,
+        bitsPerPixel: 0
+    )!
+
+    NSGraphicsContext.saveGraphicsState()
+    NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: rep)
+    color.setFill()
+    NSBezierPath(rect: NSRect(origin: .zero, size: size)).fill()
+    NSGraphicsContext.restoreGraphicsState()
+
+    return rep.representation(using: .png, properties: [:])!
+}
+
+private func rgbaComponents(from color: NSColor) -> (red: CGFloat, green: CGFloat, blue: CGFloat, alpha: CGFloat) {
+    let resolvedColor = color.usingColorSpace(.sRGB) ?? color
+    return (
+        resolvedColor.redComponent,
+        resolvedColor.greenComponent,
+        resolvedColor.blueComponent,
+        resolvedColor.alphaComponent
+    )
+}
+
+private func makeFavoriteStore(named name: String) -> UserDefaults {
+    let suiteName = "OpenNotchTests.\(name)"
+    let defaults = UserDefaults(suiteName: suiteName)!
+    defaults.removePersistentDomain(forName: suiteName)
+    return defaults
+}
