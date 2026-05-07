@@ -9,17 +9,17 @@ import SwiftUI
 
 struct SettingsToggleRow: View {
     let title: LocalizedStringKey
-    let description: LocalizedStringKey
+    let description: LocalizedStringKey?
     let systemImage: String?
     let imageName: String?
     let color: Color
     let accessibilityIdentifier: String?
-    
+
     @Binding var isOn: Bool
-    
+
     init(
         title: LocalizedStringKey,
-        description: LocalizedStringKey,
+        description: LocalizedStringKey? = nil,
         systemImage: String,
         color: Color,
         isOn: Binding<Bool>,
@@ -36,7 +36,7 @@ struct SettingsToggleRow: View {
 
     init(
         title: LocalizedStringKey,
-        description: LocalizedStringKey,
+        description: LocalizedStringKey? = nil,
         imageName: String,
         color: Color,
         isOn: Binding<Bool>,
@@ -74,10 +74,12 @@ struct SettingsToggleRow: View {
                 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(title)
-                    Text(description)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
+                    if let description {
+                        Text(description)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
                 }
                 
                 Spacer()

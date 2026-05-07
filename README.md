@@ -1,40 +1,20 @@
 <p align="center">
-  <img src="DynamicNotch/Resources/Assets.xcassets/AppIcon.appiconset/logo256.png" alt="DynamicNotch logo" width="96" />
+  <img src="DynamicNotch/Resources/Assets.xcassets/AppIcon.appiconset/logo256.png" alt="OpenNotch logo" width="96" />
 </p>
 
-<h1 align="center">DynamicNotch</h1>
+<h1 align="center">OpenNotch</h1>
 
 <p align="center">
   <strong>Turn the MacBook notch into a living native surface.</strong>
 </p>
 
 <p align="center">
-  DynamicNotch is a native macOS app for notched MacBooks that turns the notch into a live system surface for media,
-  downloads, AirDrop, timers, screen recording, connectivity events, lock-screen transitions, and custom hardware HUDs.
+  OpenNotch is a native macOS app for notched MacBooks that turns the notch into a live system surface for media,
+  downloads, AirDrop, timers, screen recording, connectivity events, lock-screen transitions, custom hardware HUDs,
+  and a fully customizable interactive dashboard.
 </p>
 
 <p align="center">
-  <a href="https://t.me/Dynamic_Notch">
-    <img src="https://img.shields.io/badge/Telegram-Join%20Channel-26A5E4?style=for-the-badge&logo=telegram&logoColor=white" alt="Join the Telegram channel" />
-  </a>
-  <a href="https://dynamicnotch.evgeniy-petrukovich.workers.dev/download">
-    <img src="https://img.shields.io/badge/Website-Open%20Site-111111?style=for-the-badge&logo=safari&logoColor=white" alt="Open the DynamicNotch website" />
-  </a>
-  <a href="mailto:evgeniy.petrukovich@icloud.com?subject=A%20question%20about%20Dynamic%20Notch">
-    <img src="https://img.shields.io/badge/Email-Contact%20Me-0A84FF?style=for-the-badge&logo=icloud&logoColor=white" alt="Send an email about DynamicNotch" />
-  </a>
-  <a href="https://t.me/id10101101">
-    <img src="https://img.shields.io/badge/Telegram-Contact%20Me-229ED9?style=for-the-badge&logo=telegram&logoColor=white" alt="Contact me on Telegram" />
-  </a>
-</p>
-
-<p align="center">
-  <a href="https://github.com/jackson-storm/DynamicNotch/releases">
-    <img src="https://img.shields.io/github/downloads/jackson-storm/DynamicNotch/total?label=downloads" alt="GitHub downloads" />
-  </a>
-  <a href="https://github.com/jackson-storm/DynamicNotch/releases/latest">
-    <img src="https://img.shields.io/github/v/release/jackson-storm/DynamicNotch?display_name=release&sort=semver" alt="Latest release" />
-  </a>
   <img src="https://img.shields.io/badge/macOS-14.6%2B-111111?logo=apple" alt="macOS 14.6 or later" />
   <img src="https://img.shields.io/badge/UI-SwiftUI%20%2B%20AppKit-0A84FF" alt="SwiftUI and AppKit" />
   <img src="https://img.shields.io/badge/Swift-5-F05138?logo=swift&logoColor=white" alt="Swift 5" />
@@ -44,67 +24,85 @@
 </p>
 
 <p>
-  <img src="assets/readme/Player.png" alt="DynamicNotch preview" width="100%" />
+  <img src="assets/readme/Player.png" alt="OpenNotch preview" width="100%" />
 </p>
 
-## ✨ Why DynamicNotch
+## Why OpenNotch
 
-DynamicNotch treats the MacBook notch like a compact native surface instead of a static cutout.
+OpenNotch treats the MacBook notch like a compact native surface instead of a static cutout.
 It stays close to the hardware shape until something important happens, then expands with queue-driven
 presentation, gesture support, and system-aware feature routing.
 
 The app is built with SwiftUI and AppKit, so the notch window, settings UI, and event handling feel
 like part of macOS rather than a web-style overlay.
 
-The difference between this project and others is that it is built on its own engine, and not taken from other ready-made repositories. It completely copies the logic, animations, and behavior of a real Dynamic Island on an iPhone, unlike other projects. 
+The notch engine is built from scratch — it completely replicates the logic, animations, and behavior
+of a real Dynamic Island on an iPhone, unlike projects that borrow from existing libraries.
 
-The main goal is to make the project as native as possible, both in terms of design and interaction.
+## Highlights
 
-## 🚀 Highlights
+- **Live activities** for Now Playing, Downloads, AirDrop, Timer, Screen Recording, Focus, Personal Hotspot, and Lock Screen media surfaces
+- **Temporary alerts** for charging, low battery, full battery, Bluetooth, Wi-Fi, VPN, Focus-off, and notch resize feedback
+- **Custom hardware HUDs** replacing the default macOS overlays for brightness, keyboard brightness, and volume
+- **Interactive dashboard** that opens on notch hover — an expandable panel with app launcher, time/date, system stats, and pomodoro timer
+- **Adaptive app grid** that scales layout from 1×2 up to 3×4 depending on the number of pinned apps (up to 12)
+- **Pill widget bar** showing up to two live metrics (CPU, memory, disk, network speed) as compact progress rings or text
+- **Pomodoro inline editing** — adjust work duration directly from the dashboard using +/− controls without opening settings
+- **Full display placement control** — choose which display the notch overlay appears on
+- **Native interactions** including tap to expand, mouse drag gestures, trackpad swipes, swipe-to-dismiss, and swipe-to-restore
+- **Extensive personalization** for notch width, height, background style, stroke options, animation presets, fullscreen behavior, and app language
+- **Lock Screen controls** for sounds, media panel behavior, widget appearance, tint, and background brightness
+- **Screen Recording indicator** that lights up in the notch while macOS reports active screen capture
 
-- 🎵 Live activities for Now Playing, Downloads, AirDrop, Timer, Screen Recording, Focus, Personal Hotspot, and Lock Screen media/live activity surfaces
-- ⚡ Temporary alerts for charging, low battery, full battery, Bluetooth, Wi-Fi, VPN, Focus-off, and notch resize feedback
-- 🎚️ Custom hardware HUD replacements for brightness, keyboard brightness, and volume
-- 🖱️ Native interactions including tap to expand, mouse drag gestures, trackpad swipes, swipe-to-dismiss, and swipe-to-restore
-- 🎨 Personalization for notch width and height, background style, stroke options, animation presets, fullscreen behavior, display placement, and app language
-- 🔴 Screen Recording indicator that lights up in the notch while macOS reports active screen capture
-- 🔒 Lock Screen controls for sounds, media panel behavior, widget appearance, tint, and background brightness
-- ⚙️ A dedicated settings experience grouped into Application, Media & Files, Connectivity, and System sections
+## Dashboard & Overview
 
-## 🎬 Preview
+The dashboard opens when you hover over the notch. Inside it:
 
-<table>
-  <tr>
-    <td>
-      <video src="https://github.com/user-attachments/assets/88040eb4-a41c-4699-98b7-3242570f4918" controls muted playsinline width="100%"></video>
-    </td>
-    <td>
-      <video src="https://github.com/user-attachments/assets/7ec1661d-ff3e-4dc6-9e76-92b00576094f" controls muted playsinline width="100%"></video>
-    </td>
-  </tr>
-</table>
+| Section | Description |
+|---|---|
+| App Launcher | Quick-launch pinned apps. Adaptive grid layout, optional hidden app names. |
+| Time & Date | Large clock and date display, with optional weather. |
+| System Info | Live CPU, RAM, and disk usage at a glance. |
+| Pomodoro Timer | Inline work session countdown with +/− duration controls. |
 
-> The demos show how the notch behaves on light and dark backgrounds. The outline can be disabled in Settings.
+Each section can be individually enabled or disabled in **Settings → 界面**.
 
-## 📦 Installation
+## Settings
 
-1. Download the latest DMG from the [Releases](https://github.com/jackson-storm/DynamicNotch/releases) page.
-2. Drag `DynamicNotch` into `Applications`.
-3. Launch the app.
-4. Grant the permissions needed for the features you want to use.
-5. If macOS blocks the first launch, allow it from `System Settings > Privacy & Security`.
+Settings are organized into four groups:
 
-## ✅ Requirements
+**Application**
+- General — startup, display placement, language, appearance
+- Permissions — accessibility, Bluetooth, media control access
+- Notch — background, stroke, animation, resize feedback
+- 界面 — dashboard layout, app grid, pinned apps, overview visibility
+
+**Media & Files**
+- Now Playing, Downloads, Drag & Drop
+
+**Connectivity**
+- Focus, Bluetooth, Network
+
+**System**
+- Timer, Screen Recording, Battery, HUD, Lock Screen
+
+## Installation
+
+1. Clone or download the source and build from Xcode.
+2. Drag the built app into `Applications`.
+3. Launch the app and grant requested permissions.
+4. If macOS blocks the first launch, allow it from `System Settings → Privacy & Security`.
+
+## Requirements
 
 - macOS 14.6 or later
-- A MacBook with a hardware notch for the intended experience
+- A MacBook with a hardware notch
 - Feature-specific permissions as needed:
-  - Accessibility for custom HUD interception and some system-level interactions
+  - Accessibility for custom HUD interception
   - Bluetooth access for accessory status updates
-  - Screen Recording access for audio-reactive Now Playing visualization where macOS requires it
-  - Media/Now Playing access where macOS requires it
+  - Screen Recording access for audio-reactive Now Playing visualization
 
-## 🛠️ Build From Source
+## Build From Source
 
 ```bash
 git clone https://github.com/jackson-storm/DynamicNotch.git
@@ -112,9 +110,9 @@ cd DynamicNotch
 open DynamicNotch.xcodeproj
 ```
 
-Then run the `DynamicNotch` scheme from Xcode. Swift Package Manager dependencies are resolved by the project.
+Run the `DynamicNotch` scheme from Xcode. Swift Package Manager dependencies are resolved automatically.
 
-## 🗂️ Repository Layout
+## Repository Layout
 
 ```text
 DynamicNotch/
@@ -139,15 +137,10 @@ DynamicNotch/
 └── Shared/             # Shared UI, helpers, and extensions
 
 DynamicNotchTests/
-├── Features/
-├── Shared/
-└── TestSupport/
-
 DynamicNotchUITest/
-└── DynamicNotchUITest.swift
 ```
 
-## 🏗️ Architecture at a Glance
+## Architecture at a Glance
 
 - `AppContainer` composes services, monitors, feature view models, coordinators, and window managers.
 - `AppDelegate` manages app lifecycle, floating overlay window setup, workspace observers, and lock-screen handoff.
@@ -156,18 +149,15 @@ DynamicNotchUITest/
 - `NotchEventCoordinator` routes system events while feature-specific handlers translate them into notch content.
 - `SettingsViewModel` acts as a facade over dedicated settings stores for application, media/files, connectivity, battery, HUD, and lock-screen behavior.
 - Feature view models provide domain state for battery, Bluetooth, downloads, network, now playing, screen recording, timer, AirDrop, and lock screen.
-- Fullscreen hiding keeps the overlay window alive and hides notch activities until the user leaves fullscreen, so active features can restore cleanly.
 
-## 🧰 Tech Stack
+## Tech Stack
 
 - SwiftUI for notch content and settings UI
 - AppKit for windows, input handling, and macOS integration
 - Combine for feature and settings streams
 - [Lottie](https://github.com/airbnb/lottie-ios) for animation assets
 
-## 🌍 Localization
-
-The project currently includes localized app content for:
+## Localization
 
 - System language fallback
 - English
@@ -175,13 +165,6 @@ The project currently includes localized app content for:
 - Spanish
 - Simplified Chinese
 
-## 📈 Project Status
+## License
 
-DynamicNotch already includes a working native notch window, live activities, temporary alerts, AirDrop handoff,
-screen recording detection, custom HUD flows, a dedicated settings experience, and lock-screen-specific behavior.
-
-Some lock-screen and screen-recording-related flows depend on private or system-level behavior and can vary across macOS versions and environments.
-
-## 📄 License
-
-DynamicNotch is released under the GNU General Public License v3.0. See [LICENSE](LICENSE) for details.
+OpenNotch is released under the GNU General Public License v3.0. See [LICENSE](LICENSE) for details.

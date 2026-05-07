@@ -39,13 +39,15 @@ struct NetworkSettingsView: View {
         appearanceSettings.isShowNotchStrokeEnabled ? .white.opacity(0.2) : .clear
     }
     
+    @ViewBuilder var cards: some View {
+        networkActivity
+        networkDuration
+        vpnAppearance
+        hotspotAppearance
+    }
+
     var body: some View {
-        SettingsPageScrollView {
-            networkActivity
-            networkDuration
-            vpnAppearance
-            hotspotAppearance
-        }
+        SettingsPageScrollView { cards }
     }
     
     private var networkActivity: some View {

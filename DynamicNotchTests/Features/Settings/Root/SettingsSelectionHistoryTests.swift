@@ -5,23 +5,23 @@ final class SettingsSelectionHistoryTests: XCTestCase {
     func testRecordAppendsSelectionToHistory() {
         var history = SettingsRootViewModel.SelectionHistory(initialSelection: .general)
 
-        history.record(.network)
+        history.record(.connectivity)
 
-        XCTAssertEqual(history.currentSelection, .network)
+        XCTAssertEqual(history.currentSelection, .connectivity)
         XCTAssertTrue(history.canGoBack)
         XCTAssertFalse(history.canGoForward)
     }
 
     func testRecordAfterGoingBackDropsForwardHistory() {
         var history = SettingsRootViewModel.SelectionHistory(initialSelection: .general)
-        history.record(.network)
-        history.record(.battery)
+        history.record(.connectivity)
+        history.record(.system)
 
-        XCTAssertEqual(history.goBack(), .network)
+        XCTAssertEqual(history.goBack(), .connectivity)
 
-        history.record(.about)
+        history.record(.media)
 
-        XCTAssertEqual(history.currentSelection, .about)
+        XCTAssertEqual(history.currentSelection, .media)
         XCTAssertNil(history.goForward())
     }
 
@@ -37,15 +37,15 @@ final class SettingsSelectionHistoryTests: XCTestCase {
 
     func testBackAndForwardMoveAcrossRecordedSelections() {
         var history = SettingsRootViewModel.SelectionHistory(initialSelection: .general)
-        history.record(.network)
-        history.record(.battery)
+        history.record(.connectivity)
+        history.record(.system)
 
-        XCTAssertEqual(history.goBack(), .network)
+        XCTAssertEqual(history.goBack(), .connectivity)
         XCTAssertEqual(history.goBack(), .general)
         XCTAssertNil(history.goBack())
 
-        XCTAssertEqual(history.goForward(), .network)
-        XCTAssertEqual(history.goForward(), .battery)
+        XCTAssertEqual(history.goForward(), .connectivity)
+        XCTAssertEqual(history.goForward(), .system)
         XCTAssertNil(history.goForward())
     }
 }

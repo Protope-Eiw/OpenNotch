@@ -11,14 +11,158 @@ struct NotchSettingsView: View {
     @ObservedObject var powerService: PowerService
     @ObservedObject var applicationSettings: ApplicationSettingsStore
 
+    @AppStorage("settings.notchBar.leftWidgets")  private var leftWidgetsRaw   = NotchBarWidget.networkSpeed.rawValue
+    @AppStorage("settings.notchBar.rightWidgets") private var rightWidgetsRaw = "cpu,memory"
+
     var body: some View {
         SettingsPageScrollView {
+            notchBarDisplayCard
             prioritiesCard
             appearanceCard
             animationCard
             gesturesCard
         }
         .accessibilityIdentifier("settings.notch.root")
+    }
+
+    // MARK: - Notch Bar Display
+
+    private var notchBarDisplayCard: some View {
+        SettingsCard(title: "Notch Bar Display") {
+            // Left side — multi select (up to 2, FIFO)
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Left side")
+                    .font(.system(size: 12, weight: .medium))
+                Text("Select up to 2 widgets. Adding a third removes the first.")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+            }
+            HStack(spacing: 8) {
+                ForEach(NotchBarWidget.allCases, id: \.self) { widget in
+                    let active = leftWidgetsRaw.split(separator: ",").compactMap { NotchBarWidget(rawValue: String($0)) }
+                    let selected = active.contains(widget)
+                    Button {
+                        var list = active
+                        if selected {
+                            list.removeAll { $0 == widget }
+                        } else {
+                            if widget == .networkSpeed {
+                                list = [.networkSpeed]
+                            } else {
+                                list.removeAll { $0 == .networkSpeed }
+                                list.append(widget)
+                                if list.count > 2 { list.removeFirst() }
+                            }
+                        }
+                        if list.isEmpty { list = [.networkSpeed] }
+                        leftWidgetsRaw = list.map(\.rawValue).joined(separator: ",")
+                    } label: {
+                        widgetPreview(widget, selected: selected, multiSelect: true)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.bottom, 4)
+
+            Divider().opacity(0.6)
+
+            // Right side — multi select (up to 2, FIFO)
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Right side")
+                    .font(.system(size: 12, weight: .medium))
+                Text("Select up to 2 widgets. Adding a third removes the first.")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.top, 4)
+            HStack(spacing: 8) {
+                ForEach(NotchBarWidget.allCases, id: \.self) { widget in
+                    let active = rightWidgetsRaw.split(separator: ",").compactMap { NotchBarWidget(rawValue: String($0)) }
+                    let selected = active.contains(widget)
+                    Button {
+                        var list = active
+                        if selected {
+                            list.removeAll { $0 == widget }
+                        } else {
+                            if widget == .networkSpeed {
+                                list = [.networkSpeed]
+                            } else {
+                                list.removeAll { $0 == .networkSpeed }
+                                list.append(widget)
+                                if list.count > 2 { list.removeFirst() }
+                            }
+                        }
+                        if list.isEmpty { list = [.cpu] }
+                        rightWidgetsRaw = list.map(\.rawValue).joined(separator: ",")
+                    } label: {
+                        widgetPreview(widget, selected: selected, multiSelect: true)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.bottom, 4)
+        }
+    }
+
+    private func widgetPreview(_ widget: NotchBarWidget, selected: Bool, multiSelect: Bool = false) -> some View {
+        VStack(spacing: 5) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 9)
+                    .fill(selected ? Color.accentColor.opacity(0.15) : Color.primary.opacity(0.05))
+                RoundedRectangle(cornerRadius: 9)
+                    .stroke(selected ? Color.accentColor : Color.clear, lineWidth: 1.5)
+                Group {
+                    switch widget {
+                    case .networkSpeed:
+                        VStack(alignment: .leading, spacing: 2) {
+                            HStack(spacing: 3) {
+                                Image(systemName: "arrowtriangle.up.fill").font(.system(size: 5))
+                                    .foregroundStyle(.white.opacity(0.5))
+                                Text("1.2 MB").font(.system(size: 8, design: .monospaced))
+                                    .foregroundStyle(.mint)
+                            }
+                            HStack(spacing: 3) {
+                                Image(systemName: "arrowtriangle.down.fill").font(.system(size: 5))
+                                    .foregroundStyle(.white.opacity(0.5))
+                                Text("3.8 MB").font(.system(size: 8, design: .monospaced))
+                                    .foregroundStyle(.green)
+                            }
+                        }
+                    case .cpu:
+                        miniRingPreview(label: "CPU", fraction: 0.42, color: .green)
+                    case .memory:
+                        miniRingPreview(label: "MEM", fraction: 0.68, color: .orange)
+                    case .disk:
+                        miniRingPreview(label: "DSK", fraction: 0.51, color: .green)
+                    }
+                }
+                if multiSelect && selected {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 11))
+                        .foregroundStyle(Color.accentColor)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                        .padding(4)
+                }
+            }
+            .frame(width: 62, height: 52)
+            Text(widget.displayName)
+                .font(.system(size: 10))
+                .foregroundStyle(selected ? .primary : .secondary)
+        }
+    }
+
+    private func miniRingPreview(label: String, fraction: Double, color: Color) -> some View {
+        ZStack {
+            Circle().stroke(Color.primary.opacity(0.15), lineWidth: 2)
+            Circle().trim(from: 0, to: fraction)
+                .stroke(color, style: StrokeStyle(lineWidth: 2, lineCap: .round))
+                .rotationEffect(.degrees(-90))
+            VStack(spacing: 0) {
+                Text("\(Int(fraction * 100))").font(.system(size: 7, weight: .bold, design: .monospaced))
+                Text(label).font(.system(size: 5.5)).foregroundStyle(.secondary)
+            }
+        }
+        .frame(width: 28, height: 28)
     }
 
     private var prioritiesCard: some View {
@@ -115,7 +259,7 @@ struct NotchSettingsView: View {
             SettingsSliderRow(
                 title: "Notch width",
                 description: "Fine-tune the notch width to better match your display cutout.",
-                range: -32...16,
+                range: -16...16,
                 step: 1,
                 fractionLength: 0,
                 suffix: "px",
@@ -129,7 +273,7 @@ struct NotchSettingsView: View {
             SettingsSliderRow(
                 title: "Notch height",
                 description: "Fine-tune the notch height to better match your display cutout.",
-                range: -4...4,
+                range: 0...4,
                 step: 1,
                 fractionLength: 0,
                 suffix: "px",
@@ -418,19 +562,19 @@ private extension NotchContentPriority.Key {
     var sidebarSection: SettingsRootViewModel.Section {
         switch self {
         case .focus:
-                .focus
+                .connectivity
         case .hotspot:
-                .network
+                .connectivity
         case .download:
-                .downloads
+                .media
         case .trayActive:
-                .drop
+                .media
         case .nowPlaying:
-                .nowPlaying
+                .media
         case .timer:
-                .timer
+                .system
         case .screenRecording:
-                .screenRecording
+                .system
         }
     }
 }

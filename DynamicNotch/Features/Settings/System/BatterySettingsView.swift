@@ -17,13 +17,15 @@ struct BatterySettingsView: View {
         appearanceSettings.isDefaultActivityStrokeEnabled
     }
 
+    @ViewBuilder var cards: some View {
+        batteryActivity
+        batteryDuration
+        lowBattery
+        fullBattery
+    }
+
     var body: some View {
-        SettingsPageScrollView {
-            batteryActivity
-            batteryDuration
-            lowBattery
-            fullBattery
-        }
+        SettingsPageScrollView { cards }
     }
 
     private var batteryActivity: some View {

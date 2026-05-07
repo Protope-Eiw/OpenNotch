@@ -12,12 +12,14 @@ struct HUDSettingsView: View {
         applicationSettings.isDefaultActivityStrokeEnabled
     }
 
+    @ViewBuilder var cards: some View {
+        hudActivity
+        hudDuration
+        hudStyleCard
+    }
+
     var body: some View {
-        SettingsPageScrollView {
-            hudActivity
-            hudDuration
-            hudStyleCard
-        }
+        SettingsPageScrollView { cards }
     }
     
     private var hudActivity: some View {

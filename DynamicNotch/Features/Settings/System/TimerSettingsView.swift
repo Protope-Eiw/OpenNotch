@@ -8,10 +8,12 @@ struct TimerSettingsView: View {
         appearanceSettings.isDefaultActivityStrokeEnabled
     }
 
+    @ViewBuilder var cards: some View {
+        timerActivity
+    }
+
     var body: some View {
-        SettingsPageScrollView {
-            timerActivity
-        }
+        SettingsPageScrollView { cards }
     }
 
     private var timerActivity: some View {

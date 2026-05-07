@@ -8,11 +8,13 @@ struct DropSettingsView: View {
         appearanceSettings.isDefaultActivityStrokeEnabled
     }
     
+    @ViewBuilder var cards: some View {
+        dragAndDropActivity
+        dragAndDropMode
+    }
+
     var body: some View {
-        SettingsPageScrollView {
-            dragAndDropActivity
-            dragAndDropMode
-        }
+        SettingsPageScrollView { cards }
     }
     
     private var dragAndDropActivity: some View {

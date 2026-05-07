@@ -29,12 +29,14 @@ struct BluetoothSettingsView: View {
         return bluetoothBatteryColor(for: 82).opacity(0.3)
     }
     
+    @ViewBuilder var cards: some View {
+        bluetoothActivity
+        bluetoothDuration
+        bluetoothAppearance
+    }
+
     var body: some View {
-        SettingsPageScrollView {
-            bluetoothActivity
-            bluetoothDuration
-            bluetoothAppearance
-        }
+        SettingsPageScrollView { cards }
     }
     
     private var bluetoothActivity: some View {

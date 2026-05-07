@@ -27,11 +27,13 @@ struct DownloadsSettingsView: View {
         return "\(Self.byteCountFormatter.string(fromByteCount: previewDownload.bytesPerSecond))/s"
     }
     
+    @ViewBuilder var cards: some View {
+        downloadActivity
+        downloadAppearance
+    }
+
     var body: some View {
-        SettingsPageScrollView {
-            downloadActivity
-            downloadAppearance
-        }
+        SettingsPageScrollView { cards }
     }
     
     private var downloadActivity: some View {

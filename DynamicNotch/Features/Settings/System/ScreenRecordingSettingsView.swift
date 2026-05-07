@@ -8,10 +8,12 @@ struct ScreenRecordingSettingsView: View {
         appearanceSettings.isDefaultActivityStrokeEnabled
     }
 
+    @ViewBuilder var cards: some View {
+        screenRecordingActivity
+    }
+
     var body: some View {
-        SettingsPageScrollView {
-            screenRecordingActivity
-        }
+        SettingsPageScrollView { cards }
     }
 
     private var screenRecordingActivity: some View {

@@ -12,12 +12,14 @@ struct FocusSettingsView: View {
         appearanceSettings.isDefaultActivityStrokeEnabled
     }
     
+    @ViewBuilder var cards: some View {
+        focusActivity
+        focusDuration
+        focusAppearance
+    }
+
     var body: some View {
-        SettingsPageScrollView {
-            focusActivity
-            focusDuration
-            focusAppearance
-        }
+        SettingsPageScrollView { cards }
     }
     
     private var focusActivity: some View {

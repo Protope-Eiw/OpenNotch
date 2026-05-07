@@ -3,17 +3,10 @@ import SwiftUI
 enum SettingsWindowLayout {
     static let width: CGFloat = 760
     static let height: CGFloat = 610
+    static let sidebarWidth: CGFloat = 64
 }
 
 struct SettingsRootView: View {
-    private enum SelectionChangeOrigin {
-        case sidebar
-        case history
-        case search
-        case initial
-    }
-
-    @Environment(\.openURL) private var openURL
     @ObservedObject var powerService: PowerService
     @ObservedObject var settingsViewModel: SettingsViewModel
 
@@ -26,13 +19,10 @@ struct SettingsRootView: View {
     let timerViewModel: TimerViewModel
     let lockScreenManager: LockScreenManager
 
-    private let aboutWebsiteURL = URL(string: "https://dynamicnotch.evgeniy-petrukovich.workers.dev/download")!
     private let viewModel: SettingsRootViewModel
-    @State private var searchText = ""
     @State private var selectedSection: SettingsRootViewModel.Section
-    @State private var selectionHistory: SettingsRootViewModel.SelectionHistory
-    @State private var isShowingSearchSelection = false
     @State private var pendingResetSection: SettingsRootViewModel.Section?
+    @State private var showDonation = false
     @StateObject private var permissionController = SettingsPermissionController()
 
     init(
@@ -70,9 +60,7 @@ struct SettingsRootView: View {
             lockScreenManager: lockScreenManager
         )
         self.viewModel = rootViewModel
-        let initialSelection = rootViewModel.initialSelection()
-        _selectedSection = State(initialValue: initialSelection)
-        _selectionHistory = State(initialValue: .init(initialSelection: initialSelection))
+        _selectedSection = State(initialValue: rootViewModel.initialSelection())
     }
 
     private func localized(_ key: String, fallback: String? = nil) -> String {
@@ -80,67 +68,12 @@ struct SettingsRootView: View {
     }
 
     var body: some View {
-        NavigationSplitView {
-            List(selection: selectionBinding) {
-                ForEach(groupedSections, id: \.group.id) { group in
-                    Section {
-                        ForEach(group.sections) { section in
-                            NavigationLink(value: section) {
-                                if let imageName = section.imageName {
-                                    SettingsSidebarRow(
-                                        title: localized(section.titleKey, fallback: section.fallbackTitle),
-                                        imageName: imageName,
-                                        tint: section.tint
-                                    )
-                                } else {
-                                    SettingsSidebarRow(
-                                        title: localized(section.titleKey, fallback: section.fallbackTitle),
-                                        systemImage: section.systemImage,
-                                        tint: section.tint
-                                    )
-                                }
-                            }
-                        }
-                    } header: {
-                        if let titleKey = group.group.titleKey {
-                            Text(localized(titleKey, fallback: group.group.fallbackTitle))
-                        }
-                    }
-                }
-            }
-            .searchable(
-                text: $searchText,
-                placement: .sidebar,
-                prompt: localized("settings.search.prompt")
-            )
-            .navigationSplitViewColumnWidth(min: 170, ideal: 200, max: 200)
-
-        } detail: {
-            Group {
-                if filteredSections.isEmpty {
-                    SettingsSearchEmptyState(query: searchText)
-                } else {
-                    detailView(for: resolvedSelection)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                }
-            }
+        HStack(spacing: 0) {
+            iconSidebar
+            Divider()
+            contentArea
         }
-        .navigationTitle(
-            filteredSections.isEmpty
-            ? localized("settings.search.title")
-            : localized(resolvedSelection.titleKey, fallback: resolvedSelection.fallbackTitle)
-        )
-        .navigationSubtitle(
-            filteredSections.isEmpty
-            ? ""
-            : localized(resolvedSelection.subtitleKey, fallback: resolvedSelection.fallbackSubtitle)
-        )
-        .onChange(of: searchText) { _, newValue in
-            syncSelectionWithSearch(query: newValue)
-        }
-        .onAppear {
-            applySelection(viewModel.initialSelection(), origin: .initial)
-        }
+        .frame(width: SettingsWindowLayout.width, height: SettingsWindowLayout.height)
         .alert(item: $pendingResetSection) { section in
             Alert(
                 title: Text(
@@ -161,328 +94,171 @@ struct SettingsRootView: View {
         .preferredColorScheme(settingsViewModel.application.appearanceMode.preferredColorScheme)
     }
 
-    private var selectionBinding: Binding<SettingsRootViewModel.Section> {
-        Binding(
-            get: { selectedSection },
-            set: { applySelection($0, origin: .sidebar) }
-        )
-    }
+    // MARK: - Icon Sidebar
 
-    private var filteredSections: [SettingsRootViewModel.Section] {
-        let query = trimmedSearchText
-        guard !query.isEmpty else {
-            return viewModel.sections
-        }
+    private var iconSidebar: some View {
+        VStack(spacing: 0) {
+            Spacer(minLength: 16)
 
-        return viewModel.sections.filter { section in
-            searchableStrings(for: section).contains { value in
-                value.localizedCaseInsensitiveContains(query)
+            VStack(spacing: 4) {
+                ForEach(SettingsRootViewModel.Section.allCases) { section in
+                    sidebarIconButton(for: section)
+                }
+            }
+            .padding(.horizontal, 10)
+
+            Spacer()
+
+            Divider()
+                .padding(.horizontal, 14)
+                .padding(.bottom, 4)
+
+            Button {
+                showDonation.toggle()
+            } label: {
+                Image(systemName: showDonation ? "heart.fill" : "heart")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundStyle(showDonation ? .pink : Color.secondary)
+                    .frame(width: 40, height: 40)
+            }
+            .buttonStyle(.plain)
+            .padding(.bottom, 10)
+            .popover(isPresented: $showDonation, arrowEdge: .trailing) {
+                DonationView()
             }
         }
+        .frame(width: SettingsWindowLayout.sidebarWidth)
+        .background(Color(nsColor: .controlBackgroundColor))
     }
 
-    private var trimmedSearchText: String {
-        searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+    private func sidebarIconButton(for section: SettingsRootViewModel.Section) -> some View {
+        let isSelected = selectedSection == section
+        return Button {
+            selectedSection = section
+            viewModel.persistSelection(section)
+        } label: {
+            Group {
+                if let imageName = section.imageName {
+                    Image(imageName)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 18, height: 18)
+                } else {
+                    Image(systemName: section.systemImage)
+                        .font(.system(size: 16, weight: isSelected ? .semibold : .medium))
+                }
+            }
+            .foregroundStyle(isSelected ? Color.accentColor : Color.secondary)
+            .frame(width: 40, height: 40)
+            .background(
+                isSelected ? Color.accentColor.opacity(0.12) : Color.clear,
+                in: RoundedRectangle(cornerRadius: 10)
+            )
+        }
+        .buttonStyle(.plain)
+        .help(localized(section.titleKey, fallback: section.fallbackTitle))
+        .accessibilityIdentifier("settings.sidebar.\(section.rawValue)")
     }
 
-    private func searchableStrings(for section: SettingsRootViewModel.Section) -> [String] {
-        [
-            localized(section.titleKey, fallback: section.fallbackTitle),
-            section.fallbackTitle,
-            localized(section.subtitleKey, fallback: section.fallbackSubtitle),
-            section.fallbackSubtitle
-        ] + section.searchKeywords
-    }
+    // MARK: - Content Area
 
-    private var groupedSections: [(group: SettingsRootViewModel.SidebarGroup, sections: [SettingsRootViewModel.Section])] {
-        SettingsRootViewModel.SidebarGroup.allCases.compactMap { group in
-            let sections = filteredSections.filter { $0.sidebarGroup == group }
-            guard !sections.isEmpty else { return nil }
-            return (group, sections)
+    private var contentArea: some View {
+        VStack(spacing: 0) {
+            contentHeader
+            Divider()
+            detailView(for: selectedSection)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                .accessibilityIdentifier(selectedSection.accessibilityIdentifier)
         }
     }
 
-    private var resolvedSelection: SettingsRootViewModel.Section {
-        if filteredSections.contains(selectedSection) {
-            return selectedSection
-        }
-
-        return filteredSections.first ?? .general
-    }
-
-    private var canNavigateBack: Bool {
-        selectionHistory.canGoBack
-    }
-
-    private var canNavigateForward: Bool {
-        selectionHistory.canGoForward
-    }
-
-    private func applySelection(
-        _ section: SettingsRootViewModel.Section,
-        origin: SelectionChangeOrigin
-    ) {
-        switch origin {
-        case .sidebar:
-            guard selectedSection != section ||
-                    isShowingSearchSelection ||
-                    selectionHistory.currentSelection != section else {
-                return
+    private var contentHeader: some View {
+        HStack(alignment: .center, spacing: 0) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(localized(selectedSection.titleKey, fallback: selectedSection.fallbackTitle))
+                    .font(.system(size: 15, weight: .semibold))
+                Text(localized(selectedSection.subtitleKey, fallback: selectedSection.fallbackSubtitle))
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
             }
 
-            selectionHistory.record(section)
-            selectedSection = section
-            isShowingSearchSelection = false
-            viewModel.persistSelection(section)
+            Spacer()
 
-        case .history:
-            guard selectedSection != section || isShowingSearchSelection else { return }
-            selectedSection = section
-            isShowingSearchSelection = false
-            viewModel.persistSelection(section)
-
-        case .search:
-            guard selectedSection != section || !isShowingSearchSelection else { return }
-            selectedSection = section
-            isShowingSearchSelection = true
-
-        case .initial:
-            selectionHistory = .init(initialSelection: section)
-            selectedSection = section
-            isShowingSearchSelection = false
+            if viewModel.canReset(selectedSection) {
+                Button {
+                    pendingResetSection = selectedSection
+                } label: {
+                    Text(localized("settings.reset.action", fallback: "Reset"))
+                        .font(.system(size: 12))
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color.primary.opacity(0.06), in: RoundedRectangle(cornerRadius: 6))
+                }
+                .buttonStyle(.plain)
+            }
         }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 14)
+        .background(.background)
     }
 
-    private func syncSelectionWithSearch(query: String) {
-        let trimmedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
-
-        if trimmedQuery.isEmpty {
-            guard isShowingSearchSelection else { return }
-            applySelection(selectionHistory.currentSelection, origin: .history)
-            return
-        }
-
-        guard !filteredSections.isEmpty else { return }
-
-        if !filteredSections.contains(selectedSection) {
-            applySelection(filteredSections[0], origin: .search)
-        }
-    }
-
-    private func navigateBack() {
-        guard let previousSection = selectionHistory.goBack() else { return }
-        revealSectionIfNeeded(previousSection)
-        applySelection(previousSection, origin: .history)
-    }
-
-    private func navigateForward() {
-        guard let nextSection = selectionHistory.goForward() else { return }
-        revealSectionIfNeeded(nextSection)
-        applySelection(nextSection, origin: .history)
-    }
-
-    private func revealSectionIfNeeded(_ section: SettingsRootViewModel.Section) {
-        guard !trimmedSearchText.isEmpty else { return }
-        guard !filteredSections.contains(section) else { return }
-        searchText = ""
-    }
+    // MARK: - Detail View
 
     @ViewBuilder
     private func detailView(for section: SettingsRootViewModel.Section) -> some View {
         switch section {
         case .general:
-            detailContainer(for: section) {
-                GeneralSettingsView(
-                    applicationSettings: settingsViewModel.application
-                )
-            }
+            GeneralSettingsView(
+                applicationSettings: settingsViewModel.application
+            )
 
         case .permissions:
-            detailContainer(for: section) {
-                PermissionsSettingsView(
-                    permissionController: permissionController,
-                    applicationSettings: settingsViewModel.application
-                )
-            }
+            PermissionsSettingsView(
+                permissionController: permissionController,
+                applicationSettings: settingsViewModel.application
+            )
 
         case .notch:
-            detailContainer(for: section) {
-                NotchSettingsView(
-                    powerService: powerService,
-                    applicationSettings: settingsViewModel.application
-                )
-            }
+            NotchSettingsView(
+                powerService: powerService,
+                applicationSettings: settingsViewModel.application
+            )
 
-        case .nowPlaying:
-            detailContainer(for: section) {
-                NowPlayingSettingsView(
-                    settings: settingsViewModel.mediaAndFiles,
-                    applicationSettings: settingsViewModel.application
-                )
-            }
+        case .interface:
+            InterfaceSettingsView(applicationSettings: settingsViewModel.application)
 
-        case .downloads:
-            detailContainer(for: section) {
-                DownloadsSettingsView(
-                    mediaSettings: settingsViewModel.mediaAndFiles,
-                    appearanceSettings: settingsViewModel.application
-                )
-            }
+        case .media:
+            MediaSettingsView(
+                mediaSettings: settingsViewModel.mediaAndFiles,
+                applicationSettings: settingsViewModel.application
+            )
 
-        case .drop:
-            detailContainer(for: section) {
-                DropSettingsView(
-                    mediaSettings: settingsViewModel.mediaAndFiles,
-                    appearanceSettings: settingsViewModel.application
-                )
-            }
+        case .connectivity:
+            ConnectivitySettingsView(
+                connectivitySettings: settingsViewModel.connectivity,
+                applicationSettings: settingsViewModel.application
+            )
 
-        case .timer:
-            detailContainer(for: section) {
-                TimerSettingsView(
-                    mediaSettings: settingsViewModel.mediaAndFiles,
-                    appearanceSettings: settingsViewModel.application
-                )
-            }
-
-        case .screenRecording:
-            detailContainer(for: section) {
-                ScreenRecordingSettingsView(
-                    settings: settingsViewModel.screenRecording,
-                    appearanceSettings: settingsViewModel.application
-                )
-            }
-
-        case .focus:
-            detailContainer(for: section) {
-                FocusSettingsView(
-                    connectivitySettings: settingsViewModel.connectivity,
-                    appearanceSettings: settingsViewModel.application
-                )
-            }
-
-        case .bluetooth:
-            detailContainer(for: section) {
-                BluetoothSettingsView(
-                    settings: settingsViewModel.connectivity,
-                    applicationSettings: settingsViewModel.application
-                )
-            }
-
-        case .network:
-            detailContainer(for: section) {
-                NetworkSettingsView(
-                    connectivitySettings: settingsViewModel.connectivity,
-                    appearanceSettings: settingsViewModel.application
-                )
-            }
-
-        case .battery:
-            detailContainer(for: section) {
-                BatterySettingsView(
-                    batterySettings: settingsViewModel.battery,
-                    appearanceSettings: settingsViewModel.application
-                )
-            }
-
-        case .hud:
-            detailContainer(for: section) {
-                HUDSettingsView(
-                    settings: settingsViewModel.hud,
-                    applicationSettings: settingsViewModel.application
-                )
-            }
+        case .system:
+            SystemSettingsView(
+                batterySettings: settingsViewModel.battery,
+                hudSettings: settingsViewModel.hud,
+                mediaSettings: settingsViewModel.mediaAndFiles,
+                screenRecordingSettings: settingsViewModel.screenRecording,
+                applicationSettings: settingsViewModel.application
+            )
 
         case .lockScreen:
-            detailContainer(for: section) {
-                LockScreenSettingsView(settings: settingsViewModel.lockScreen, applicationSettings: settingsViewModel.application)
-            }
+            LockScreenSettingsView(
+                settings: settingsViewModel.lockScreen,
+                applicationSettings: settingsViewModel.application
+            )
 
-#if DEBUG
+        #if DEBUG
         case .debug:
-            detailContainer(for: section) {
-                DebugSettingsView(
-                    viewModel: viewModel.debugViewModel
-                )
-            }
-#endif
-
-        case .about:
-            detailContainer(for: section) {
-                AboutAppSettingsView(
-                    applicationSettings: settingsViewModel.application,
-                    onRequestInternetAccess: {
-                        notchEventCoordinator.requestInternetAccess()
-                    }
-                )
-            }
+            DebugSettingsView(viewModel: viewModel.debugViewModel)
+        #endif
         }
-    }
-
-    private func detailContainer<Content: View>(for section: SettingsRootViewModel.Section, @ViewBuilder content: () -> Content) -> some View {
-        content()
-            .accessibilityIdentifier(section.accessibilityIdentifier)
-            .toolbar { toolbarContent(for: section) }
-    }
-
-    @ToolbarContentBuilder
-    private func toolbarContent(for section: SettingsRootViewModel.Section) -> some ToolbarContent {
-        ToolbarItemGroup(placement: .navigation) {
-            Button {
-                navigateBack()
-            } label: {
-                Image(systemName: "chevron.backward")
-            }
-            .disabled(!canNavigateBack)
-            .help(localized("settings.navigation.back", fallback: "Back"))
-            .keyboardShortcut("[", modifiers: [.command])
-            .accessibilityLabel(Text(localized("settings.navigation.back", fallback: "Back")))
-            .accessibilityIdentifier("settings.toolbar.back")
-
-            Button {
-                navigateForward()
-            } label: {
-                Image(systemName: "chevron.forward")
-            }
-            .disabled(!canNavigateForward)
-            .help(localized("settings.navigation.forward", fallback: "Forward"))
-            .keyboardShortcut("]", modifiers: [.command])
-            .accessibilityLabel(Text(localized("settings.navigation.forward", fallback: "Forward")))
-            .accessibilityIdentifier("settings.toolbar.forward")
-        }
-
-        if section == .about {
-            ToolbarItem(placement: .primaryAction) {
-                Button {
-                    openInternetURL(aboutWebsiteURL)
-                } label: {
-                    Text("Check update")
-                }
-                .help("Open the DynamicNotch website")
-                .accessibilityIdentifier("settings.toolbar.aboutWebsite")
-            }
-        }
-
-        if viewModel.canReset(section) {
-            ToolbarItem(placement: .confirmationAction) {
-                Button {
-                    pendingResetSection = section
-                } label: {
-                    Text("Reset")
-                }
-                .help(
-                    viewModel.resetHelpText(
-                        for: section,
-                        locale: settingsViewModel.application.appLanguage.locale
-                    )
-                )
-                .accessibilityIdentifier("settings.toolbar.resetCurrentTab")
-            }
-        }
-    }
-
-    private func openInternetURL(_ url: URL) {
-        guard notchEventCoordinator.requestInternetAccess() else { return }
-        openURL(url)
     }
 }

@@ -19,12 +19,14 @@ struct NowPlayingSettingsView: View {
         )
     }
     
+    @ViewBuilder var cards: some View {
+        playbackActivity
+        pausedPlaybackBehavior
+        playerAppearance
+    }
+
     var body: some View {
-        SettingsPageScrollView {
-            playbackActivity
-            pausedPlaybackBehavior
-            playerAppearance
-        }
+        SettingsPageScrollView { cards }
     }
     
     private var playbackActivity: some View {
