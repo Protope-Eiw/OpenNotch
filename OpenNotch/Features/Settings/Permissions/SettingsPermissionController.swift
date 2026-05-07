@@ -1,5 +1,6 @@
 import Combine
 import CoreBluetooth
+import EventKit
 import Foundation
 internal import AppKit
 import SwiftUI
@@ -13,6 +14,7 @@ enum Kind: String {
     case bluetooth
     case mediaControls
     case screenRecording
+    case calendar
 }
 
 struct PermissionItem: Identifiable {
@@ -38,11 +40,13 @@ final class SettingsPermissionController: NSObject, ObservableObject, CBCentralM
     @Published private(set) var bluetoothAuthorization: CBManagerAuthorization
     @Published private(set) var canPostMediaKeyEvents: Bool
     @Published private(set) var canCaptureScreenAudio: Bool
+    @Published private(set) var calendarAuthStatus: EKAuthorizationStatus
 
     private var didPromptForAccessibility = false
     private var didPromptForPostEventAccess = false
     private var didPromptForScreenCaptureAccess = false
     private var bluetoothPermissionRequester: CBCentralManager?
+    private let ekStore = EKEventStore()
     private var cancellables = Set<AnyCancellable>()
 
     private static let privacySettingsURL = URL(
@@ -54,12 +58,16 @@ final class SettingsPermissionController: NSObject, ObservableObject, CBCentralM
     private static let screenCapturePrivacySettingsURL = URL(
         string: "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture"
     )
+    private static let calendarPrivacySettingsURL = URL(
+        string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Calendars"
+    )
 
     init(notificationCenter: NotificationCenter = .default) {
         self.bluetoothAuthorization = Self.currentBluetoothAuthorizationStatus()
         self.isAccessibilityTrusted = Self.currentAccessibilityTrustState()
         self.canPostMediaKeyEvents = Self.currentPostEventAccessState()
         self.canCaptureScreenAudio = Self.currentScreenCaptureAccessState()
+        self.calendarAuthStatus = EKEventStore.authorizationStatus(for: .event)
 
         super.init()
 
@@ -76,6 +84,7 @@ final class SettingsPermissionController: NSObject, ObservableObject, CBCentralM
         isAccessibilityTrusted = Self.currentAccessibilityTrustState()
         canPostMediaKeyEvents = Self.currentPostEventAccessState()
         canCaptureScreenAudio = Self.currentScreenCaptureAccessState()
+        calendarAuthStatus = EKEventStore.authorizationStatus(for: .event)
     }
 
     var permissionItems: [PermissionItem] {
@@ -153,6 +162,26 @@ final class SettingsPermissionController: NSObject, ObservableObject, CBCentralM
                     didPromptForScreenCaptureAccess ? "Open Privacy Settings" : "Grant Access"
                 ),
                 accessibilityIdentifier: "settings.permissions.screenRecording"
+            ),
+            PermissionItem(
+                kind: .calendar,
+                titleKey: "settings.permissions.calendar.title",
+                fallbackTitle: "Calendar",
+                descriptionKey: "settings.permissions.calendar.description",
+                fallbackDescription: "Allow Calendar access to show your events in the dashboard.",
+                assetImageName: nil,
+                systemImage: "calendar",
+                tintColor: .red,
+                isGranted: calendarAuthStatus == .fullAccess,
+                actionTitleKey: calendarAuthStatus == .fullAccess ? nil : (
+                    calendarAuthStatus == .notDetermined ?
+                    "settings.permissions.action.grantAccess" :
+                    "settings.permissions.action.openPrivacySettings"
+                ),
+                fallbackActionTitle: calendarAuthStatus == .fullAccess ? nil : (
+                    calendarAuthStatus == .notDetermined ? "Grant Access" : "Open Privacy Settings"
+                ),
+                accessibilityIdentifier: "settings.permissions.calendar"
             )
         ]
     }
@@ -167,6 +196,8 @@ final class SettingsPermissionController: NSObject, ObservableObject, CBCentralM
             requestPostEventAccess()
         case .screenRecording:
             requestScreenCaptureAccess()
+        case .calendar:
+            requestCalendarAccess()
         }
     }
 
@@ -291,6 +322,30 @@ final class SettingsPermissionController: NSObject, ObservableObject, CBCentralM
     private static func openScreenCapturePrivacySettings() {
         guard let screenCapturePrivacySettingsURL else { return }
         NSWorkspace.shared.open(screenCapturePrivacySettingsURL)
+    }
+
+    private func requestCalendarAccess() {
+        let status = EKEventStore.authorizationStatus(for: .event)
+        guard status == .notDetermined else {
+            Self.openCalendarPrivacySettings()
+            refresh()
+            return
+        }
+        Task {
+            do {
+                let granted = try await ekStore.requestFullAccessToEvents()
+                // Trust return value directly — TCC database can lag behind.
+                calendarAuthStatus = granted ? .fullAccess : .denied
+            } catch {
+                Self.openCalendarPrivacySettings()
+                refresh()
+            }
+        }
+    }
+
+    private static func openCalendarPrivacySettings() {
+        guard let calendarPrivacySettingsURL else { return }
+        NSWorkspace.shared.open(calendarPrivacySettingsURL)
     }
 
     private static func currentAccessibilityTrustState() -> Bool {

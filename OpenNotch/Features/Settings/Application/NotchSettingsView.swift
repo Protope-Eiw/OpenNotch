@@ -11,8 +11,9 @@ struct NotchSettingsView: View {
     @ObservedObject var powerService: PowerService
     @ObservedObject var applicationSettings: ApplicationSettingsStore
 
-    @AppStorage("settings.notchBar.leftWidgets")  private var leftWidgetsRaw   = NotchBarWidget.networkSpeed.rawValue
-    @AppStorage("settings.notchBar.rightWidgets") private var rightWidgetsRaw = "cpu,memory"
+    @AppStorage("settings.notchBar.leftWidgets")   private var leftWidgetsRaw   = NotchBarWidget.networkSpeed.rawValue
+    @AppStorage("settings.notchBar.rightWidgets")  private var rightWidgetsRaw  = "cpu,memory"
+    @AppStorage("settings.notchBar.hideWidgets")   private var hideWidgets      = false
 
     var body: some View {
         SettingsPageScrollView {
@@ -29,78 +30,93 @@ struct NotchSettingsView: View {
 
     private var notchBarDisplayCard: some View {
         SettingsCard(title: "Notch Bar Display") {
-            // Left side — multi select (up to 2, FIFO)
-            VStack(alignment: .leading, spacing: 6) {
-                Text("左侧")
-                    .font(.system(size: 12, weight: .medium))
-                Text("最多选 2 个，添加第三个时自动移除最早的。可全不选。")
-                    .font(.system(size: 11))
-                    .foregroundStyle(.secondary)
-            }
-            HStack(spacing: 8) {
-                ForEach(NotchBarWidget.allCases, id: \.self) { widget in
-                    let active = leftWidgetsRaw.split(separator: ",").compactMap { NotchBarWidget(rawValue: String($0)) }
-                    let selected = active.contains(widget)
-                    let networkSpeedActive = active.contains(.networkSpeed)
-                    let isDisabled = networkSpeedActive && widget != .networkSpeed
-                    Button {
-                        var list = active
-                        if selected {
-                            list.removeAll { $0 == widget }
-                        } else if widget == .networkSpeed {
-                            list = [.networkSpeed]
-                        } else {
-                            list.append(widget)
-                            if list.count > 2 { list.removeFirst() }
-                        }
-                        leftWidgetsRaw = list.map(\.rawValue).joined(separator: ",")
-                    } label: {
-                        widgetPreview(widget, selected: selected, multiSelect: true)
-                            .opacity(isDisabled ? 0.35 : 1)
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(isDisabled)
-                }
-            }
-            .padding(.bottom, 4)
+            SettingsToggleRow(
+                title: "不显示组件",
+                description: "隐藏刘海左右两侧的所有 widget。",
+                systemImage: "eye.slash",
+                color: .gray,
+                isOn: Binding(
+                    get: { hideWidgets },
+                    set: { newValue in withAnimation(.spring(response: 0.38, dampingFraction: 0.88)) { hideWidgets = newValue } }
+                ),
+                accessibilityIdentifier: "settings.notchBar.hideWidgets"
+            )
 
-            Divider().opacity(0.6)
+            VStack(spacing: 0) {
+                Divider().opacity(0.6)
 
-            // 右侧 — 最多选 2 个，可全不选
-            VStack(alignment: .leading, spacing: 6) {
-                Text("右侧")
-                    .font(.system(size: 12, weight: .medium))
-                Text("最多选 2 个，添加第三个时自动移除最早的。可全不选。")
-                    .font(.system(size: 11))
-                    .foregroundStyle(.secondary)
-            }
-            .padding(.top, 4)
-            HStack(spacing: 8) {
-                ForEach(NotchBarWidget.allCases, id: \.self) { widget in
-                    let active = rightWidgetsRaw.split(separator: ",").compactMap { NotchBarWidget(rawValue: String($0)) }
-                    let selected = active.contains(widget)
-                    let networkSpeedActive = active.contains(.networkSpeed)
-                    let isDisabled = networkSpeedActive && widget != .networkSpeed
-                    Button {
-                        var list = active
-                        if selected {
-                            list.removeAll { $0 == widget }
-                        } else if widget == .networkSpeed {
-                            list = [.networkSpeed]
-                        } else {
-                            list.append(widget)
-                            if list.count > 2 { list.removeFirst() }
-                        }
-                        rightWidgetsRaw = list.map(\.rawValue).joined(separator: ",")
-                    } label: {
-                        widgetPreview(widget, selected: selected, multiSelect: true)
-                            .opacity(isDisabled ? 0.35 : 1)
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(isDisabled)
+                // Left side — multi select (up to 2, FIFO)
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("左侧")
+                        .font(.system(size: 12, weight: .medium))
+                    Text("最多选 2 个，添加第三个时自动移除最早的。可全不选。")
+                        .font(.system(size: 11))
+                        .foregroundStyle(.secondary)
                 }
+                HStack(spacing: 8) {
+                    ForEach(NotchBarWidget.allCases, id: \.self) { widget in
+                        let active = leftWidgetsRaw.split(separator: ",").compactMap { NotchBarWidget(rawValue: String($0)) }
+                        let selected = active.contains(widget)
+                        Button {
+                            var list = active
+                            if selected {
+                                list.removeAll { $0 == widget }
+                            } else if widget == .networkSpeed {
+                                list = [.networkSpeed]
+                            } else {
+                                list.removeAll { $0 == .networkSpeed }
+                                list.append(widget)
+                                if list.count > 2 { list.removeFirst() }
+                            }
+                            leftWidgetsRaw = list.map(\.rawValue).joined(separator: ",")
+                        } label: {
+                            widgetPreview(widget, selected: selected, multiSelect: true)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.bottom, 4)
+
+                Divider().opacity(0.6)
+
+                // 右侧 — 最多选 2 个，可全不选
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("右侧")
+                        .font(.system(size: 12, weight: .medium))
+                    Text("最多选 2 个，添加第三个时自动移除最早的。可全不选。")
+                        .font(.system(size: 11))
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.top, 4)
+                HStack(spacing: 8) {
+                    ForEach(NotchBarWidget.allCases, id: \.self) { widget in
+                        let active = rightWidgetsRaw.split(separator: ",").compactMap { NotchBarWidget(rawValue: String($0)) }
+                        let selected = active.contains(widget)
+                        Button {
+                            var list = active
+                            if selected {
+                                list.removeAll { $0 == widget }
+                            } else if widget == .networkSpeed {
+                                list = [.networkSpeed]
+                            } else {
+                                list.removeAll { $0 == .networkSpeed }
+                                list.append(widget)
+                                if list.count > 2 { list.removeFirst() }
+                            }
+                            rightWidgetsRaw = list.map(\.rawValue).joined(separator: ",")
+                        } label: {
+                            widgetPreview(widget, selected: selected, multiSelect: true)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.bottom, 4)
             }
-            .padding(.bottom, 4)
+            .opacity(hideWidgets ? 0 : 1)
+            .frame(maxHeight: hideWidgets ? 0 : .infinity, alignment: .top)
+            .clipped()
+            .allowsHitTesting(!hideWidgets)
+            .animation(.spring(response: 0.38, dampingFraction: 0.88), value: hideWidgets)
         }
     }
 

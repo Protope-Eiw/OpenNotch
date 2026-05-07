@@ -13,15 +13,12 @@ struct NotchCustomScaleModifier: ViewModifier {
     @Binding var isPressed: Bool
     
     @State private var pendingExpansionToken: UUID?
-    @State private var pressAnimationToken: UUID?
     @State private var initialPressLocation: CGPoint?
     @State private var isPressValidForTap = false
     @State private var didCompleteHoldAction = false
-    @State private var pressScale: CGFloat = 1
-    
+
     let baseSize: CGSize
-    
-    private let scaleFactor: CGFloat = 1.04
+
     private let tapMovementTolerance: CGFloat = 8
     
     func body(content: Content) -> some View {
@@ -32,21 +29,14 @@ struct NotchCustomScaleModifier: ViewModifier {
 private extension NotchCustomScaleModifier {
     func pressableContent(_ content: Content) -> some View {
         let hitBounds = CGRect(origin: .zero, size: baseSize)
-        let isExpandedPresentation = notchViewModel.notchModel.isPresentingExpandedLiveActivity
-        let isPresentationHidden = notchViewModel.isActivityPresentationHidden
 
         return content
-            .scaleEffect(
-                x: !isExpandedPresentation && !isPresentationHidden ? pressScale : 1,
-                y: !isExpandedPresentation && !isPresentationHidden ? pressScale : 1,
-                anchor: .top
-            )
             .simultaneousGesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { value in
                         guard !notchViewModel.isActivityPresentationHidden,
                               !notchViewModel.notchModel.isPresentingExpandedLiveActivity else {
-                            resetPressState(cancelPressAnimation: true)
+                            resetPressState()
                             return
                         }
 
@@ -54,7 +44,7 @@ private extension NotchCustomScaleModifier {
 
                         guard isInsideBounds else {
                             isPressValidForTap = false
-                            resetPressState(cancelPressAnimation: true)
+                            resetPressState()
                             return
                         }
 
@@ -63,7 +53,6 @@ private extension NotchCustomScaleModifier {
                             initialPressLocation = value.location
                             isPressValidForTap = true
                             didCompleteHoldAction = false
-                            startPressAnimation()
                         }
 
                         if let initialPressLocation,
@@ -79,7 +68,7 @@ private extension NotchCustomScaleModifier {
                     .onEnded { value in
                         guard !notchViewModel.isActivityPresentationHidden,
                               !notchViewModel.notchModel.isPresentingExpandedLiveActivity else {
-                            resetPressState(cancelPressAnimation: true)
+                            resetPressState()
                             didCompleteHoldAction = false
                             return
                         }
@@ -88,7 +77,7 @@ private extension NotchCustomScaleModifier {
                         isPressValidForTap &&
                         !didCompleteHoldAction
 
-                        resetPressState(cancelPressAnimation: false)
+                        resetPressState()
 
                         if notchViewModel.shouldExpandActiveContentOnClick && isValidPress {
                             notchViewModel.handleActiveContentTap()
@@ -100,30 +89,9 @@ private extension NotchCustomScaleModifier {
                     }
             )
             .onDisappear {
-                resetPressState(cancelPressAnimation: true)
+                resetPressState()
                 didCompleteHoldAction = false
             }
-    }
-
-    private func startPressAnimation() {
-        let token = UUID()
-        let pressPeakDuration = notchViewModel.notchPressHoldDuration
-        pressAnimationToken = token
-        pressScale = 1
-
-        withAnimation(.easeOut(duration: pressPeakDuration)) {
-            pressScale = scaleFactor
-        }
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + pressPeakDuration) {
-            guard pressAnimationToken == token else { return }
-
-            pressAnimationToken = nil
-
-            withAnimation(.spring(response: 0.30, dampingFraction: 0.5)) {
-                pressScale = 1
-            }
-        }
     }
 
     private func performPressHaptic() {
@@ -151,25 +119,15 @@ private extension NotchCustomScaleModifier {
             pendingExpansionToken = nil
             didCompleteHoldAction = true
             performPressHaptic()
-            resetPressState(cancelPressAnimation: true)
+            resetPressState()
             notchViewModel.handleActiveContentTap()
         }
     }
 
-    private func resetPressState(cancelPressAnimation: Bool) {
+    private func resetPressState() {
         pendingExpansionToken = nil
         initialPressLocation = nil
         isPressValidForTap = false
-
-        if cancelPressAnimation {
-            pressAnimationToken = nil
-
-            if pressScale != 1 {
-                withAnimation(.easeOut(duration: 0.12)) {
-                    pressScale = 1
-                }
-            }
-        }
 
         if isPressed {
             isPressed = false

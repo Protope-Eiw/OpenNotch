@@ -1724,114 +1724,425 @@ private struct MusicPlayerView: View {
 
 private struct CalendarTabView: View {
     @StateObject private var store = CalendarStore()
+    @State private var selectedDate = Date()
+    @State private var displayedMonth: Date = {
+        let c = Calendar.current
+        return c.date(from: c.dateComponents([.year, .month], from: Date())) ?? Date()
+    }()
 
     var body: some View {
-        Group {
-            switch store.authStatus {
-            case .notDetermined:
-                Button("Grant calendar access") { store.requestAccess() }
-                    .font(.system(size: 12))
-                    .foregroundStyle(.white.opacity(0.6))
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            case .denied, .restricted:
-                VStack(spacing: 6) {
-                    Image(systemName: "calendar.badge.exclamationmark")
-                        .font(.system(size: 22))
-                        .foregroundStyle(.white.opacity(0.2))
-                    Text("Calendar access denied")
-                        .font(.system(size: 11))
-                        .foregroundStyle(.white.opacity(0.3))
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-            default:
-                if store.events.isEmpty {
-                    VStack(spacing: 6) {
-                        Image(systemName: "calendar")
-                            .font(.system(size: 22))
-                            .foregroundStyle(.white.opacity(0.2))
-                        Text("No events today")
-                            .font(.system(size: 11))
-                            .foregroundStyle(.white.opacity(0.3))
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else {
-                    ScrollView(.vertical, showsIndicators: false) {
-                        VStack(spacing: 0) {
-                            ForEach(store.events, id: \.eventIdentifier) { event in
-                                EventRow(event: event)
-                            }
-                        }
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 8)
-                    }
-                }
+        switch store.authStatus {
+        case .notDetermined:
+            calendarPermissionView(
+                icon: "calendar",
+                message: "需要日历权限",
+                buttonLabel: "授权访问",
+                action: { store.requestAccess() }
+            )
+        case .denied, .restricted:
+            calendarPermissionView(
+                icon: "calendar.badge.exclamationmark",
+                message: "日历访问被拒绝",
+                buttonLabel: "打开系统设置",
+                action: { store.openPrivacySettings() }
+            )
+        default:
+            HStack(spacing: 0) {
+                MiniCalendarView(selectedDate: $selectedDate, displayedMonth: $displayedMonth)
+                    .frame(width: 162)
+                Rectangle()
+                    .fill(Color.white.opacity(0.07))
+                    .frame(width: 1)
+                    .padding(.vertical, 10)
+                CalendarEventPane(
+                    date: selectedDate,
+                    events: store.events,
+                    version: store.version
+                )
             }
+            .onAppear { store.load(for: selectedDate) }
+            .onChange(of: selectedDate) { _, d in store.load(for: d) }
         }
-        .onAppear { store.loadIfNeeded() }
+    }
+
+    private func calendarPermissionView(
+        icon: String, message: String, buttonLabel: String, action: @escaping () -> Void
+    ) -> some View {
+        VStack(spacing: 10) {
+            Image(systemName: icon)
+                .font(.system(size: 22))
+                .foregroundStyle(.white.opacity(0.2))
+            Text(message)
+                .font(.system(size: 11))
+                .foregroundStyle(.white.opacity(0.3))
+            Button(buttonLabel, action: action)
+                .font(.system(size: 11))
+                .foregroundStyle(.white.opacity(0.55))
+                .buttonStyle(.plain)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 4)
+                .background(Color.white.opacity(0.08))
+                .clipShape(RoundedRectangle(cornerRadius: 6))
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
-private struct EventRow: View {
+// MARK: - Mini Calendar
+
+private struct MiniCalendarView: View {
+    @Binding var selectedDate: Date
+    @Binding var displayedMonth: Date
+
+    private let cal = Calendar.current
+
+    // Weekday header symbols, Monday-first, locale-aware
+    private var weekdaySymbols: [String] {
+        var s = cal.veryShortWeekdaySymbols   // Sunday-first
+        s.append(s.removeFirst())             // rotate → Monday-first
+        return s
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            // ── Month navigation ──
+            HStack(spacing: 0) {
+                Button { navigate(-1) } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 9, weight: .semibold))
+                        .frame(width: 22, height: 22)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(.white.opacity(0.45))
+
+                Spacer()
+
+                Text(monthYearString)
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .onTapGesture { jumpToToday() }
+
+                Spacer()
+
+                Button { navigate(1) } label: {
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 9, weight: .semibold))
+                        .frame(width: 22, height: 22)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(.white.opacity(0.45))
+            }
+            .padding(.horizontal, 6)
+            .padding(.top, 8)
+            .padding(.bottom, 3)
+
+            // ── Weekday labels ──
+            HStack(spacing: 0) {
+                ForEach(weekdaySymbols, id: \.self) { sym in
+                    Text(sym)
+                        .font(.system(size: 8.5, weight: .medium))
+                        .foregroundStyle(.white.opacity(0.28))
+                        .frame(maxWidth: .infinity)
+                }
+            }
+            .padding(.horizontal, 4)
+            .padding(.bottom, 2)
+
+            // ── Date grid ──
+            LazyVGrid(
+                columns: Array(repeating: GridItem(.flexible(), spacing: 1), count: 7),
+                spacing: 1
+            ) {
+                ForEach(gridCells, id: \.index) { cell in
+                    if let date = cell.date {
+                        MiniDateCell(
+                            day: cal.component(.day, from: date),
+                            isToday: cal.isDateInToday(date),
+                            isSelected: cal.isDate(date, inSameDayAs: selectedDate)
+                        ) {
+                            selectedDate = date
+                        }
+                    } else {
+                        Color.clear.frame(height: 19)
+                    }
+                }
+            }
+            .padding(.horizontal, 4)
+            .padding(.bottom, 8)
+        }
+    }
+
+    private var monthYearString: String {
+        let f = DateFormatter()
+        f.dateFormat = "MMM yyyy"
+        return f.string(from: displayedMonth)
+    }
+
+    private func navigate(_ delta: Int) {
+        guard let next = cal.date(byAdding: .month, value: delta, to: displayedMonth) else { return }
+        displayedMonth = cal.date(from: cal.dateComponents([.year, .month], from: next)) ?? next
+    }
+
+    private func jumpToToday() {
+        let today = Date()
+        selectedDate = today
+        displayedMonth = cal.date(from: cal.dateComponents([.year, .month], from: today)) ?? today
+    }
+
+    private struct Cell { let index: Int; let date: Date? }
+
+    private var gridCells: [Cell] {
+        let start = cal.date(from: cal.dateComponents([.year, .month], from: displayedMonth))!
+        let daysInMonth = cal.range(of: .day, in: .month, for: start)!.count
+        let firstWeekday = cal.component(.weekday, from: start) // Sun=1
+        let leading = (firstWeekday + 5) % 7                   // Mon=0 … Sun=6
+
+        var cells: [Cell] = []
+        var idx = 0
+        for _ in 0..<leading          { cells.append(Cell(index: idx, date: nil)); idx += 1 }
+        for d in 0..<daysInMonth      { cells.append(Cell(index: idx, date: cal.date(byAdding: .day, value: d, to: start))); idx += 1 }
+        let rem = cells.count % 7
+        if rem != 0 { for _ in 0..<(7 - rem) { cells.append(Cell(index: idx, date: nil)); idx += 1 } }
+        return cells
+    }
+}
+
+private struct MiniDateCell: View {
+    let day: Int
+    let isToday: Bool
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text("\(day)")
+                .font(.system(size: 10.5, weight: isToday ? .semibold : .regular))
+                .foregroundStyle(isToday || isSelected ? .white : .white.opacity(0.5))
+                .frame(maxWidth: .infinity)
+                .frame(height: 19)
+                .background(
+                    isToday     ? Color.accentColor :
+                    isSelected  ? Color.white.opacity(0.18) : Color.clear
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 4))
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+// MARK: - Calendar Event Pane
+
+private struct CalendarEventPane: View {
+    let date: Date
+    let events: [EKEvent]
+    let version: Int
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            // Date label
+            HStack {
+                Text(dateLabel)
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundStyle(.white.opacity(0.45))
+                    .padding(.leading, 12)
+                    .padding(.top, 8)
+                    .padding(.bottom, 5)
+                Spacer()
+            }
+
+            Divider().opacity(0.08)
+
+            if events.isEmpty {
+                VStack(spacing: 5) {
+                    Image(systemName: "calendar.badge.checkmark")
+                        .font(.system(size: 16))
+                        .foregroundStyle(.white.opacity(0.15))
+                    Text(Calendar.current.isDateInToday(date) ? "今天没有日程" : "没有日程")
+                        .font(.system(size: 10))
+                        .foregroundStyle(.white.opacity(0.25))
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                ScrollViewReader { proxy in
+                    ScrollView(.vertical, showsIndicators: false) {
+                        VStack(spacing: 0) {
+                            ForEach(events, id: \.eventIdentifier) { event in
+                                CalendarEventRow(event: event).id(event.eventIdentifier)
+                                if event.eventIdentifier != events.last?.eventIdentifier {
+                                    Divider().opacity(0.08).padding(.leading, 11)
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                    }
+                    .onAppear { scrollToUpcoming(proxy) }
+                    .onChange(of: version) { _, _ in scrollToUpcoming(proxy) }
+                }
+            }
+        }
+    }
+
+    private var dateLabel: String {
+        let c = Calendar.current
+        if c.isDateInToday(date)     { return "今天" }
+        if c.isDateInYesterday(date) { return "昨天" }
+        if c.isDateInTomorrow(date)  { return "明天" }
+        let f = DateFormatter()
+        f.dateFormat = c.component(.year, from: date) == c.component(.year, from: Date())
+            ? "M月d日" : "yyyy年M月d日"
+        return f.string(from: date)
+    }
+
+    private func scrollToUpcoming(_ proxy: ScrollViewProxy) {
+        let now = Date()
+        let target = events.first(where: { !$0.isAllDay && $0.endDate > now })
+            ?? events.first(where: { $0.isAllDay })
+            ?? events.last
+        if let id = target?.eventIdentifier {
+            withTransaction(Transaction(animation: nil)) { proxy.scrollTo(id, anchor: .top) }
+        }
+    }
+}
+
+// MARK: - Calendar Event Row
+
+private struct CalendarEventRow: View {
     let event: EKEvent
 
     var body: some View {
-        HStack(spacing: 8) {
-            RoundedRectangle(cornerRadius: 2)
+        HStack(alignment: .top, spacing: 8) {
+            RoundedRectangle(cornerRadius: 1.5)
                 .fill(Color(cgColor: event.calendar.cgColor))
-                .frame(width: 3, height: 32)
+                .frame(width: 3)
+                .padding(.top, 1)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(event.title ?? "Untitled")
                     .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(.white)
                     .lineLimit(1)
-                Text(timeString)
-                    .font(.system(size: 10))
-                    .foregroundStyle(.white.opacity(0.45))
+                if let loc = event.location, !loc.isEmpty {
+                    Text(loc)
+                        .font(.system(size: 9))
+                        .foregroundStyle(.white.opacity(0.38))
+                        .lineLimit(1)
+                }
             }
 
             Spacer(minLength: 0)
+
+            VStack(alignment: .trailing, spacing: 2) {
+                if event.isAllDay {
+                    Text("全天")
+                        .font(.system(size: 9, weight: .medium))
+                        .foregroundStyle(.white.opacity(0.45))
+                } else {
+                    Text(fmt(event.startDate))
+                        .font(.system(size: 9, weight: .medium))
+                        .foregroundStyle(.white.opacity(0.65))
+                    Text(fmt(event.endDate))
+                        .font(.system(size: 9))
+                        .foregroundStyle(.white.opacity(0.3))
+                }
+            }
         }
         .padding(.vertical, 5)
+        .opacity(isPast ? 0.45 : 1)
     }
 
-    private var timeString: String {
-        if event.isAllDay { return "All day" }
-        let fmt = DateFormatter()
-        fmt.timeStyle = .short
-        fmt.dateStyle = .none
-        return "\(fmt.string(from: event.startDate)) \u{2013} \(fmt.string(from: event.endDate))"
+    private var isPast: Bool {
+        !event.isAllDay
+            && event.endDate < Date()
+            && Calendar.current.isDateInToday(event.startDate)
+    }
+
+    private func fmt(_ date: Date) -> String {
+        let f = DateFormatter()
+        f.timeStyle = .short
+        f.dateStyle = .none
+        return f.string(from: date)
     }
 }
+
+// MARK: - CalendarStore
 
 @MainActor
 private final class CalendarStore: ObservableObject {
     @Published var events: [EKEvent] = []
+    @Published var version: Int = 0
     @Published var authStatus: EKAuthorizationStatus = EKEventStore.authorizationStatus(for: .event)
 
     private let ekStore = EKEventStore()
+    private var activeObserver: NSObjectProtocol?
+    private var lastLoadedDate: Date?
 
-    func loadIfNeeded() {
+    init() {
+        // Refresh when user returns to the app (e.g. after granting access in System Settings)
+        activeObserver = NotificationCenter.default.addObserver(
+            forName: NSApplication.didBecomeActiveNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            guard let self else { return }
+            Task { @MainActor in self.refreshStatus() }
+        }
+    }
+
+    func load(for date: Date) {
+        lastLoadedDate = date
         let status = EKEventStore.authorizationStatus(for: .event)
         authStatus = status
-        if status == .fullAccess { fetchToday() }
+        guard isAuthorized(status) else { return }
+        fetch(for: date)
     }
 
     func requestAccess() {
         Task {
-            _ = try? await ekStore.requestFullAccessToEvents()
-            authStatus = EKEventStore.authorizationStatus(for: .event)
-            if authStatus == .fullAccess { fetchToday() }
+            do {
+                let granted = try await ekStore.requestFullAccessToEvents()
+                // Trust the return value directly — don't re-read status yet,
+                // TCC database can lag behind the dialog completion.
+                if granted {
+                    authStatus = .fullAccess
+                    fetch(for: lastLoadedDate ?? Date())
+                } else {
+                    authStatus = .denied
+                }
+            } catch {
+                // Hardened Runtime blocked the call or another error — open System Settings
+                openPrivacySettings()
+            }
         }
     }
 
-    private func fetchToday() {
-        let cal = Calendar.current
-        let start = cal.startOfDay(for: .now)
-        let end = cal.date(byAdding: .day, value: 1, to: start) ?? start
-        let pred = ekStore.predicateForEvents(withStart: start, end: end, calendars: nil)
-        events = ekStore.events(matching: pred)
-            .sorted { $0.startDate < $1.startDate }
+    func openPrivacySettings() {
+        NSWorkspace.shared.open(
+            URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Calendars")!
+        )
+    }
+
+    private func refreshStatus() {
+        let status = EKEventStore.authorizationStatus(for: .event)
+        authStatus = status
+        if isAuthorized(status), let date = lastLoadedDate {
+            fetch(for: date)
+        }
+    }
+
+    private func isAuthorized(_ status: EKAuthorizationStatus) -> Bool {
+        status == .fullAccess
+    }
+
+    private func fetch(for date: Date) {
+        let cal   = Calendar.current
+        let start = cal.startOfDay(for: date)
+        let end   = cal.date(byAdding: .day, value: 1, to: start) ?? start
+        let pred  = ekStore.predicateForEvents(withStart: start, end: end, calendars: nil)
+        events  = ekStore.events(matching: pred).sorted { $0.startDate < $1.startDate }
+        version += 1
     }
 }
 
