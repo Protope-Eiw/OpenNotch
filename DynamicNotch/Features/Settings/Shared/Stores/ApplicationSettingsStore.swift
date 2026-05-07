@@ -144,6 +144,12 @@ final class ApplicationSettingsStore: SettingsStoreBase, NotchSettingsProviding 
         }
     }
 
+    @Published var dashboardDisabledTabs: Set<String> {
+        didSet {
+            persist(Array(dashboardDisabledTabs), for: GeneralSettingsStorage.Keys.dashboardDisabledTabs)
+        }
+    }
+
     @Published var notchPressHoldDuration: TimeInterval {
         didSet {
             let clampedValue = Self.clampNotchPressHoldDuration(notchPressHoldDuration)
@@ -286,6 +292,9 @@ final class ApplicationSettingsStore: SettingsStoreBase, NotchSettingsProviding 
         self.dashboardOpenMode = DashboardOpenMode.resolved(
             defaults.string(forKey: GeneralSettingsStorage.Keys.dashboardOpenMode)
         )
+        self.dashboardDisabledTabs = Set(
+            defaults.stringArray(forKey: GeneralSettingsStorage.Keys.dashboardDisabledTabs) ?? []
+        )
         self.notchPressHoldDuration = Self.clampNotchPressHoldDuration(
             defaults.object(forKey: GeneralSettingsStorage.Keys.notchPressHoldDuration) as? Double ??
             Self.defaultNotchPressHoldDuration
@@ -341,6 +350,7 @@ final class ApplicationSettingsStore: SettingsStoreBase, NotchSettingsProviding 
         dashboardOpenMode = DashboardOpenMode.resolved(
             defaultString(for: GeneralSettingsStorage.Keys.dashboardOpenMode)
         )
+        dashboardDisabledTabs = []
     }
 
     func resetNotch() {

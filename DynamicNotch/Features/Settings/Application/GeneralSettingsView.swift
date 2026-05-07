@@ -36,6 +36,7 @@ struct GeneralSettingsView: View {
     var body: some View {
         SettingsPageScrollView {
             systemCard
+            dashboardCard
             themeCard
             displayCard
             languageCard
@@ -178,17 +179,62 @@ struct GeneralSettingsView: View {
                 accessibilityIdentifier: "settings.general.hideNotchInFullscreen"
             )
 
-            Divider()
-                .opacity(0.6)
+        }
+    }
 
+    private var dashboardCard: some View {
+        SettingsCard(title: "Dashboard") {
             SettingsMenuRow(
-                title: "Dashboard trigger",
-                description: "Choose whether the system monitor panel opens when you hover over the notch area, or only when you click it.",
+                title: "Open trigger",
+                description: "Choose whether the dashboard opens on hover or click.",
                 options: Array(DashboardOpenMode.allCases),
                 optionTitle: { $0.title },
                 accessibilityIdentifier: "settings.general.dashboardOpenMode",
                 selection: $applicationSettings.dashboardOpenMode
             )
+
+            Divider().opacity(0.6)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Visible tabs")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(.primary)
+                Text("Choose which tabs appear in the dashboard. At least one tab must remain enabled.")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.top, 4)
+
+            ForEach(DashboardTab.allCases, id: \.self) { tab in
+                let enabled = Binding<Bool>(
+                    get: { !applicationSettings.dashboardDisabledTabs.contains(tab.rawValue) },
+                    set: { isOn in
+                        let wouldLeaveNone = !isOn &&
+                            DashboardTab.allCases
+                                .filter { !applicationSettings.dashboardDisabledTabs.contains($0.rawValue) }
+                                .count <= 1
+                        guard !wouldLeaveNone else { return }
+                        if isOn {
+                            applicationSettings.dashboardDisabledTabs.remove(tab.rawValue)
+                        } else {
+                            applicationSettings.dashboardDisabledTabs.insert(tab.rawValue)
+                        }
+                    }
+                )
+
+                Divider()
+                    .opacity(0.6)
+                    .padding(.leading, 43)
+
+                SettingsToggleRow(
+                    title: tab.title,
+                    description: tab.settingsDescription,
+                    systemImage: tab.icon,
+                    color: tab.settingsColor,
+                    isOn: enabled,
+                    accessibilityIdentifier: "settings.dashboard.tab.\(tab.rawValue)"
+                )
+            }
         }
     }
 

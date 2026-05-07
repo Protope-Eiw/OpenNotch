@@ -11,6 +11,9 @@ final class SystemMonitorViewModel: ObservableObject {
     @Published private(set) var downloadSpeed: Double = 0
     @Published private(set) var batteryLevel: Int = 0
     @Published private(set) var isCharging: Bool = false
+    @Published private(set) var diskUsage: Double = 0
+    @Published private(set) var diskUsedText: String = "–"
+    @Published private(set) var diskTotalText: String = "–"
 
     private var monitorTask: Task<Void, Never>?
     private var previousNetworkStats: NetworkStats?
@@ -41,6 +44,7 @@ final class SystemMonitorViewModel: ObservableObject {
         memoryUsage = readMemoryUsage()
         updateNetworkSpeed()
         readBattery()
+        updateDiskUsage()
     }
 
     private func readBattery() {
@@ -140,6 +144,23 @@ final class SystemMonitorViewModel: ObservableObject {
         }
 
         previousNetworkStats = NetworkStats(bytesSent: totalSent, bytesReceived: totalReceived, timestamp: now)
+    }
+
+    private func updateDiskUsage() {
+        let url = URL(fileURLWithPath: "/")
+        guard let vals = try? url.resourceValues(forKeys: [
+                  .volumeTotalCapacityKey,
+                  .volumeAvailableCapacityKey]),
+              let total = vals.volumeTotalCapacity, total > 0,
+              let avail = vals.volumeAvailableCapacity else { return }
+        let used = max(0, total - avail)
+        diskUsage = Double(used) / Double(total) * 100
+        diskUsedText = formatGB(Int64(used))
+        diskTotalText = formatGB(Int64(total))
+    }
+
+    private func formatGB(_ bytes: Int64) -> String {
+        String(format: "%.0fG", Double(bytes) / 1_073_741_824)
     }
 
     func formattedSpeed(_ bytesPerSec: Double) -> String {

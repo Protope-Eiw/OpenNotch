@@ -18,6 +18,7 @@ enum GeneralSettingsStorage {
         static let notchAnimationPreset = "settings.general.notchAnimationPreset"
         static let hideNotchInFullscreenEnabled = "settings.general.hideNotchInFullscreen"
         static let dashboardOpenMode = "settings.general.dashboardOpenMode"
+        static let dashboardDisabledTabs = "settings.general.dashboard.disabledTabs"
         static let notchTapToExpandEnabled = "settings.notch.gestures.tapToExpand"
         static let notchExpandInteraction = "settings.notch.gestures.expandInteraction"
         static let notchPressHoldDuration = "settings.notch.gestures.pressHoldDuration"

@@ -760,6 +760,9 @@
         }
       }
     },
+    "App Launcher" : {
+
+    },
     "Appearance" : {
       "localizations" : {
         "en" : {
@@ -1716,6 +1719,12 @@
           }
         }
       }
+    },
+    "Calendar" : {
+
+    },
+    "Calendar access denied" : {
+
     },
     "Carry notch context and media playback into the lock screen transition for a more cohesive experience." : {
       "localizations" : {
@@ -2935,6 +2944,9 @@
         }
       }
     },
+    "Choose whether the dashboard opens on hover or click." : {
+
+    },
     "Choose whether the hotspot activity stays minimal or shows more status." : {
       "localizations" : {
         "en" : {
@@ -2990,9 +3002,6 @@
           }
         }
       }
-    },
-    "Choose whether the system monitor panel opens when you hover over the notch area, or only when you click it." : {
-
     },
     "Choose whether the VPN activity stays compact or shows tunnel details." : {
       "localizations" : {
@@ -3110,6 +3119,9 @@
           }
         }
       }
+    },
+    "Choose which tabs appear in the dashboard. At least one tab must remain enabled." : {
+
     },
     "Choose which target appears while files are dragged over the notch." : {
       "localizations" : {
@@ -3859,7 +3871,10 @@
     "CPU %lld%%" : {
 
     },
-    "Dashboard trigger" : {
+    "CPU, memory, disk, network, and battery stats." : {
+
+    },
+    "Dashboard" : {
 
     },
     "Debug Ensemble" : {
@@ -5135,6 +5150,9 @@
           }
         }
       }
+    },
+    "Grant calendar access" : {
+
     },
     "Graphite" : {
       "extractionState" : "stale",
@@ -6804,6 +6822,12 @@
         }
       }
     },
+    "Music" : {
+
+    },
+    "Music player with playback controls and progress bar." : {
+
+    },
     "Network activity" : {
       "localizations" : {
         "en" : {
@@ -6860,6 +6884,9 @@
         }
       }
     },
+    "No apps found" : {
+
+    },
     "No audio outputs available" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -6888,6 +6915,9 @@
           }
         }
       }
+    },
+    "No events today" : {
+
     },
     "No Internet Connection" : {
       "extractionState" : "stale",
@@ -7116,6 +7146,9 @@
           }
         }
       }
+    },
+    "Nothing playing" : {
+
     },
     "Nothing Playing" : {
       "extractionState" : "stale",
@@ -7430,6 +7463,9 @@
           }
         }
       }
+    },
+    "Open trigger" : {
+
     },
     "Orange" : {
       "extractionState" : "stale",
@@ -8087,6 +8123,9 @@
         }
       }
     },
+    "Quick launcher for pinned apps." : {
+
+    },
     "Quit" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -8513,6 +8552,9 @@
           }
         }
       }
+    },
+    "Search apps" : {
+
     },
     "Set a global motion parameter that controls the speed of the animation." : {
       "localizations" : {
@@ -14970,6 +15012,9 @@
         }
       }
     },
+    "System Status" : {
+
+    },
     "Tap to expand live activity" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -15338,6 +15383,9 @@
           }
         }
       }
+    },
+    "Today's calendar events from your calendars." : {
+
     },
     "Toggle persistent previews to inspect their live activity UI." : {
       "extractionState" : "stale",
@@ -16135,6 +16183,9 @@
           }
         }
       }
+    },
+    "Visible tabs" : {
+
     },
     "Volume" : {
       "extractionState" : "stale",
