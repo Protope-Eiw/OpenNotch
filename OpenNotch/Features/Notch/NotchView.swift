@@ -157,14 +157,6 @@ private extension NotchView {
     // Apps tab expands height to ~3× the standard panel (173 × 3 ≈ 519)
     var dashboardPanelHeight: CGFloat { dashboardTab == .apps ? 519 : 173 }
 
-    var isMusicTabPlaying: Bool {
-        dashboardOpen && dashboardTab == .music && nowPlayingViewModel.snapshot?.isPlaying == true
-    }
-
-    var artworkTintColor: Color {
-        Color(nsColor: nowPlayingViewModel.artworkPalette.equalizerBaseColor)
-    }
-
     // True when the notch body is taller than the base pill height (content pushing down)
     // and the dashboard is not open (dashboard has its own animation path).
     private var notchExpandedDownward: Bool {
@@ -414,15 +406,6 @@ private extension NotchView {
         .frame(width: totalWidth)
         .animation(.spring(response: 0.42, dampingFraction: 0.85), value: dashboardOpen)
         .background(Color.black)
-        .overlay(artworkTintColor.opacity(isMusicTabPlaying ? 0.18 : 0)
-            .animation(.easeInOut(duration: 0.6), value: isMusicTabPlaying)
-            .clipShape(UnevenRoundedRectangle(
-                topLeadingRadius: 0,
-                bottomLeadingRadius: dashboardOpen ? 16 : 9,
-                bottomTrailingRadius: dashboardOpen ? 16 : 9,
-                topTrailingRadius: 0
-            ))
-        )
         .clipShape(UnevenRoundedRectangle(
             topLeadingRadius: 0,
             bottomLeadingRadius: dashboardOpen ? 16 : 9,
