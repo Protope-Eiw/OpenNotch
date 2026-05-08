@@ -447,10 +447,12 @@ private extension NotchView {
         }
 
         guard settingsViewModel.application.dashboardOpenMode == .hover else { return }
+        guard !notchExpandedDownward else { return }
 
         dashboardHoverTask = Task { @MainActor in
             try? await Task.sleep(for: .milliseconds(200))
             guard !Task.isCancelled else { return }
+            guard !notchExpandedDownward else { return }
             withAnimation(.spring(response: 0.42, dampingFraction: 0.8)) {
                 dashboardOpen = true
             }
@@ -1262,65 +1264,98 @@ private struct OverviewView: View {
     // MARK: – 番茄计时器列
 
     private var pomodoroColumn: some View {
-        VStack(spacing: 8) {
-            Image(systemName: pomodoroViewModel.state == .idle ? "timer"
-                  : pomodoroViewModel.phase == .work ? "flame.fill" : "cup.and.heat.waves.fill")
-                .font(.system(size: 20))
-                .foregroundStyle(pomodoroViewModel.state == .idle ? .white.opacity(0.25)
-                               : pomodoroViewModel.phase == .work ? .orange : .mint)
+        let isIdle      = pomodoroViewModel.state == .idle
+        let accentColor: Color = pomodoroViewModel.phase == .work ? .orange : .mint
+        let total       = max(1, pomodoroViewModel.phaseTotalSeconds)
+        let progress    = isIdle ? 1.0 : min(1.0, Double(pomodoroViewModel.timeRemaining) / Double(total))
 
-            if pomodoroViewModel.state == .idle {
-                // 时长调节
-                HStack(spacing: 8) {
-                    Button {
-                        if workMinutes > 1 { workMinutes -= 1; pomodoroViewModel.updateWorkMinutes(workMinutes) }
-                    } label: { Image(systemName: "minus").font(.system(size: 11, weight: .medium)) }
-                    .buttonStyle(.plain).foregroundStyle(.white.opacity(0.4))
+        return ZStack {
+            // 深色圆形背景
+            Circle()
+                .fill(Color(red: 0.14, green: 0.10, blue: 0.08))
 
-                    Text("\(workMinutes)m")
-                        .font(.system(size: 13, weight: .semibold, design: .monospaced))
-                        .foregroundStyle(.white.opacity(0.7))
-                        .frame(minWidth: 32, alignment: .center)
+            // 轨道环
+            Circle()
+                .stroke(Color.white.opacity(0.08), lineWidth: 3)
+                .padding(2)
 
-                    Button {
-                        if workMinutes < 120 { workMinutes += 1; pomodoroViewModel.updateWorkMinutes(workMinutes) }
-                    } label: { Image(systemName: "plus").font(.system(size: 11, weight: .medium)) }
-                    .buttonStyle(.plain).foregroundStyle(.white.opacity(0.4))
-                }
+            // 进度环
+            Circle()
+                .trim(from: 0, to: progress)
+                .stroke(accentColor.opacity(isIdle ? 0.4 : 0.9),
+                        style: StrokeStyle(lineWidth: 3, lineCap: .round))
+                .padding(2)
+                .rotationEffect(.degrees(-90))
+                .animation(.linear(duration: 1), value: pomodoroViewModel.timeRemaining)
 
-                Button { pomodoroViewModel.toggleRunning() } label: {
-                    Text("开始")
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 16).padding(.vertical, 4)
-                        .background(Color.orange.opacity(0.75))
-                        .clipShape(Capsule())
-                }
-                .buttonStyle(.plain)
-
-            } else {
+            // 内容
+            VStack(spacing: 6) {
                 Text(pomodoroViewModel.timeString)
-                    .font(.system(size: 22, weight: .bold, design: .monospaced))
-                    .foregroundStyle(pomodoroViewModel.phase == .work ? .orange : .mint)
+                    .font(.system(size: 20, weight: .bold, design: .monospaced))
+                    .foregroundStyle(.white)
 
-                Text(pomodoroViewModel.phase == .work ? "专注中" : "休息中")
+                Text(isIdle ? "\(workMinutes)m"
+                     : pomodoroViewModel.phase == .work ? "专注中" : "休息中")
                     .font(.system(size: 9))
-                    .foregroundStyle(.white.opacity(0.4))
+                    .foregroundStyle(isIdle ? .white.opacity(0.3) : accentColor.opacity(0.8))
 
-                HStack(spacing: 14) {
+                HStack(spacing: 10) {
+                    // 播放/暂停
                     Button { pomodoroViewModel.toggleRunning() } label: {
                         Image(systemName: pomodoroViewModel.state == .running ? "pause.fill" : "play.fill")
-                            .font(.system(size: 14))
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .frame(width: 26, height: 26)
+                            .background(accentColor)
+                            .clipShape(Circle())
                     }
-                    .buttonStyle(.plain).foregroundStyle(.white.opacity(0.6))
+                    .buttonStyle(.plain)
 
-                    Button { pomodoroViewModel.reset() } label: {
-                        Image(systemName: "xmark.circle").font(.system(size: 14))
+                    // +/- 1 分钟
+                    VStack(spacing: 0) {
+                        Button {
+                            if isIdle {
+                                if workMinutes < 120 { workMinutes += 1; pomodoroViewModel.updateWorkMinutes(workMinutes) }
+                            } else {
+                                pomodoroViewModel.adjustTime(minutes: 1)
+                            }
+                        } label: {
+                            Image(systemName: "chevron.up")
+                                .font(.system(size: 7, weight: .semibold))
+                                .frame(width: 18, height: 11)
+                        }
+                        .buttonStyle(.plain).foregroundStyle(.white.opacity(0.5))
+                        .contentShape(Rectangle())
+
+                        Button {
+                            if isIdle {
+                                if workMinutes > 1 { workMinutes -= 1; pomodoroViewModel.updateWorkMinutes(workMinutes) }
+                            } else {
+                                pomodoroViewModel.adjustTime(minutes: -1)
+                            }
+                        } label: {
+                            Image(systemName: "chevron.down")
+                                .font(.system(size: 7, weight: .semibold))
+                                .frame(width: 18, height: 11)
+                        }
+                        .buttonStyle(.plain).foregroundStyle(.white.opacity(0.5))
+                        .contentShape(Rectangle())
                     }
-                    .buttonStyle(.plain).foregroundStyle(.white.opacity(0.3))
+
+                    // 重置
+                    Button { pomodoroViewModel.reset() } label: {
+                        Image(systemName: "arrow.counterclockwise")
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundStyle(.white.opacity(0.6))
+                            .frame(width: 26, height: 26)
+                            .background(Color.white.opacity(0.1))
+                            .clipShape(Circle())
+                    }
+                    .buttonStyle(.plain)
                 }
             }
         }
+        .frame(width: 116, height: 116)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
@@ -2422,6 +2457,7 @@ final class PomodoroViewModel: ObservableObject {
     private var _workMinutes: Int = 25
 
     var timeString: String { String(format: "%02d:%02d", timeRemaining / 60, timeRemaining % 60) }
+    var phaseTotalSeconds: Int { phase == .work ? _workMinutes * 60 : 5 * 60 }
 
     init() {
         let stored = UserDefaults.standard.integer(forKey: AppStorageKeys.Overview.pomodoroDuration)
@@ -2447,6 +2483,10 @@ final class PomodoroViewModel: ObservableObject {
             state = .running
             startCountdown()
         }
+    }
+
+    func adjustTime(minutes: Int) {
+        timeRemaining = max(0, timeRemaining + minutes * 60)
     }
 
     func reset() {
