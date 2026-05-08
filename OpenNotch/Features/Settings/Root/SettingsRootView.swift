@@ -150,8 +150,10 @@ struct SettingsRootView: View {
                 isSelected ? Color.accentColor.opacity(0.12) : Color.clear,
                 in: RoundedRectangle(cornerRadius: 10)
             )
+            .frame(maxWidth: .infinity)
         }
         .buttonStyle(.plain)
+        .contentShape(Rectangle())
         .help(localized(section.titleKey, fallback: section.fallbackTitle))
         .accessibilityIdentifier("settings.sidebar.\(section.rawValue)")
     }

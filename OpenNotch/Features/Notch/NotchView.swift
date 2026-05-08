@@ -1219,7 +1219,7 @@ private struct OverviewView: View {
             }
         }
         .padding(.horizontal, 10)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     // MARK: – 系统信息列
