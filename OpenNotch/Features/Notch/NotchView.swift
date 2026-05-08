@@ -414,12 +414,6 @@ private extension NotchView {
         .frame(width: totalWidth)
         .animation(.spring(response: 0.42, dampingFraction: 0.85), value: dashboardOpen)
         .background(Color.black)
-        .overlay(
-            artworkTintColor
-                .opacity(isMusicTabPlaying ? 0.18 : 0)
-                .animation(.easeInOut(duration: 0.6), value: isMusicTabPlaying)
-                .allowsHitTesting(false)
-        )
         .clipShape(UnevenRoundedRectangle(
             topLeadingRadius: 0,
             bottomLeadingRadius: dashboardOpen ? 16 : 9,
@@ -919,6 +913,7 @@ private struct DashboardPanelView: View {
                 MusicPlayerView(
                     snapshot: snapshot,
                     artwork: nowPlayingViewModel.artworkImage,
+                    palette: nowPlayingViewModel.artworkPalette,
                     onPlayPause:   { nowPlayingViewModel.togglePlayPause() },
                     onPrev:        { nowPlayingViewModel.previousTrack() },
                     onNext:        { nowPlayingViewModel.nextTrack() },
@@ -1584,6 +1579,7 @@ private struct StatBar: View {
 private struct MusicPlayerView: View {
     let snapshot: NowPlayingSnapshot
     let artwork: NSImage?
+    let palette: NowPlayingArtworkPalette
     let onPlayPause: () -> Void
     let onPrev: () -> Void
     let onNext: () -> Void
@@ -1693,6 +1689,13 @@ private struct MusicPlayerView: View {
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(nsColor: palette.equalizerBaseColor).opacity(snapshot.isPlaying ? 0.15 : 0))
+                .padding(6)
+                .animation(.easeInOut(duration: 0.6), value: snapshot.isPlaying)
+        )
+        .allowsHitTesting(true)
     }
 
     // 封面：播放时发光光晕 + 全尺寸；暂停时缩小 + 暗色蒙层
@@ -1729,7 +1732,7 @@ private struct MusicPlayerView: View {
             .aspectRatio(1, contentMode: .fit)
             .frame(maxHeight: .infinity)
             .clipShape(RoundedRectangle(cornerRadius: 12))
-            .scaleEffect(snapshot.isPlaying ? 1.0 : 0.87)
+            .scaleEffect(snapshot.isPlaying ? 0.92 : 0.87)
             .animation(.spring(response: 0.4, dampingFraction: 0.75), value: snapshot.isPlaying)
 
             // 暂停时的暗色蒙层
