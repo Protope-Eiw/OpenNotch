@@ -4,6 +4,13 @@
 
 The app is called **OpenNotch**. The Xcode project and folder structure still uses `DynamicNotch` as the identifier/bundle prefix; do not rename those.
 
+## References
+
+OpenNotch is inspired by and references two open-source projects:
+
+- **[DynamicNotch](https://github.com/MrKai77/DynamicNotch)** by MrKai77 — foundational notch overlay architecture and window management approach.
+- **[BoringNotch](https://github.com/TheBoredTeam/boring.notch)** by TheBoredTeam — UI patterns for music player, audio spectrum visualizer, HUD interception, and feature set inspiration.
+
 ## Architecture overview
 
 - `NSNonactivatingPanel` transparent 1000×1000pt canvas anchored to the top of the screen — this is the notch overlay window.
