@@ -95,7 +95,7 @@ struct OnboardingNotchView: View {
         case .third:
             HStack {
                 Button(action: {
-                    guard let url = URL(string: "https://github.com/jackson-storm/OpenNotch") else {
+                    guard let url = URL(string: "https://github.com/Protope-Eiw/mynotch?tab=readme-ov-file") else {
                         return
                     }
                     openURL(url)
