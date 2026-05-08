@@ -7,8 +7,9 @@ extension BluetoothService {
     // MARK: - Setup Methods
 
     func setupBluetoothObservers() {
+        #if DEBUG
         print("🎧 [BluetoothAudioManager] Setting up Bluetooth observers...")
-
+        #endif
         let dnc = DistributedNotificationCenter.default()
 
         dnc.addObserver(
@@ -25,12 +26,17 @@ extension BluetoothService {
             object: nil
         )
 
+        #if DEBUG
+
         print("🎧 [BluetoothAudioManager] ✅ Observers registered with DistributedNotificationCenter")
+
+        #endif
     }
 
     func startPollingForChanges() {
+        #if DEBUG
         print("🎧 [BluetoothAudioManager] Starting polling timer (\(pollingInterval)s interval)...")
-
+        #endif
         pollingTimer = Timer.scheduledTimer(withTimeInterval: pollingInterval, repeats: true) { [weak self] _ in
             self?.checkForDeviceChanges()
         }
@@ -40,7 +46,9 @@ extension BluetoothService {
     func checkForDeviceChanges() {
         guard IOBluetoothHostController.default()?.powerState == kBluetoothHCIPowerStateON else {
             if !connectedDevices.isEmpty {
+                #if DEBUG
                 print("🎧 [BluetoothAudioManager] ⚠️ Bluetooth powered off - clearing connected devices")
+                #endif
                 connectedDevices.removeAll()
                 isBluetoothAudioConnected = false
             }
@@ -61,27 +69,36 @@ extension BluetoothService {
 
         let newAddresses = currentlyConnectedAddresses.subtracting(previousAddresses)
         if !newAddresses.isEmpty {
+            #if DEBUG
             print("🎧 [BluetoothAudioManager] 🔍 Polling detected new connection(s)")
+            #endif
             checkForNewlyConnectedDevices()
         }
 
         let removedAddresses = previousAddresses.subtracting(currentlyConnectedAddresses)
         if !removedAddresses.isEmpty {
+            #if DEBUG
             print("🎧 [BluetoothAudioManager] 🔍 Polling detected disconnection(s)")
+            #endif
             updateConnectedDevices()
         }
     }
 
     func checkInitialDevices() {
+        #if DEBUG
         print("🎧 [BluetoothAudioManager] Checking for initially connected devices...")
-
+        #endif
         guard IOBluetoothHostController.default()?.powerState == kBluetoothHCIPowerStateON else {
+            #if DEBUG
             print("🎧 [BluetoothAudioManager] ⚠️ Bluetooth is powered off - skipping initial check")
+            #endif
             return
         }
 
         guard let pairedDevices = IOBluetoothDevice.pairedDevices() as? [IOBluetoothDevice] else {
+            #if DEBUG
             print("🎧 [BluetoothAudioManager] No paired devices found")
+            #endif
             return
         }
 
@@ -89,8 +106,11 @@ extension BluetoothService {
             device.isConnected() && isAudioDevice(device)
         }
 
+        #if DEBUG
+
         print("🎧 [BluetoothAudioManager] Found \(connectedAudioDevices.count) connected audio devices")
 
+        #endif
         connectedDevices = connectedAudioDevices.compactMap { device in
             createBluetoothAudioDevice(from: device)
         }
@@ -100,7 +120,9 @@ extension BluetoothService {
 
         if let lastDevice = connectedDevices.last {
             lastConnectedDevice = lastDevice
+            #if DEBUG
             print("🎧 [BluetoothAudioManager] ✅ Bluetooth audio connected: \(lastDevice.name)")
+            #endif
         }
     }
 
@@ -108,19 +130,25 @@ extension BluetoothService {
 
     @objc
     func handleDeviceConnectedNotification(_ notification: Notification) {
+        #if DEBUG
         print("🎧 [BluetoothAudioManager] 📡 Device connection notification received")
+        #endif
         checkForNewlyConnectedDevices()
     }
 
     @objc
     func handleDeviceDisconnectedNotification(_ notification: Notification) {
+        #if DEBUG
         print("🎧 [BluetoothAudioManager] 📡 Device disconnection notification received")
+        #endif
         updateConnectedDevices()
     }
 
     func checkForNewlyConnectedDevices() {
         guard IOBluetoothHostController.default()?.powerState == kBluetoothHCIPowerStateON else {
+            #if DEBUG
             print("🎧 [BluetoothAudioManager] ⚠️ Bluetooth is powered off - skipping device check")
+            #endif
             return
         }
 
@@ -136,8 +164,9 @@ extension BluetoothService {
             let address = device.addressString ?? "Unknown"
 
             if !connectedDevices.contains(where: { $0.address == address }) {
+                #if DEBUG
                 print("🎧 [BluetoothAudioManager] 🎉 New audio device connected: \(device.name ?? "Unknown")")
-
+                #endif
                 guard let audioDevice = createBluetoothAudioDevice(from: device) else {
                     continue
                 }
@@ -175,7 +204,9 @@ extension BluetoothService {
         }
 
         if !removedDevices.isEmpty {
+            #if DEBUG
             print("🎧 [BluetoothAudioManager] 👋 Audio device(s) disconnected")
+            #endif
             removedDevices.forEach {
                 cancelHUDBatteryWait(for: $0)
                 cancelPostConnectionBatteryRefresh(for: $0)
@@ -188,17 +219,24 @@ extension BluetoothService {
 
     func handleDeviceConnected(_ notification: Notification) {
         guard let device = notification.object as? IOBluetoothDevice else {
+            #if DEBUG
             print("🎧 [BluetoothAudioManager] ⚠️ Could not extract device from notification")
+            #endif
             return
         }
 
         guard isAudioDevice(device) else {
+            #if DEBUG
             print("🎧 [BluetoothAudioManager] Device is not an audio device, ignoring")
+            #endif
             return
         }
 
+        #if DEBUG
+
         print("🎧 [BluetoothAudioManager] 🎉 Audio device connected: \(device.name ?? "Unknown")")
 
+        #endif
         guard let audioDevice = createBluetoothAudioDevice(from: device) else {
             return
         }
@@ -223,8 +261,11 @@ extension BluetoothService {
             return
         }
 
+        #if DEBUG
+
         print("🎧 [BluetoothAudioManager] 👋 Audio device disconnected: \(device.name ?? "Unknown")")
 
+        #endif
         let address = device.addressString ?? "Unknown"
         let removed = connectedDevices.filter { $0.address == address }
         connectedDevices.removeAll { $0.address == address }
@@ -238,8 +279,9 @@ extension BluetoothService {
     // MARK: - Cleanup
 
     func cleanup() {
+        #if DEBUG
         print("🎧 [BluetoothAudioManager] Cleaning up observers...")
-
+        #endif
         pollingTimer?.invalidate()
         pollingTimer = nil
 

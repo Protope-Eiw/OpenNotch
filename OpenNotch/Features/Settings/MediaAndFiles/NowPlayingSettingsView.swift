@@ -53,7 +53,7 @@ struct NowPlayingSettingsView: View {
                 accessibilityIdentifier: "settings.activities.live.nowPlaying.withoutCloseTimer"
             )
 
-            Divider().opacity(0.6)
+            SettingsDivider()
 
             SettingsSliderRow(
                 title: "Close delay",
@@ -80,7 +80,7 @@ struct NowPlayingSettingsView: View {
                 applicationSettings: applicationSettings
             )
 
-            Divider().opacity(0.6)
+            SettingsDivider()
 
             SettingsToggleRow(
                 title: "Hide favorite",

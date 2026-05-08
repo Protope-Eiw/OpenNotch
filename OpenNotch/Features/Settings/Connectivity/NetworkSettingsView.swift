@@ -120,7 +120,7 @@ struct NetworkSettingsView: View {
             .disabled(!connectivitySettings.isWifiTemporaryActivityEnabled)
             .opacity(connectivitySettings.isWifiTemporaryActivityEnabled ? 1 : 0.5)
             
-            Divider().opacity(0.6)
+            SettingsDivider()
             
             SettingsSliderRow(
                 title: "VPN duration",
@@ -186,7 +186,7 @@ struct NetworkSettingsView: View {
                 hotspotAppearancePickerContent(for: style, isSelected: isSelected)
             }
 
-            Divider().opacity(0.6)
+            SettingsDivider()
 
             SettingsStrokeToggleRow(
                 title: "Default stroke",

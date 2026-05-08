@@ -88,7 +88,7 @@ struct BluetoothSettingsView: View {
             }
             .accessibilityIdentifier("settings.activities.temporary.bluetooth.style")
 
-            Divider().opacity(0.6)
+            SettingsDivider()
 
             SettingsMenuRow(
                 title: "Battery indicator",
@@ -99,7 +99,7 @@ struct BluetoothSettingsView: View {
                 selection: $settings.bluetoothBatteryIndicatorStyle
             )
 
-            Divider().opacity(0.6)
+            SettingsDivider()
             
             SettingsStrokeToggleRow(
                 title: "Battery-colored stroke",

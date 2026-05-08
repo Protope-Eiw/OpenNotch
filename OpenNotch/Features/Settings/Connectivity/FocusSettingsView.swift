@@ -84,7 +84,7 @@ struct FocusSettingsView: View {
                 focusStylePickerContent(for: style, isSelected: isSelected)
             }
 
-            Divider().opacity(0.6)
+            SettingsDivider()
 
             SettingsStrokeToggleRow(
                 title: "Default stroke",

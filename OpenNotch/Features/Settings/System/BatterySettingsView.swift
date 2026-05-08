@@ -87,7 +87,7 @@ struct BatterySettingsView: View {
             .disabled(!batterySettings.isChargerTemporaryActivityEnabled)
             .opacity(batterySettings.isChargerTemporaryActivityEnabled ? 1 : 0.5)
 
-            Divider().opacity(0.6)
+            SettingsDivider()
 
             SettingsSliderRow(
                 title: "Low battery duration",
@@ -105,7 +105,7 @@ struct BatterySettingsView: View {
             .disabled(!batterySettings.isLowPowerTemporaryActivityEnabled)
             .opacity(batterySettings.isLowPowerTemporaryActivityEnabled ? 1 : 0.5)
 
-            Divider().opacity(0.6)
+            SettingsDivider()
 
             SettingsSliderRow(
                 title: "Full battery duration",
@@ -144,7 +144,7 @@ struct BatterySettingsView: View {
                 )
             }
 
-            Divider().opacity(0.6)
+            SettingsDivider()
 
             SettingsStrokeToggleRow(
                 title: "Default stroke",
@@ -155,7 +155,7 @@ struct BatterySettingsView: View {
             .disabled(isDefaultStrokeLocked)
             .opacity(isDefaultStrokeLocked ? 0.5 : 1)
 
-            Divider().opacity(0.6)
+            SettingsDivider()
             
             SettingsSliderRow(
                 title: "Low battery threshold",
@@ -192,7 +192,7 @@ struct BatterySettingsView: View {
                 )
             }
 
-            Divider().opacity(0.6)
+            SettingsDivider()
 
             SettingsStrokeToggleRow(
                 title: "Default stroke",
@@ -203,7 +203,7 @@ struct BatterySettingsView: View {
             .disabled(isDefaultStrokeLocked)
             .opacity(isDefaultStrokeLocked ? 0.5 : 1)
 
-            Divider().opacity(0.6)
+            SettingsDivider()
             
             SettingsSliderRow(
                 title: "Full charge threshold",

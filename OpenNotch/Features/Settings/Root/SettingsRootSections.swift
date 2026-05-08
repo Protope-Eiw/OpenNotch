@@ -15,12 +15,12 @@ private struct SettingsSectionDescriptor {
 extension SettingsRootViewModel {
     enum Section: String, CaseIterable, Identifiable {
         case general
-        case permissions
         case notch
         case interface
         case media
         case connectivity
         case system
+        case permissions
         case lockScreen
         case donation
         #if DEBUG

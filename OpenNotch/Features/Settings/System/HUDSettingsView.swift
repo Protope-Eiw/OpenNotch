@@ -79,7 +79,7 @@ struct HUDSettingsView: View {
             .disabled(!settings.isBrightnessHUDEnabled)
             .opacity(settings.isBrightnessHUDEnabled ? 1 : 0.5)
 
-            Divider().opacity(0.6)
+            SettingsDivider()
 
             SettingsSliderRow(
                 title: "Keyboard duration",
@@ -97,7 +97,7 @@ struct HUDSettingsView: View {
             .disabled(!settings.isKeyboardHUDEnabled)
             .opacity(settings.isKeyboardHUDEnabled ? 1 : 0.5)
 
-            Divider().opacity(0.6)
+            SettingsDivider()
 
             SettingsSliderRow(
                 title: "Volume duration",
@@ -130,7 +130,7 @@ struct HUDSettingsView: View {
             }
             .accessibilityIdentifier("settings.general.hud.style")
 
-            Divider().opacity(0.6)
+            SettingsDivider()
 
             SettingsMenuRow(
                 title: "Level indicator",
@@ -141,7 +141,7 @@ struct HUDSettingsView: View {
                 selection: $settings.indicatorStyle
             )
 
-            Divider().opacity(0.6)
+            SettingsDivider()
 
             SettingsToggleRow(
                 title: "Colored level tint",

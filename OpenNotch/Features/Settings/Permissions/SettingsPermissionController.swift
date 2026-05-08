@@ -46,7 +46,7 @@ final class SettingsPermissionController: NSObject, ObservableObject, CBCentralM
     private var didPromptForPostEventAccess = false
     private var didPromptForScreenCaptureAccess = false
     private var bluetoothPermissionRequester: CBCentralManager?
-    private let ekStore = EKEventStore()
+    private let ekStore = EKEventStore.app
     private var cancellables = Set<AnyCancellable>()
 
     private static let privacySettingsURL = URL(

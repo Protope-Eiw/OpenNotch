@@ -65,7 +65,7 @@ struct LockScreenSettingsView: View {
             }
             .accessibilityIdentifier("settings.activities.lockScreen.style")
 
-            Divider().opacity(0.6)
+            SettingsDivider()
 
             SettingsToggleRow(
                 title: "Lock screen sound",
@@ -105,7 +105,7 @@ struct LockScreenSettingsView: View {
             }
             .accessibilityIdentifier("settings.activities.lockScreen.widgetAppearance")
             
-            Divider().opacity(0.6)
+            SettingsDivider()
             
             SettingsMenuRow(
                 title: "Media panel background",
@@ -117,7 +117,7 @@ struct LockScreenSettingsView: View {
             )
             .accessibilityIdentifier("settings.activities.lockScreen.mediaPanelBackground")
             
-            Divider().opacity(0.6)
+            SettingsDivider()
             
             SettingsToggleRow(
                 title: "Accent tint",
@@ -131,7 +131,7 @@ struct LockScreenSettingsView: View {
                 accessibilityIdentifier: "settings.activities.lockScreen.widgetTint"
             )
             
-            Divider().opacity(0.6)
+            SettingsDivider()
 
             SettingsSliderRow(
                 title: "Background brightness",

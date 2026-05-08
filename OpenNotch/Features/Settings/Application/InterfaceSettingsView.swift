@@ -3,15 +3,15 @@ import SwiftUI
 struct InterfaceSettingsView: View {
     @ObservedObject var applicationSettings: ApplicationSettingsStore
 
-    @AppStorage("settings.overview.showApps")           private var showApps           = true
-    @AppStorage("settings.overview.showTimeDate")       private var showTimeDate       = true
-    @AppStorage("settings.overview.showSystemInfo")     private var showSystemInfo     = true
-    @AppStorage("settings.overview.showPomodoro")       private var showPomodoro       = true
-    @AppStorage("settings.overview.showWeather")        private var showWeather        = true
-    @AppStorage("settings.overview.hideAppNames")       private var hideAppNames       = false
-    @AppStorage("settings.general.dashboardDefaultTab") private var dashboardDefaultTab = "last"
-    @AppStorage("settings.music.showSkipButtons")       private var showSkipButtons    = true
-    @AppStorage("settings.music.showVisualizer")        private var showVisualizer     = true
+    @AppStorage(AppStorageKeys.Overview.showApps)           private var showApps           = true
+    @AppStorage(AppStorageKeys.Overview.showTimeDate)       private var showTimeDate       = true
+    @AppStorage(AppStorageKeys.Overview.showSystemInfo)     private var showSystemInfo     = true
+    @AppStorage(AppStorageKeys.Overview.showPomodoro)       private var showPomodoro       = true
+    @AppStorage(AppStorageKeys.Overview.showWeather)        private var showWeather        = true
+    @AppStorage(AppStorageKeys.Overview.hideAppNames)       private var hideAppNames       = false
+    @AppStorage(AppStorageKeys.General.dashboardDefaultTab) private var dashboardDefaultTab = "last"
+    @AppStorage(AppStorageKeys.Music.showSkipButtons)       private var showSkipButtons    = true
+    @AppStorage(AppStorageKeys.Music.showVisualizer)        private var showVisualizer     = true
 
     private var enabledTabs: [DashboardTab] {
         DashboardTab.allCases.filter { !applicationSettings.dashboardDisabledTabs.contains($0.rawValue) }
@@ -52,18 +52,18 @@ struct InterfaceSettingsView: View {
                 selection: $applicationSettings.dashboardOpenMode
             )
 
-            Divider().opacity(0.6)
+            SettingsDivider()
 
             SettingsMenuRow(
                 title: "默认标签",
                 description: "打开仪表盘时显示的标签页。",
                 options: defaultTabOptions,
                 optionTitle: { defaultTabOptionTitle($0) },
-                accessibilityIdentifier: "settings.general.dashboardDefaultTab",
+                accessibilityIdentifier: AppStorageKeys.General.dashboardDefaultTab,
                 selection: $dashboardDefaultTab
             )
 
-            Divider().opacity(0.6)
+            SettingsDivider()
 
             Text("可见标签")
                 .font(.system(size: 12, weight: .medium))
@@ -90,7 +90,7 @@ struct InterfaceSettingsView: View {
                     }
                 )
 
-                Divider().opacity(0.6).padding(.leading, 43)
+                SettingsDivider(indented: true)
 
                 SettingsToggleRow(
                     title: tab.title,
@@ -118,14 +118,14 @@ struct InterfaceSettingsView: View {
             SubToggleRow(
                 title: "快进/快退 15 秒",
                 isOn: $showSkipButtons,
-                accessibilityIdentifier: "settings.music.showSkipButtons"
+                accessibilityIdentifier: AppStorageKeys.Music.showSkipButtons
             )
 
             Divider().opacity(0.4).padding(.leading, 43)
             SubToggleRow(
                 title: "音频频谱可视化",
                 isOn: $showVisualizer,
-                accessibilityIdentifier: "settings.music.showVisualizer"
+                accessibilityIdentifier: AppStorageKeys.Music.showVisualizer
             )
         }
         .background(Color.primary.opacity(0.03))
@@ -145,7 +145,7 @@ struct InterfaceSettingsView: View {
                 systemImage: "square.grid.2x2.fill",
                 color: .blue,
                 isOn: $showApps,
-                accessibilityIdentifier: "settings.overview.showApps"
+                accessibilityIdentifier: AppStorageKeys.Overview.showApps
             )
             .padding(.leading, 16)
 
@@ -154,7 +154,7 @@ struct InterfaceSettingsView: View {
                 SubToggleRow(
                     title: "隐藏应用名称",
                     isOn: $hideAppNames,
-                    accessibilityIdentifier: "settings.overview.hideAppNames"
+                    accessibilityIdentifier: AppStorageKeys.Overview.hideAppNames
                 )
                 .padding(.leading, 32)
 
@@ -171,7 +171,7 @@ struct InterfaceSettingsView: View {
                 systemImage: "clock.fill",
                 color: .orange,
                 isOn: $showTimeDate,
-                accessibilityIdentifier: "settings.overview.showTimeDate"
+                accessibilityIdentifier: AppStorageKeys.Overview.showTimeDate
             )
             .padding(.leading, 16)
 
@@ -180,7 +180,7 @@ struct InterfaceSettingsView: View {
                 SubToggleRow(
                     title: "天气",
                     isOn: $showWeather,
-                    accessibilityIdentifier: "settings.overview.showWeather"
+                    accessibilityIdentifier: AppStorageKeys.Overview.showWeather
                 )
                 .padding(.leading, 32)
             }
@@ -192,7 +192,7 @@ struct InterfaceSettingsView: View {
                 systemImage: "cpu.fill",
                 color: .green,
                 isOn: $showSystemInfo,
-                accessibilityIdentifier: "settings.overview.showSystemInfo"
+                accessibilityIdentifier: AppStorageKeys.Overview.showSystemInfo
             )
             .padding(.leading, 16)
 
@@ -203,7 +203,7 @@ struct InterfaceSettingsView: View {
                 systemImage: "timer",
                 color: .red,
                 isOn: $showPomodoro,
-                accessibilityIdentifier: "settings.overview.showPomodoro"
+                accessibilityIdentifier: AppStorageKeys.Overview.showPomodoro
             )
             .padding(.leading, 16)
 

@@ -62,7 +62,9 @@ final class BluetoothService: ObservableObject {
     let postConnectionBatteryRetryDelays: [TimeInterval] = [0.4, 0.8, 1.2]
 
     private init() {
+        #if DEBUG
         print("🎧 [BluetoothAudioManager] Initializing...")
+        #endif
         setupBluetoothObservers()
         checkInitialDevices()
         startPollingForChanges()
@@ -119,8 +121,9 @@ final class BluetoothService: ObservableObject {
     }
 
     func presentDeviceConnectedHUD(device: BluetoothAudioDevice, batteryLevel: Int?) {
+        #if DEBUG
         print("🎧 [BluetoothAudioManager] 📱 Showing device connected HUD")
-
+        #endif
         let _: CGFloat = if let batteryLevel {
             CGFloat(clampBatteryPercentage(batteryLevel)) / 100.0
         } else {

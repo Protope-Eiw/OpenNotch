@@ -317,7 +317,7 @@ struct DebugSettingsView: View {
                 action: viewModel.hideCurrentTemporaryPreview
             )
             
-            Divider().opacity(0.6)
+            SettingsDivider()
             
             DebugActionRow(
                 title: "Reset All Previews",

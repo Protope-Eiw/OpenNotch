@@ -65,7 +65,7 @@ struct DownloadsSettingsView: View {
             }
             .accessibilityIdentifier("settings.activities.live.downloads.style")
             
-            Divider().opacity(0.6)
+            SettingsDivider()
             
             SettingsMenuRow(
                 title: "Progress indicator",
@@ -76,7 +76,7 @@ struct DownloadsSettingsView: View {
                 selection: $mediaSettings.downloadsProgressIndicatorStyle
             )
             
-            Divider().opacity(0.6)
+            SettingsDivider()
             
             SettingsStrokeToggleRow(
                 title: "Default stroke",

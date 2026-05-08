@@ -62,7 +62,7 @@ struct DropSettingsView: View {
                 dragAndDropPreviewContent
             }
 
-            Divider().opacity(0.6)
+            SettingsDivider()
 
             SettingsMenuRow(
                 title: "Target mode",
@@ -73,7 +73,7 @@ struct DropSettingsView: View {
                 selection: $mediaSettings.dragAndDropActivityMode
             )
             
-            Divider().opacity(0.6)
+            SettingsDivider()
 
             SettingsStrokeToggleRow(
                 title: "Default stroke",

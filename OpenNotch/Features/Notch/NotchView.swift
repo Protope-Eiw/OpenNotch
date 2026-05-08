@@ -35,11 +35,11 @@ struct NotchView: View {
     @State private var dragTargetIndex: Int = 0
     @State private var appSearchText = ""
     @StateObject private var pomodoroViewModel = PomodoroViewModel()
-    @AppStorage("settings.notchBar.leftWidgets")  private var leftWidgetsRaw  = NotchBarWidget.networkSpeed.rawValue
-    @AppStorage("settings.notchBar.rightWidgets") private var rightWidgetsRaw = "cpu,memory"
-    @AppStorage("settings.notchBar.hideWidgets")  private var hideWidgets     = false
-    @AppStorage("settings.general.dashboardLastTab")    private var dashboardLastTab    = DashboardTab.system.rawValue
-    @AppStorage("settings.general.dashboardDefaultTab") private var dashboardDefaultTab = "last"
+    @AppStorage(AppStorageKeys.NotchBar.leftWidgets)  private var leftWidgetsRaw  = NotchBarWidget.networkSpeed.rawValue
+    @AppStorage(AppStorageKeys.NotchBar.rightWidgets) private var rightWidgetsRaw = "cpu,memory"
+    @AppStorage(AppStorageKeys.NotchBar.hideWidgets)  private var hideWidgets     = false
+    @AppStorage(AppStorageKeys.General.dashboardLastTab)    private var dashboardLastTab    = DashboardTab.system.rawValue
+    @AppStorage(AppStorageKeys.General.dashboardDefaultTab) private var dashboardDefaultTab = "last"
     // Separate show/hide state so widgets only reappear after the notch finishes collapsing
     @State private var showSideWidgets = true
     @State private var sideWidgetTask: Task<Void, Never>? = nil
@@ -291,9 +291,7 @@ private extension NotchView {
                 .opacity(showSideWidgets ? 1 : 0)
                 .scaleEffect(showSideWidgets ? 1 : 0.90, anchor: .leading)
                 .blur(radius: showSideWidgets ? 0 : 2)
-                .animation(.spring(response: 0.42, dampingFraction: 0.88), value: hideWidgets)
                 .frame(width: notchExpandedSideWidth, height: baseHeight)
-                .animation(.spring(response: 0.42, dampingFraction: 0.88), value: hideWidgets)
                 .contentShape(Rectangle())
                 .onTapGesture {
                     guard settingsViewModel.application.dashboardOpenMode != .hover else { return }
@@ -316,6 +314,9 @@ private extension NotchView {
                         Button {
                             openWindow(id: WindowsScene.settings)
                             SettingsWindowCoordinator.activate()
+                            if dashboardOpen && settingsViewModel.application.dashboardOpenMode != .hover {
+                                toggleDashboard()
+                            }
                         } label: {
                             Image(systemName: "gearshape")
                                 .font(.system(size: 13, weight: .medium))
@@ -365,7 +366,6 @@ private extension NotchView {
                     Color.clear.frame(width: outerPad)
                 }
                 .frame(width: notchExpandedSideWidth, height: baseHeight)
-                .animation(.spring(response: 0.42, dampingFraction: 0.88), value: hideWidgets)
                 .contentShape(Rectangle())
                 .onTapGesture {
                     guard settingsViewModel.application.dashboardOpenMode != .hover else { return }
@@ -394,10 +394,17 @@ private extension NotchView {
                 .onChange(of: dashboardTab) { _, newTab in
                     if newTab != .apps { appSearchText = "" }
                 }
+                .background {
+                    if settingsViewModel.application.dashboardOpenMode != .hover {
+                        ClickOutsideMonitor {
+                            toggleDashboard()
+                        }
+                    }
+                }
             }
         }
         .frame(width: totalWidth)
-        .animation(.spring(response: 0.42, dampingFraction: 0.85), value: totalWidth)
+        .animation(.spring(response: 0.42, dampingFraction: 0.85), value: dashboardOpen)
         .background(Color.black)
         .clipShape(UnevenRoundedRectangle(
             topLeadingRadius: 0,
@@ -596,6 +603,7 @@ private extension NotchView {
                     .onChanged { _ in
                         guard !notchTapFired else { return }
                         guard settingsViewModel.application.dashboardOpenMode != .hover else { return }
+                        guard !notchExpandedDownward else { return }
                         notchTapFired = true
                         toggleDashboard()
                     }
@@ -1050,13 +1058,13 @@ private struct OverviewView: View {
     @ObservedObject var systemMonitorViewModel: SystemMonitorViewModel
     @ObservedObject var pomodoroViewModel: PomodoroViewModel
 
-    @AppStorage("settings.overview.showApps")         private var showApps       = true
-    @AppStorage("settings.overview.showTimeDate")     private var showTimeDate   = true
-    @AppStorage("settings.overview.showSystemInfo")   private var showSystemInfo = true
-    @AppStorage("settings.overview.showPomodoro")     private var showPomodoro   = true
-    @AppStorage("settings.overview.hideAppNames")     private var hideAppNames   = false
-    @AppStorage("settings.overview.showWeather")      private var showWeather    = true
-    @AppStorage("settings.overview.pomodoroDuration") private var workMinutes    = 25
+    @AppStorage(AppStorageKeys.Overview.showApps)         private var showApps       = true
+    @AppStorage(AppStorageKeys.Overview.showTimeDate)     private var showTimeDate   = true
+    @AppStorage(AppStorageKeys.Overview.showSystemInfo)   private var showSystemInfo = true
+    @AppStorage(AppStorageKeys.Overview.showPomodoro)     private var showPomodoro   = true
+    @AppStorage(AppStorageKeys.Overview.hideAppNames)     private var hideAppNames   = false
+    @AppStorage(AppStorageKeys.Overview.showWeather)      private var showWeather    = true
+    @AppStorage(AppStorageKeys.Overview.pomodoroDuration) private var workMinutes    = 25
 
     @StateObject private var pinnedAppsStore = PinnedAppsStore()
     @StateObject private var weatherService  = WeatherService()
@@ -1425,7 +1433,7 @@ private struct OverviewAppPickerView: View {
 private struct PomodoroInlineView: View {
     enum PomodoroState { case idle, work, rest }
 
-    @AppStorage("settings.overview.pomodoroDuration") private var workMinutes = 25
+    @AppStorage(AppStorageKeys.Overview.pomodoroDuration) private var workMinutes = 25
     @State private var state: PomodoroState = .idle
     @State private var remaining: Int = 0
     @State private var timerTask: Task<Void, Never>? = nil
@@ -1536,8 +1544,8 @@ private struct MusicPlayerView: View {
     let onSkipBack: () -> Void
     let onSkipForward: () -> Void
 
-    @AppStorage("settings.music.showSkipButtons") private var showSkipButtons = true
-    @AppStorage("settings.music.showVisualizer")  private var showVisualizer  = true
+    @AppStorage(AppStorageKeys.Music.showSkipButtons) private var showSkipButtons = true
+    @AppStorage(AppStorageKeys.Music.showVisualizer)  private var showVisualizer  = true
 
     @State private var scrubProgress: Double? = nil
     @State private var isDragging = false
@@ -2075,7 +2083,7 @@ private final class CalendarStore: ObservableObject {
     @Published var version: Int = 0
     @Published var authStatus: EKAuthorizationStatus = EKEventStore.authorizationStatus(for: .event)
 
-    private let ekStore = EKEventStore()
+    private let ekStore = EKEventStore.app
     private var activeObserver: NSObjectProtocol?
     private var lastLoadedDate: Date?
 
@@ -2273,6 +2281,48 @@ final class AppLauncherStore: ObservableObject {
     }
 }
 
+// MARK: - ClickOutsideMonitor
+
+/// Detects left-clicks outside the notch window and fires a dismiss callback.
+/// Install as .background() on a view that is only in the hierarchy when dismiss-on-outside-click should be active.
+/// Automatically removed when the view is dismantled.
+private struct ClickOutsideMonitor: NSViewRepresentable {
+    let onClickOutside: () -> Void
+
+    func makeCoordinator() -> Coordinator { Coordinator() }
+
+    func makeNSView(context: Context) -> NSView {
+        let v = NSView(frame: .zero)
+        context.coordinator.start(onClickOutside: onClickOutside)
+        return v
+    }
+
+    func updateNSView(_ nsView: NSView, context: Context) {
+        context.coordinator.onClickOutside = onClickOutside
+    }
+
+    static func dismantleNSView(_ nsView: NSView, coordinator: Coordinator) {
+        coordinator.stop()
+    }
+
+    final class Coordinator {
+        var onClickOutside: (() -> Void)?
+        private var monitor: Any?
+
+        func start(onClickOutside: @escaping () -> Void) {
+            self.onClickOutside = onClickOutside
+            monitor = NSEvent.addGlobalMonitorForEvents(matching: .leftMouseDown) { [weak self] _ in
+                DispatchQueue.main.async { self?.onClickOutside?() }
+            }
+        }
+
+        func stop() {
+            if let m = monitor { NSEvent.removeMonitor(m) }
+            monitor = nil
+        }
+    }
+}
+
 // MARK: - SwipeEventMonitor
 
 /// Detects two-finger horizontal trackpad swipes via NSEvent monitoring.
@@ -2374,7 +2424,7 @@ final class PomodoroViewModel: ObservableObject {
     var timeString: String { String(format: "%02d:%02d", timeRemaining / 60, timeRemaining % 60) }
 
     init() {
-        let stored = UserDefaults.standard.integer(forKey: "settings.overview.pomodoroDuration")
+        let stored = UserDefaults.standard.integer(forKey: AppStorageKeys.Overview.pomodoroDuration)
         _workMinutes = stored > 0 ? stored : 25
         timeRemaining = _workMinutes * 60
     }
