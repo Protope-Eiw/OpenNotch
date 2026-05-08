@@ -405,7 +405,17 @@ private extension NotchView {
         }
         .frame(width: totalWidth)
         .animation(.spring(response: 0.42, dampingFraction: 0.85), value: dashboardOpen)
-        .background(Color.black)
+        .background {
+            let isMusicActive = dashboardOpen
+                && dashboardTab == .music
+                && nowPlayingViewModel.snapshot?.isPlaying == true
+            let tint = Color(nsColor: nowPlayingViewModel.artworkPalette.equalizerBaseColor)
+            ZStack {
+                Color.black
+                tint.opacity(isMusicActive ? 0.14 : 0)
+            }
+            .animation(.easeInOut(duration: 0.6), value: isMusicActive)
+        }
         .clipShape(UnevenRoundedRectangle(
             topLeadingRadius: 0,
             bottomLeadingRadius: dashboardOpen ? 16 : 9,
