@@ -5,6 +5,7 @@
 //  Created by Евгений Петрукович on 2/17/26.
 //
 
+import CoreBluetooth
 import Foundation
 import Combine
 import SwiftUI
@@ -65,6 +66,12 @@ final class BluetoothService: ObservableObject {
         #if DEBUG
         print("🎧 [BluetoothAudioManager] Initializing...")
         #endif
+        guard CBManager.authorization == .allowedAlways else {
+            #if DEBUG
+            print("🎧 [BluetoothAudioManager] Skipping hardware init — Bluetooth not yet authorized")
+            #endif
+            return
+        }
         setupBluetoothObservers()
         checkInitialDevices()
         startPollingForChanges()

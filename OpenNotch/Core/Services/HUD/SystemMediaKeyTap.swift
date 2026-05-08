@@ -83,7 +83,9 @@ final class SystemMediaKeyTap {
             return true
         }
 
-        requestAccessibilityPermissionIfNeeded()
+        guard AXIsProcessTrusted() else {
+            return false
+        }
 
         guard let systemDefinedEvent else {
             NSLog("Failed to resolve the system-defined CGEvent type.")

@@ -42,9 +42,6 @@ final class SettingsPermissionController: NSObject, ObservableObject, CBCentralM
     @Published private(set) var canCaptureScreenAudio: Bool
     @Published private(set) var calendarAuthStatus: EKAuthorizationStatus
 
-    private var didPromptForAccessibility = false
-    private var didPromptForPostEventAccess = false
-    private var didPromptForScreenCaptureAccess = false
     private var bluetoothPermissionRequester: CBCentralManager?
     private let ekStore = EKEventStore.app
     private var cancellables = Set<AnyCancellable>()
@@ -99,14 +96,8 @@ final class SettingsPermissionController: NSObject, ObservableObject, CBCentralM
                 systemImage: "hand.raised.fill",
                 tintColor: .orange,
                 isGranted: isAccessibilityTrusted,
-                actionTitleKey: isAccessibilityTrusted ? nil : (
-                    didPromptForAccessibility ?
-                    "settings.permissions.action.openPrivacySettings" :
-                    "settings.permissions.action.grantAccess"
-                ),
-                fallbackActionTitle: isAccessibilityTrusted ? nil : (
-                    didPromptForAccessibility ? "Open Privacy Settings" : "Grant Access"
-                ),
+                actionTitleKey: isAccessibilityTrusted ? nil : "settings.permissions.action.grantAccess",
+                fallbackActionTitle: isAccessibilityTrusted ? nil : "Grant Access",
                 accessibilityIdentifier: "settings.permissions.accessibility"
             ),
             PermissionItem(
@@ -133,14 +124,8 @@ final class SettingsPermissionController: NSObject, ObservableObject, CBCentralM
                 systemImage: "music.note",
                 tintColor: .pink,
                 isGranted: canPostMediaKeyEvents,
-                actionTitleKey: canPostMediaKeyEvents ? nil : (
-                    didPromptForPostEventAccess ?
-                    "settings.permissions.action.openPrivacySettings" :
-                    "settings.permissions.action.grantAccess"
-                ),
-                fallbackActionTitle: canPostMediaKeyEvents ? nil : (
-                    didPromptForPostEventAccess ? "Open Privacy Settings" : "Grant Access"
-                ),
+                actionTitleKey: canPostMediaKeyEvents ? nil : "settings.permissions.action.grantAccess",
+                fallbackActionTitle: canPostMediaKeyEvents ? nil : "Grant Access",
                 accessibilityIdentifier: "settings.permissions.mediaControls"
             ),
             PermissionItem(
@@ -153,14 +138,8 @@ final class SettingsPermissionController: NSObject, ObservableObject, CBCentralM
                 systemImage: "record.circle",
                 tintColor: .red,
                 isGranted: canCaptureScreenAudio,
-                actionTitleKey: canCaptureScreenAudio ? nil : (
-                    didPromptForScreenCaptureAccess ?
-                    "settings.permissions.action.openPrivacySettings" :
-                    "settings.permissions.action.grantAccess"
-                ),
-                fallbackActionTitle: canCaptureScreenAudio ? nil : (
-                    didPromptForScreenCaptureAccess ? "Open Privacy Settings" : "Grant Access"
-                ),
+                actionTitleKey: canCaptureScreenAudio ? nil : "settings.permissions.action.grantAccess",
+                fallbackActionTitle: canCaptureScreenAudio ? nil : "Grant Access",
                 accessibilityIdentifier: "settings.permissions.screenRecording"
             ),
             PermissionItem(
@@ -203,65 +182,48 @@ final class SettingsPermissionController: NSObject, ObservableObject, CBCentralM
 
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
         refresh()
+        scheduleDelayedRefresh()
     }
 
     private func requestAccessibilityAccess() {
-        guard !Self.currentAccessibilityTrustState() else {
-            refresh()
-            return
-        }
-
-        if !didPromptForAccessibility {
-            didPromptForAccessibility = true
-
-            #if canImport(ApplicationServices)
-            let promptKey = kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String
-            let options = [promptKey: true] as CFDictionary
-            _ = AXIsProcessTrustedWithOptions(options)
-            #endif
-        } else {
-            Self.openPrivacySettings()
-        }
-
-        refresh()
+        guard !Self.currentAccessibilityTrustState() else { refresh(); return }
+        #if canImport(ApplicationServices)
+        let promptKey = kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String
+        _ = AXIsProcessTrustedWithOptions([promptKey: true] as CFDictionary)
+        #endif
+        scheduleDelayedRefresh()
     }
 
     private func requestPostEventAccess() {
-        guard !Self.currentPostEventAccessState() else {
-            refresh()
-            return
-        }
-
-        if !didPromptForPostEventAccess {
-            didPromptForPostEventAccess = true
-
-            #if canImport(ApplicationServices)
-            _ = CGRequestPostEventAccess()
-            #endif
-        } else {
-            Self.openPrivacySettings()
-        }
-
-        refresh()
+        guard !Self.currentPostEventAccessState() else { refresh(); return }
+        #if canImport(ApplicationServices)
+        _ = CGRequestPostEventAccess()
+        #endif
+        scheduleDelayedRefresh()
     }
 
     private func requestScreenCaptureAccess() {
-        guard !Self.currentScreenCaptureAccessState() else {
-            refresh()
-            return
+        guard !Self.currentScreenCaptureAccessState() else { refresh(); return }
+        #if canImport(ApplicationServices)
+        _ = CGRequestScreenCaptureAccess()
+        #endif
+        scheduleDelayedRefresh()
+    }
+
+    private func scheduleDelayedRefresh() {
+        Task { @MainActor in
+            for _ in 0..<20 {
+                try? await Task.sleep(for: .milliseconds(500))
+                let before = (isAccessibilityTrusted, canPostMediaKeyEvents, canCaptureScreenAudio,
+                              bluetoothAuthorization, calendarAuthStatus)
+                refresh()
+                let after = (isAccessibilityTrusted, canPostMediaKeyEvents, canCaptureScreenAudio,
+                             bluetoothAuthorization, calendarAuthStatus)
+                let changed = before.0 != after.0 || before.1 != after.1 || before.2 != after.2
+                    || before.3 != after.3 || before.4 != after.4
+                if changed { break }
+            }
         }
-
-        if !didPromptForScreenCaptureAccess {
-            didPromptForScreenCaptureAccess = true
-
-            #if canImport(ApplicationServices)
-            _ = CGRequestScreenCaptureAccess()
-            #endif
-        } else {
-            Self.openScreenCapturePrivacySettings()
-        }
-
-        refresh()
     }
 
     private var bluetoothActionTitleKey: String? {
@@ -328,17 +290,16 @@ final class SettingsPermissionController: NSObject, ObservableObject, CBCentralM
         let status = EKEventStore.authorizationStatus(for: .event)
         guard status == .notDetermined else {
             Self.openCalendarPrivacySettings()
-            refresh()
+            scheduleDelayedRefresh()
             return
         }
         Task {
             do {
                 let granted = try await ekStore.requestFullAccessToEvents()
-                // Trust return value directly — TCC database can lag behind.
                 calendarAuthStatus = granted ? .fullAccess : .denied
             } catch {
                 Self.openCalendarPrivacySettings()
-                refresh()
+                scheduleDelayedRefresh()
             }
         }
     }
