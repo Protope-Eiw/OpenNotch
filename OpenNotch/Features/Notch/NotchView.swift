@@ -312,10 +312,6 @@ private extension NotchView {
                     Spacer(minLength: 0)
                     ZStack(alignment: .trailing) {
                         pillRightWidgetView
-                        .onTapGesture {
-                            openWindow(id: WindowsScene.settings)
-                            SettingsWindowCoordinator.activate()
-                        }
                         .contextMenu { contextMenuItem }
                         .opacity(dashboardOpen ? 0 : 1)
                         .scaleEffect(dashboardOpen ? 0.72 : 1, anchor: .trailing)
