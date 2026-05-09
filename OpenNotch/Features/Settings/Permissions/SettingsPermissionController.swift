@@ -68,8 +68,19 @@ final class SettingsPermissionController: NSObject, ObservableObject, CBCentralM
 
         super.init()
 
+        // Refresh when app regains focus
         notificationCenter.publisher(for: NSApplication.didBecomeActiveNotification)
             .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.refresh()
+            }
+            .store(in: &cancellables)
+
+        // Poll every 2s while settings window is open — TCC state can lag behind
+        // NSApplication.didBecomeActiveNotification and the app may never lose focus
+        // if the user keeps both windows visible side by side.
+        Timer.publish(every: 2, on: .main, in: .common)
+            .autoconnect()
             .sink { [weak self] _ in
                 self?.refresh()
             }

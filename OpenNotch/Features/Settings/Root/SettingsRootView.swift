@@ -90,7 +90,6 @@ struct SettingsRootView: View {
         }
         .accessibilityIdentifier("settings.root")
         .environment(\.locale, settingsViewModel.application.appLanguage.locale)
-        .preferredColorScheme(settingsViewModel.application.appearanceMode.preferredColorScheme)
     }
 
     // MARK: - Icon Sidebar
