@@ -23,7 +23,7 @@ enum LockScreenSettings {
     }
 
     static func isSoundEnabled(in defaults: UserDefaults = .standard) -> Bool {
-        resolvedBoolean(forKey: soundKey, defaultValue: true, in: defaults)
+        resolvedBoolean(forKey: soundKey, defaultValue: false, in: defaults)
     }
 
     static func legacyCustomSoundPath(in defaults: UserDefaults = .standard) -> String? {

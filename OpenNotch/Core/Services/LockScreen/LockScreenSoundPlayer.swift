@@ -4,11 +4,15 @@ import Foundation
 protocol LockScreenSoundPlaying: AnyObject {
     func playLock()
     func playUnlock()
+    func stopAll()
+    func prewarm()
 }
 
 final class InactiveLockScreenSoundPlayer: LockScreenSoundPlaying {
     func playLock() {}
     func playUnlock() {}
+    func stopAll() {}
+    func prewarm() {}
 }
 
 final class LockScreenSoundPlayer: LockScreenSoundPlaying {
@@ -17,7 +21,7 @@ final class LockScreenSoundPlayer: LockScreenSoundPlaying {
         case unlock = "OpenNotch_unlock"
 
         var fileName: String {
-            rawValue + ".mp3"
+            rawValue + ".aiff"
         }
     }
 
@@ -38,6 +42,16 @@ final class LockScreenSoundPlayer: LockScreenSoundPlaying {
 
     func playUnlock() {
         play(.unlock)
+    }
+
+    func stopAll() {
+        players.values.forEach { $0.stop() }
+        customPlayers.values.forEach { $0.stop() }
+    }
+
+    func prewarm() {
+        _ = player(for: .lock)
+        _ = player(for: .unlock)
     }
 }
 
@@ -122,14 +136,17 @@ private extension LockScreenSoundPlayer {
 
     private func soundURL(for asset: SoundAsset) -> URL? {
         let subdirectories = [nil, "Sounds", "Resources", "Resources/Sounds"]
+        let extensions = ["aiff", "mp3", "wav", "caf", "m4a"]
 
-        for subdirectory in subdirectories {
-            if let url = bundle.url(
-                forResource: asset.rawValue,
-                withExtension: "mp3",
-                subdirectory: subdirectory
-            ) {
-                return url
+        for ext in extensions {
+            for subdirectory in subdirectories {
+                if let url = bundle.url(
+                    forResource: asset.rawValue,
+                    withExtension: ext,
+                    subdirectory: subdirectory
+                ) {
+                    return url
+                }
             }
         }
 
@@ -146,7 +163,7 @@ private extension LockScreenSoundPlayer {
         }
 
         while let candidateURL = enumerator.nextObject() as? URL {
-            if candidateURL.lastPathComponent == asset.fileName {
+            if candidateURL.deletingPathExtension().lastPathComponent == asset.rawValue {
                 return candidateURL
             }
         }

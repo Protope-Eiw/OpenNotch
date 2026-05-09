@@ -44,6 +44,7 @@ final class LockScreenManager: ObservableObject {
         hasStartedMonitoring = true
         service.startMonitoring()
         registerWorkspaceObservers()
+        soundPlayer.prewarm()
     }
 
     func stopMonitoring() {
@@ -114,6 +115,12 @@ final class LockScreenManager: ObservableObject {
         unlockWorkItem = nil
         isPreparingLock = true
         isLockIdle = false
+
+        // Play lock sound NOW while the audio session is still active.
+        // Waiting for screenIsLocked fires too late — audio is already suspended.
+        if LockScreenSettings.isSoundEnabled(in: defaults) {
+            soundPlayer.playLock()
+        }
     }
 
     private func handleSessionDidBecomeActive() {
@@ -134,9 +141,7 @@ final class LockScreenManager: ObservableObject {
         unlockWorkItem = nil
 
         if locked {
-            if LockScreenSettings.isSoundEnabled(in: defaults) {
-                soundPlayer.playLock()
-            }
+            // Lock sound already played in handleSessionDidResignActive
             isPreparingLock = false
             isLocked = true
             isLockIdle = false
@@ -145,6 +150,8 @@ final class LockScreenManager: ObservableObject {
         }
 
         if LockScreenSettings.isSoundEnabled(in: defaults) {
+            // Stop any buffered lock sound that never played, then play unlock
+            soundPlayer.stopAll()
             soundPlayer.playUnlock()
         }
         isLocked = false

@@ -55,6 +55,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         applyActivationPolicy(
             showsDockIcon: isRunningUITests || settingsViewModel.application.isDockIconVisible
         )
+        observeAppearanceModeChanges()
         observeDisplayLocationChanges()
         observeFullscreenVisibilityChanges()
         observeDockIconVisibilityChanges()

@@ -73,6 +73,19 @@ extension AppDelegate {
             .store(in: &cancellables)
     }
 
+    func observeAppearanceModeChanges() {
+        settingsViewModel.application.$appearanceMode
+            .removeDuplicates()
+            .sink { mode in
+                switch mode {
+                case .system: NSApp.appearance = nil
+                case .light:  NSApp.appearance = NSAppearance(named: .aqua)
+                case .dark:   NSApp.appearance = NSAppearance(named: .darkAqua)
+                }
+            }
+            .store(in: &cancellables)
+    }
+
     func observeDisplayLocationChanges() {
         Publishers.CombineLatest3(
             settingsViewModel.application.$displayLocation.removeDuplicates(),

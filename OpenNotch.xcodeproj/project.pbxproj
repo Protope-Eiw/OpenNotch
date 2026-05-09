@@ -56,8 +56,8 @@
 				Resources/LottieImage/confirm.json,
 				Resources/LottieImage/star.json,
 				Resources/LottieImage/telegram.json,
-				Resources/Sounds/OpenNotch_lock.mp3,
-				Resources/Sounds/OpenNotch_unlock.mp3,
+				Resources/Sounds/OpenNotch_lock.aiff,
+				Resources/Sounds/OpenNotch_unlock.aiff,
 			);
 			target = F10000000000000000000006 /* OpenNotchTests */;
 		};
@@ -67,8 +67,8 @@
 				Resources/LottieImage/confirm.json,
 				Resources/LottieImage/star.json,
 				Resources/LottieImage/telegram.json,
-				Resources/Sounds/OpenNotch_lock.mp3,
-				Resources/Sounds/OpenNotch_unlock.mp3,
+				Resources/Sounds/OpenNotch_lock.aiff,
+				Resources/Sounds/OpenNotch_unlock.aiff,
 			);
 			target = F20000000000000000000006 /* OpenNotchUITests */;
 		};

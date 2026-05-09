@@ -182,7 +182,6 @@ final class SettingsPermissionController: NSObject, ObservableObject, CBCentralM
 
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
         refresh()
-        scheduleDelayedRefresh()
     }
 
     private func requestAccessibilityAccess() {
@@ -212,17 +211,8 @@ final class SettingsPermissionController: NSObject, ObservableObject, CBCentralM
 
     private func scheduleDelayedRefresh() {
         Task { @MainActor in
-            for _ in 0..<20 {
-                try? await Task.sleep(for: .milliseconds(500))
-                let before = (isAccessibilityTrusted, canPostMediaKeyEvents, canCaptureScreenAudio,
-                              bluetoothAuthorization, calendarAuthStatus)
-                refresh()
-                let after = (isAccessibilityTrusted, canPostMediaKeyEvents, canCaptureScreenAudio,
-                             bluetoothAuthorization, calendarAuthStatus)
-                let changed = before.0 != after.0 || before.1 != after.1 || before.2 != after.2
-                    || before.3 != after.3 || before.4 != after.4
-                if changed { break }
-            }
+            try? await Task.sleep(for: .milliseconds(500))
+            refresh()
         }
     }
 
@@ -290,16 +280,17 @@ final class SettingsPermissionController: NSObject, ObservableObject, CBCentralM
         let status = EKEventStore.authorizationStatus(for: .event)
         guard status == .notDetermined else {
             Self.openCalendarPrivacySettings()
-            scheduleDelayedRefresh()
+            refresh()
             return
         }
         Task {
             do {
                 let granted = try await ekStore.requestFullAccessToEvents()
+                // Trust return value directly — TCC database can lag behind.
                 calendarAuthStatus = granted ? .fullAccess : .denied
             } catch {
                 Self.openCalendarPrivacySettings()
-                scheduleDelayedRefresh()
+                refresh()
             }
         }
     }
