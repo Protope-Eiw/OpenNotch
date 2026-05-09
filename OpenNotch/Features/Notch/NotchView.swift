@@ -339,7 +339,7 @@ private extension NotchView {
 
                         // Placeholder — maintains ZStack width for layout
                         Color.clear
-                            .frame(width: 220, height: 28)
+                            .frame(maxWidth: 220, minHeight: 28)
                             .opacity(dashboardOpen ? 1 : 0)
 
                         // Search bar — only in view hierarchy when apps tab is active (avoids NSTextField I-beam cursor on other tabs)
