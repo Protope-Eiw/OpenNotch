@@ -8293,7 +8293,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "dejar de fumar"
+            "value" : "Salir"
           }
         },
         "ru" : {
@@ -8305,7 +8305,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "戒烟"
+            "value" : "退出"
           }
         }
       }
