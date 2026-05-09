@@ -337,32 +337,37 @@ private extension NotchView {
                         .scaleEffect(dashboardOpen && dashboardTab != .apps ? 1 : 0.72, anchor: .trailing)
                         .allowsHitTesting(dashboardOpen && dashboardTab != .apps)
 
-                        // Search bar — visible when apps tab is active
-                        HStack(spacing: 5) {
-                            Image(systemName: "magnifyingglass")
-                                .font(.system(size: 11))
-                                .foregroundStyle(.white.opacity(0.45))
-                            TextField("Search apps", text: $appSearchText)
-                                .textFieldStyle(.plain)
-                                .font(.system(size: 12))
-                                .foregroundStyle(.white)
-                            if !appSearchText.isEmpty {
-                                Button { appSearchText = "" } label: {
-                                    Image(systemName: "xmark.circle.fill")
-                                        .font(.system(size: 11))
-                                        .foregroundStyle(.white.opacity(0.45))
+                        // Placeholder — maintains ZStack width for layout
+                        Color.clear
+                            .frame(width: 220, height: 28)
+                            .opacity(dashboardOpen ? 1 : 0)
+
+                        // Search bar — only in view hierarchy when apps tab is active (avoids NSTextField I-beam cursor on other tabs)
+                        if dashboardOpen && dashboardTab == .apps {
+                            HStack(spacing: 5) {
+                                Image(systemName: "magnifyingglass")
+                                    .font(.system(size: 11))
+                                    .foregroundStyle(.white.opacity(0.45))
+                                TextField("Search apps", text: $appSearchText)
+                                    .textFieldStyle(.plain)
+                                    .font(.system(size: 12))
+                                    .foregroundStyle(.white)
+                                if !appSearchText.isEmpty {
+                                    Button { appSearchText = "" } label: {
+                                        Image(systemName: "xmark.circle.fill")
+                                            .font(.system(size: 11))
+                                            .foregroundStyle(.white.opacity(0.45))
+                                    }
+                                    .buttonStyle(.plain)
                                 }
-                                .buttonStyle(.plain)
                             }
+                            .padding(.horizontal, 9)
+                            .padding(.vertical, 5)
+                            .frame(maxWidth: 220)
+                            .background(Color.white.opacity(0.1))
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                            .transition(.opacity)
                         }
-                        .padding(.horizontal, 9)
-                        .padding(.vertical, 5)
-                        .frame(maxWidth: 220)
-                        .background(Color.white.opacity(0.1))
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                        .opacity(dashboardOpen && dashboardTab == .apps ? 1 : 0)
-                        .scaleEffect(dashboardOpen && dashboardTab == .apps ? 1 : 0.72, anchor: .trailing)
-                        .allowsHitTesting(dashboardOpen && dashboardTab == .apps)
                     }
                     .animation(spring, value: dashboardOpen)
                     .animation(spring, value: dashboardTab == .apps)
