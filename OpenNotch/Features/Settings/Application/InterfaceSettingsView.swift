@@ -223,7 +223,7 @@ struct InterfaceSettingsView: View {
                     Text(localized("settings.interface.overview.workDuration", fallback: "Work Duration"))
                         .font(.system(size: 13, weight: .medium))
                     Spacer()
-                    Text(localized("settings.interface.overview.workDurationValue", fallback: "\(applicationSettings.overviewPomodoroDuration) min"))
+                    Text(applicationSettings.appLanguage.locale.dnFormat("settings.interface.overview.workDurationValue", fallback: "%lld min", Int64(applicationSettings.overviewPomodoroDuration)))
                         .font(.system(size: 13))
                         .foregroundStyle(.secondary)
                     Stepper("", value: $applicationSettings.overviewPomodoroDuration, in: 1...120)

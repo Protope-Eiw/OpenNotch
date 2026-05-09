@@ -23,7 +23,7 @@ struct DownloadsSettingsView: View {
     private let previewDownload = DownloadSettingsPreviewModel.settingsPreview
     
     private var speedLabel: String {
-        guard previewDownload.bytesPerSecond > 0 else { return "0 KB/s" }
+        guard previewDownload.bytesPerSecond > 0 else { return localized("settings.downloads.speed.zero", fallback: "0 KB/s") }
         return "\(Self.byteCountFormatter.string(fromByteCount: previewDownload.bytesPerSecond))/s"
     }
     

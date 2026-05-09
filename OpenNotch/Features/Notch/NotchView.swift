@@ -219,6 +219,7 @@ private extension NotchView {
                         openWindow(id: WindowsScene.settings)
                         SettingsWindowCoordinator.activate()
                     }
+                    .contextMenu { contextMenuItem }
                     .opacity(dashboardOpen ? 0 : 1)
                     .scaleEffect(dashboardOpen ? 0.72 : 1, anchor: .leading)
                     .allowsHitTesting(!dashboardOpen)
@@ -315,6 +316,7 @@ private extension NotchView {
                             openWindow(id: WindowsScene.settings)
                             SettingsWindowCoordinator.activate()
                         }
+                        .contextMenu { contextMenuItem }
                         .opacity(dashboardOpen ? 0 : 1)
                         .scaleEffect(dashboardOpen ? 0.72 : 1, anchor: .trailing)
                         .allowsHitTesting(!dashboardOpen)
@@ -680,20 +682,24 @@ private extension NotchView {
             SettingsWindowCoordinator.activate()
         } label: {
             Image(systemName: "gearshape")
-            Text(verbatim: "Settings")
+            Text(verbatim: localizedContextMenu("Settings", fallback: "Settings"))
         }
         
         Divider()
         
         Button(action: { AppRelauncher.restartApp() }) {
             Image(systemName: "arrow.trianglehead.2.counterclockwise.rotate.90")
-            Text(verbatim: "Restart")
+            Text(verbatim: localizedContextMenu("Restart", fallback: "Restart"))
         }
         
         Button(action: { NSApp.terminate(nil) }) {
             Image(systemName: "rectangle.portrait.and.arrow.right")
-            Text(verbatim: "Quit")
+            Text(verbatim: localizedContextMenu("Quit", fallback: "Quit"))
         }
+    }
+    
+    private func localizedContextMenu(_ key: String, fallback: String) -> String {
+        settingsViewModel.application.appLanguage.locale.dn(key, fallback: fallback)
     }
 }
 

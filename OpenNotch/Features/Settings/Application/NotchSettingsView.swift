@@ -29,10 +29,10 @@ struct NotchSettingsView: View {
     // MARK: - Notch Bar Display
 
     private var notchBarDisplayCard: some View {
-        SettingsCard(title: localized("Notch Bar Display")) {
+        SettingsCard(title: localized("settings.notch.barDisplay.title", fallback: "Notch Bar Display")) {
             SettingsToggleRow(
-                title: localized("不显示组件"),
-                description: localized("隐藏刘海左右两侧的所有 widget。"),
+                title: localized("settings.notch.hideWidgets.title", fallback: "Hide Widgets"),
+                description: localized("settings.notch.hideWidgets.description", fallback: "Hide all widgets on both sides of the notch."),
                 systemImage: "eye.slash",
                 color: .gray,
                 isOn: Binding(
@@ -44,9 +44,9 @@ struct NotchSettingsView: View {
 
             VStack(spacing: 0) {
                 SettingsDivider()
-                widgetSelector(label: "左侧", storage: $leftWidgetsRaw)
+                widgetSelector(label: localized("settings.notch.leftSide", fallback: "Left"), storage: $leftWidgetsRaw)
                 SettingsDivider()
-                widgetSelector(label: "右侧", storage: $rightWidgetsRaw, topPadding: 4)
+                widgetSelector(label: localized("settings.notch.rightSide", fallback: "Right"), storage: $rightWidgetsRaw, topPadding: 4)
             }
             .opacity(hideWidgets ? 0 : 1)
             .frame(maxHeight: hideWidgets ? 0 : .infinity, alignment: .top)
@@ -96,7 +96,7 @@ struct NotchSettingsView: View {
                 }
             }
             .frame(width: 62, height: 52)
-            Text(widget.displayName)
+            Text(localized("settings.notch.widget.\(widget.rawValue)", fallback: widget.displayName))
                 .font(.system(size: 10))
                 .foregroundStyle(selected ? .primary : .secondary)
         }
@@ -109,7 +109,7 @@ struct NotchSettingsView: View {
                 .stroke(color, style: StrokeStyle(lineWidth: 2, lineCap: .round))
                 .rotationEffect(.degrees(-90))
             VStack(spacing: 0) {
-                Text(localized("\(Int(fraction * 100))")).font(.system(size: 7, weight: .bold, design: .monospaced))
+                Text("\(Int(fraction * 100))").font(.system(size: 7, weight: .bold, design: .monospaced))
                 Text(label).font(.system(size: 5.5)).foregroundStyle(.secondary)
             }
         }

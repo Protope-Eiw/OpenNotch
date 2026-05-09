@@ -294,11 +294,11 @@ struct BatterySettingsView: View {
 
             HStack {
                 if kind == .low {
-                    Text(verbatim: "Low Battery")
+                    Text(localized("settings.battery.preview.lowBattery", fallback: "Low Battery"))
                         .foregroundStyle(.white.opacity(0.8))
                         .lineLimit(1)
                 } else {
-                    Text(verbatim: "Full Battery")
+                    Text(localized("settings.battery.preview.fullBattery", fallback: "Full Battery"))
                         .foregroundStyle(.white.opacity(0.8))
                         .lineLimit(1)
                 }
@@ -306,7 +306,7 @@ struct BatterySettingsView: View {
                 Spacer(minLength: 8)
 
                 HStack(spacing: 6) {
-                    Text(localized("\(batteryLevel)%"))
+                    Text("\(batteryLevel)%")
                         .font(.system(size: 12, weight: .medium, design: .rounded))
                         .foregroundStyle(tint)
 
@@ -326,18 +326,18 @@ struct BatterySettingsView: View {
     private func batteryStandardTitle(for kind: BatteryNotificationPreviewKind) -> some View {
         HStack(spacing: 5) {
             if kind == .low {
-                Text(verbatim: "Battery Low")
+                Text(localized("settings.battery.preview.batteryLow", fallback: "Battery Low"))
                     .font(.system(size: 10.5, weight: .semibold))
                     .foregroundStyle(.white.opacity(0.82))
                     .lineLimit(1)
             } else {
-                Text(verbatim: "Full Battery")
+                Text(localized("settings.battery.preview.fullBattery", fallback: "Full Battery"))
                     .font(.system(size: 10.5, weight: .semibold))
                     .foregroundStyle(.white.opacity(0.82))
                     .lineLimit(1)
             }
 
-            Text(kind == .low ? "20%" : "100%")
+            Text(kind == .low ? localized("settings.battery.preview.lowPercent", fallback: "20%") : localized("settings.battery.preview.fullPercent", fallback: "100%"))
                 .font(.system(size: kind == .low ? 10 : 10.5, weight: .semibold))
                 .foregroundStyle(kind == .low ? .red : .green)
         }

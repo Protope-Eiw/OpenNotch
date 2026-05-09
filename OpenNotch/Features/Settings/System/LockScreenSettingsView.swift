@@ -233,7 +233,7 @@ struct LockScreenSettingsView: View {
                     .accessibilityIdentifier("\(kind.accessibilityIdentifier).reset")
                 }
 
-                Button(hasCustomSound(for: kind) ? "Change" : "Choose") {
+                Button(hasCustomSound(for: kind) ? localized("settings.lockscreen.sound.change", fallback: "Change") : localized("settings.lockscreen.sound.choose", fallback: "Choose")) {
                     selectCustomSound(for: kind)
                 }
                 .buttonStyle(.borderedProminent)
