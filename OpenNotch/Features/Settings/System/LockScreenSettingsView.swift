@@ -26,10 +26,10 @@ struct LockScreenSettingsView: View {
     }
     
     private var lockScreenActivity: some View {
-        SettingsCard(title: "Lock screen activity") {
+        SettingsCard(title: localized("Lock screen activity")) {
             SettingsToggleRow(
-                title: "Lock screen live activity",
-                description: "Show the lock-screen live activity during lock and unlock transitions.",
+                title: localized("Lock screen live activity"),
+                description: localized("Show the lock-screen live activity during lock and unlock transitions."),
                 systemImage: "lock.fill",
                 color: .black,
                 isOn: $settings.isLockScreenLiveActivityEnabled,
@@ -42,8 +42,8 @@ struct LockScreenSettingsView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
             
             SettingsToggleRow(
-                title: "Lock screen media panel",
-                description: "Show the detached media panel on the lock screen while playback is active.",
+                title: localized("Lock screen media panel"),
+                description: localized("Show the detached media panel on the lock screen while playback is active."),
                 systemImage: "play.rectangle.fill",
                 color: .pink,
                 isOn: $settings.isLockScreenMediaPanelEnabled,
@@ -53,11 +53,11 @@ struct LockScreenSettingsView: View {
     }
     
     private var notchAppearance: some View {
-        SettingsCard(title: "Notch appearance") {
+        SettingsCard(title: localized("Notch appearance")) {
             CustomPicker(
                 selection: $settings.lockScreenStyle,
                 options: Array(LockScreenStyle.allCases),
-                title: { $0.title },
+                title: { localized($0.title) },
                 lightBackgroundImage: Image("backgroundLight"),
                 darkBackgroundImage: Image("backgroundDark")
             ) { style, isSelected in
@@ -68,8 +68,8 @@ struct LockScreenSettingsView: View {
             SettingsDivider()
 
             SettingsToggleRow(
-                title: "Lock screen sound",
-                description: "Play a sound when locking or unlocking your Mac.",
+                title: localized("Lock screen sound"),
+                description: localized("Play a sound when locking or unlocking your Mac."),
                 systemImage: "speaker.wave.2.fill",
                 color: .red,
                 isOn: $settings.isLockScreenSoundEnabled,
@@ -92,11 +92,11 @@ struct LockScreenSettingsView: View {
     }
     
     private var widgetAppearance: some View {
-        SettingsCard(title: "Widget appearance") {
+        SettingsCard(title: localized("Widget appearance")) {
             CustomPicker(
                 selection: $settings.widgetAppearanceStyle,
                 options: LockScreenWidgetAppearanceStyle.availableOptions,
-                title: { $0.title },
+                title: { localized($0.title) },
                 itemHeight: 128,
                 lightBackgroundImage: Image("backgroundLight"),
                 darkBackgroundImage: Image("backgroundDark")
@@ -108,10 +108,10 @@ struct LockScreenSettingsView: View {
             SettingsDivider()
             
             SettingsMenuRow(
-                title: "Media panel background",
-                description: "Choose which background will be displayed when playing media.",
+                title: localized("Media panel background"),
+                description: localized("Choose which background will be displayed when playing media."),
                 options: Array(LockScreenMediaPanelBackgroundStyle.allCases),
-                optionTitle: { $0.title },
+                optionTitle: { localized($0.title) },
                 accessibilityIdentifier: "settings.general.hud.indicatorStyle",
                 selection: $settings.mediaPanelBackgroundStyle
             )
@@ -120,8 +120,8 @@ struct LockScreenSettingsView: View {
             SettingsDivider()
             
             SettingsToggleRow(
-                title: "Accent tint",
-                description: "Blend the app accent color into the lock-screen widget background.",
+                title: localized("Accent tint"),
+                description: localized("Blend the app accent color into the lock-screen widget background."),
                 systemImage: "paintpalette.fill",
                 color: .accentColor,
                 isOn: Binding(
@@ -134,8 +134,8 @@ struct LockScreenSettingsView: View {
             SettingsDivider()
 
             SettingsSliderRow(
-                title: "Background brightness",
-                description: "Brighten or darken the widget background without changing the selected material style.",
+                title: localized("Background brightness"),
+                description: localized("Brighten or darken the widget background without changing the selected material style."),
                 range: LockScreenSettings.widgetBackgroundBrightnessRange.lowerBound * 100...LockScreenSettings.widgetBackgroundBrightnessRange.upperBound * 100,
                 step: 5,
                 fractionLength: 0,
@@ -182,7 +182,8 @@ struct LockScreenSettingsView: View {
         LockScreenWidgetAppearancePickerPreview(
             style: style,
             tintStyle: settings.widgetTintStyle,
-            backgroundBrightness: settings.widgetBackgroundBrightness
+            backgroundBrightness: settings.widgetBackgroundBrightness,
+            applicationSettings: applicationSettings
         )
         .scaleEffect(isSelected ? 1 : 0.97)
     }
@@ -224,7 +225,7 @@ struct LockScreenSettingsView: View {
 
             HStack(spacing: 8) {
                 if hasCustomSound(for: kind) {
-                    Button("Reset") {
+                    Button(localized("Reset")) {
                         resetCustomSoundSelection(for: kind)
                     }
                     .buttonStyle(.bordered)
@@ -374,11 +375,16 @@ private struct LockScreenWidgetAppearancePickerPreview: View {
     let style: LockScreenWidgetAppearanceStyle
     let tintStyle: LockScreenWidgetTintStyle
     let backgroundBrightness: Double
+    let applicationSettings: ApplicationSettingsStore
 
     private let panelSize = CGSize(width: 380, height: 228)
     private let panelCornerRadius: CGFloat = 34
     private let previewScale: CGFloat = 0.34
     private let progress: CGFloat = 81.0 / 214.0
+
+    private func localized(_ key: String, fallback: String? = nil) -> String {
+        applicationSettings.appLanguage.locale.dn(key, fallback: fallback ?? key)
+    }
 
     var body: some View {
         ZStack {
@@ -395,7 +401,7 @@ private struct LockScreenWidgetAppearancePickerPreview: View {
 
                     VStack(alignment: .leading, spacing: 3) {
                         HStack(alignment: .center, spacing: 10) {
-                            Text("Midnight Echoes")
+                            Text(localized("Midnight Echoes"))
                                 .font(.system(size: 18, weight: .medium))
                                 .foregroundStyle(.white.opacity(0.82))
                                 .lineLimit(1)
@@ -405,7 +411,7 @@ private struct LockScreenWidgetAppearancePickerPreview: View {
                             previewEqualizer
                         }
 
-                        Text("Debug Ensemble")
+                        Text(localized("Debug Ensemble"))
                             .font(.system(size: 15))
                             .foregroundStyle(.white.opacity(0.5))
                             .lineLimit(1)
@@ -415,13 +421,13 @@ private struct LockScreenWidgetAppearancePickerPreview: View {
                 Spacer()
 
                 HStack(spacing: 10) {
-                    Text("1:21")
+                    Text(localized("1:21"))
                         .font(.system(size: 12, weight: .medium, design: .rounded))
                         .foregroundStyle(.white.opacity(0.4))
 
                     previewProgressBar
 
-                    Text("3:34")
+                    Text(localized("3:34"))
                         .font(.system(size: 12, weight: .medium, design: .rounded))
                         .foregroundStyle(.white.opacity(0.4))
                 }

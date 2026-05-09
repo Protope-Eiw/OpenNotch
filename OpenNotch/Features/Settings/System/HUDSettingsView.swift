@@ -23,10 +23,10 @@ struct HUDSettingsView: View {
     }
     
     private var hudActivity: some View {
-        SettingsCard(title: "HUD activity") {
+        SettingsCard(title: localized("HUD activity")) {
             SettingsToggleRow(
-                title: "Brightness HUD",
-                description: "Replace the system brightness HUD with OpenNotch HUD.",
+                title: localized("Brightness HUD"),
+                description: localized("Replace the system brightness HUD with OpenNotch HUD."),
                 systemImage: "sun.max.fill",
                 color: .orange,
                 isOn: $settings.isBrightnessHUDEnabled,
@@ -38,8 +38,8 @@ struct HUDSettingsView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
             
             SettingsToggleRow(
-                title: "Keyboard HUD",
-                description: "Replace the keyboard backlight HUD with OpenNotch HUD.",
+                title: localized("Keyboard HUD"),
+                description: localized("Replace the keyboard backlight HUD with OpenNotch HUD."),
                 systemImage: "light.max",
                 color: .orange,
                 isOn: $settings.isKeyboardHUDEnabled,
@@ -51,8 +51,8 @@ struct HUDSettingsView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
             
             SettingsToggleRow(
-                title: "Volume HUD",
-                description: "Replace the system volume HUD with OpenNotch HUD.",
+                title: localized("Volume HUD"),
+                description: localized("Replace the system volume HUD with OpenNotch HUD."),
                 systemImage: "speaker.wave.2.fill",
                 color: .orange,
                 isOn: $settings.isVolumeHUDEnabled,
@@ -62,10 +62,10 @@ struct HUDSettingsView: View {
     }
 
     private var hudDuration: some View {
-        SettingsCard(title: "HUD duration") {
+        SettingsCard(title: localized("HUD duration")) {
             SettingsSliderRow(
-                title: "Brightness duration",
-                description: "Choose how long the brightness HUD stays visible.",
+                title: localized("Brightness duration"),
+                description: localized("Choose how long the brightness HUD stays visible."),
                 range: temporaryActivityDurationRange,
                 step: 1,
                 fractionLength: 0,
@@ -82,8 +82,8 @@ struct HUDSettingsView: View {
             SettingsDivider()
 
             SettingsSliderRow(
-                title: "Keyboard duration",
-                description: "Choose how long the keyboard backlight HUD stays visible.",
+                title: localized("Keyboard duration"),
+                description: localized("Choose how long the keyboard backlight HUD stays visible."),
                 range: temporaryActivityDurationRange,
                 step: 1,
                 fractionLength: 0,
@@ -100,8 +100,8 @@ struct HUDSettingsView: View {
             SettingsDivider()
 
             SettingsSliderRow(
-                title: "Volume duration",
-                description: "Choose how long the volume HUD stays visible.",
+                title: localized("Volume duration"),
+                description: localized("Choose how long the volume HUD stays visible."),
                 range: temporaryActivityDurationRange,
                 step: 1,
                 fractionLength: 0,
@@ -118,11 +118,11 @@ struct HUDSettingsView: View {
     }
     
     private var hudStyleCard: some View {
-        SettingsCard(title: "HUD appearance") {
+        SettingsCard(title: localized("HUD appearance")) {
             CustomPicker(
                 selection: $settings.hudStyle,
                 options: Array(HudStyle.allCases),
-                title: { $0.title },
+                title: { localized($0.title) },
                 lightBackgroundImage: Image("backgroundLight"),
                 darkBackgroundImage: Image("backgroundDark")
             ) { style, isSelected in
@@ -133,10 +133,10 @@ struct HUDSettingsView: View {
             SettingsDivider()
 
             SettingsMenuRow(
-                title: "Level indicator",
-                description: "Choose whether the HUD level uses a bar or a circular ring.",
+                title: localized("Level indicator"),
+                description: localized("Choose whether the HUD level uses a bar or a circular ring."),
                 options: Array(HudIndicatorStyle.allCases),
-                optionTitle: { $0.title },
+                optionTitle: { localized($0.title) },
                 accessibilityIdentifier: "settings.general.hud.indicatorStyle",
                 selection: $settings.indicatorStyle
             )
@@ -144,8 +144,8 @@ struct HUDSettingsView: View {
             SettingsDivider()
 
             SettingsToggleRow(
-                title: "Colored level tint",
-                description: "Use the dynamic green-to-red fill for the HUD level indicator instead of a plain white fill.",
+                title: localized("Colored level tint"),
+                description: localized("Use the dynamic green-to-red fill for the HUD level indicator instead of a plain white fill."),
                 systemImage: "paintpalette.fill",
                 color: .purple,
                 isOn: $settings.isColoredLevelEnabled,
@@ -158,8 +158,8 @@ struct HUDSettingsView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
 
             SettingsStrokeToggleRow(
-                title: "Level-based stroke color",
-                description: "Tint the notch stroke using the current HUD level color instead of the default white stroke.",
+                title: localized("Level-based stroke color"),
+                description: localized("Tint the notch stroke using the current HUD level color instead of the default white stroke."),
                 isOn: $settings.isColoredLevelStrokeEnabled,
                 accessibilityIdentifier: "settings.general.hud.coloredStroke"
             )
@@ -262,4 +262,9 @@ struct HUDSettingsView: View {
             isEnabled: settings.isColoredLevelStrokeEnabled && !isLevelStrokeLocked
         )
     }
+
+    private func localized(_ key: String, fallback: String? = nil) -> String {
+        applicationSettings.appLanguage.locale.dn(key, fallback: fallback)
+    }
+
 }

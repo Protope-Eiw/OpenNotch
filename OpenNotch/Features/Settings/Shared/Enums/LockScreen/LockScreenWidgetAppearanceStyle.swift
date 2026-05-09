@@ -13,7 +13,7 @@ enum LockScreenWidgetAppearanceStyle: String, CaseIterable {
         return [.ultraThinMaterial, .ultraThickMaterial]
     }
 
-    var title: LocalizedStringKey {
+    var title: String {
         switch self {
         case .ultraThinMaterial:
             return "Soft"

@@ -127,27 +127,23 @@ final class NotchViewModel: ObservableObject {
     
     var canDismissWithMouseDrag: Bool {
         settings.isNotchMouseDragGesturesEnabled &&
-        settings.isNotchSwipeDismissEnabled &&
         !isActivityPresentationHidden &&
         notchModel.content != nil
     }
     
     var canRestoreWithMouseDrag: Bool {
         settings.isNotchMouseDragGesturesEnabled &&
-        settings.isNotchSwipeRestoreEnabled &&
         canRestoreDismissedContent
     }
     
     var canDismissWithTrackpadSwipe: Bool {
         settings.isNotchTrackpadSwipeGesturesEnabled &&
-        settings.isNotchSwipeDismissEnabled &&
         !isActivityPresentationHidden &&
         notchModel.content != nil
     }
     
     var canRestoreWithTrackpadSwipe: Bool {
         settings.isNotchTrackpadSwipeGesturesEnabled &&
-        settings.isNotchSwipeRestoreEnabled &&
         canRestoreDismissedContent
     }
     

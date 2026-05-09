@@ -26,6 +26,7 @@ final class NotchEngine: ObservableObject {
     private var eventQueue: [NotchState] = []
     private var isProcessingQueue = false
     private var isTransitioning = false
+    private var transitionContinuation: CheckedContinuation<Void, Never>?
 
     init(
         animations: @escaping () -> NotchAnimations,
@@ -297,8 +298,10 @@ final class NotchEngine: ObservableObject {
     }
 
     private func executeState(_ state: NotchState) async {
-        while isTransitioning {
-            try? await Task.sleep(nanoseconds: 10_000_000)
+        if isTransitioning {
+            await withCheckedContinuation { continuation in
+                transitionContinuation = continuation
+            }
         }
 
         switch state {
@@ -447,6 +450,8 @@ final class NotchEngine: ObservableObject {
             DispatchQueue.main.asyncAfter(deadline: .now() + currentDelay) {
                 show()
                 self.isTransitioning = false
+                self.transitionContinuation?.resume()
+                self.transitionContinuation = nil
             }
         }
     }

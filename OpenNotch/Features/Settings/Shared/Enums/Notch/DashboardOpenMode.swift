@@ -4,7 +4,7 @@ enum DashboardOpenMode: String, CaseIterable {
     case hover
     case click
 
-    var title: LocalizedStringKey {
+    var title: String {
         switch self {
         case .hover: return "Hover"
         case .click: return "Click"

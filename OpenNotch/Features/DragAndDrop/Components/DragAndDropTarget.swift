@@ -4,7 +4,7 @@ enum DragAndDropTarget: String, Equatable, CaseIterable {
     case airDrop
     case tray
 
-    var title: LocalizedStringKey {
+    var title: String {
         switch self {
         case .airDrop:
             return "AirDrop"

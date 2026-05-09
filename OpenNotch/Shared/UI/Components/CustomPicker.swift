@@ -12,10 +12,10 @@ struct CustomPicker<Option: Hashable>: View {
     
     @Binding var selection: Option
     let options: [Option]
-    let title: (Option) -> LocalizedStringKey
-    let headerTitle: LocalizedStringKey?
-    let headerDescription: LocalizedStringKey?
-    let headerValueTitle: ((Option) -> LocalizedStringKey)?
+    let title: (Option) -> String
+    let headerTitle: String?
+    let headerDescription: String?
+    let headerValueTitle: ((Option) -> String)?
     let itemHeight: CGFloat
     let showsOptionTitle: Bool
     let lightBackgroundImage: Image?
@@ -27,10 +27,10 @@ struct CustomPicker<Option: Hashable>: View {
     init(
         selection: Binding<Option>,
         options: [Option],
-        title: @escaping (Option) -> LocalizedStringKey,
-        headerTitle: LocalizedStringKey? = nil,
-        headerDescription: LocalizedStringKey? = nil,
-        headerValueTitle: ((Option) -> LocalizedStringKey)? = nil,
+        title: @escaping (Option) -> String,
+        headerTitle: String? = nil,
+        headerDescription: String? = nil,
+        headerValueTitle: ((Option) -> String)? = nil,
         itemHeight: CGFloat = 62,
         showsOptionTitle: Bool = true,
         lightBackgroundImage: Image? = nil,
@@ -61,10 +61,10 @@ struct CustomPicker<Option: Hashable>: View {
     
     init(
         selection: Binding<Option>,
-        title: @escaping (Option) -> LocalizedStringKey,
-        headerTitle: LocalizedStringKey? = nil,
-        headerDescription: LocalizedStringKey? = nil,
-        headerValueTitle: ((Option) -> LocalizedStringKey)? = nil,
+        title: @escaping (Option) -> String,
+        headerTitle: String? = nil,
+        headerDescription: String? = nil,
+        headerValueTitle: ((Option) -> String)? = nil,
         itemHeight: CGFloat = 62,
         showsOptionTitle: Bool = true,
         lightBackgroundImage: Image? = nil,
@@ -93,10 +93,10 @@ struct CustomPicker<Option: Hashable>: View {
     init<Content: View>(
         selection: Binding<Option>,
         options: [Option],
-        title: @escaping (Option) -> LocalizedStringKey,
-        headerTitle: LocalizedStringKey? = nil,
-        headerDescription: LocalizedStringKey? = nil,
-        headerValueTitle: ((Option) -> LocalizedStringKey)? = nil,
+        title: @escaping (Option) -> String,
+        headerTitle: String? = nil,
+        headerDescription: String? = nil,
+        headerValueTitle: ((Option) -> String)? = nil,
         itemHeight: CGFloat = 62,
         showsOptionTitle: Bool = true,
         lightBackgroundImage: Image? = nil,
@@ -124,10 +124,10 @@ struct CustomPicker<Option: Hashable>: View {
 
     init<Content: View>(
         selection: Binding<Option>,
-        title: @escaping (Option) -> LocalizedStringKey,
-        headerTitle: LocalizedStringKey? = nil,
-        headerDescription: LocalizedStringKey? = nil,
-        headerValueTitle: ((Option) -> LocalizedStringKey)? = nil,
+        title: @escaping (Option) -> String,
+        headerTitle: String? = nil,
+        headerDescription: String? = nil,
+        headerValueTitle: ((Option) -> String)? = nil,
         itemHeight: CGFloat = 62,
         showsOptionTitle: Bool = true,
         lightBackgroundImage: Image? = nil,
@@ -203,7 +203,7 @@ struct CustomPicker<Option: Hashable>: View {
     }
     
     @ViewBuilder
-    private func pickerHeader(title: LocalizedStringKey) -> some View {
+    private func pickerHeader(title: String) -> some View {
         HStack(alignment: .center) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
@@ -225,7 +225,7 @@ struct CustomPicker<Option: Hashable>: View {
         }
     }
     
-    private var selectedHeaderValueTitle: LocalizedStringKey {
+    private var selectedHeaderValueTitle: String {
         headerValueTitle?(selection) ?? title(selection)
     }
 

@@ -4,7 +4,7 @@ enum LockScreenWidgetTintStyle: String, CaseIterable {
     case neutral
     case accent
 
-    var title: LocalizedStringKey {
+    var title: String {
         switch self {
         case .neutral:
             return "Default"

@@ -8,12 +8,12 @@
 import SwiftUI
 
 struct SettingsCard<Content: View>: View {
-    let title: LocalizedStringKey?
+    let title: String?
     
     private let content: Content
     
     init(
-        title: LocalizedStringKey? = nil,
+        title: String? = nil,
         @ViewBuilder content: () -> Content
     ) {
         self.title = title

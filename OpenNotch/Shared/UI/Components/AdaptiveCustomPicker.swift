@@ -12,10 +12,10 @@ struct AdaptiveCustomPicker<Option: Hashable>: View {
 
     @Binding var selection: Option
     let options: [Option]
-    let title: (Option) -> LocalizedStringKey
-    let headerTitle: LocalizedStringKey?
-    let headerDescription: LocalizedStringKey?
-    let headerValueTitle: ((Option) -> LocalizedStringKey)?
+    let title: (Option) -> String
+    let headerTitle: String?
+    let headerDescription: String?
+    let headerValueTitle: ((Option) -> String)?
     let minimumItemWidth: CGFloat
     let maximumItemWidth: CGFloat
     let itemHeight: CGFloat
@@ -25,13 +25,13 @@ struct AdaptiveCustomPicker<Option: Hashable>: View {
     init<Content: View>(
         selection: Binding<Option>,
         options: [Option],
-        headerTitle: LocalizedStringKey? = nil,
-        headerDescription: LocalizedStringKey? = nil,
-        headerValueTitle: ((Option) -> LocalizedStringKey)? = nil,
+        headerTitle: String? = nil,
+        headerDescription: String? = nil,
+        headerValueTitle: ((Option) -> String)? = nil,
         minimumItemWidth: CGFloat = 88,
         maximumItemWidth: CGFloat = 104,
         itemHeight: CGFloat = 62,
-        title: @escaping (Option) -> LocalizedStringKey,
+        title: @escaping (Option) -> String,
         accessibilityIdentifier: ((Option) -> String?)? = nil,
         @ViewBuilder content: @escaping (Option, Bool) -> Content
     ) {
@@ -120,7 +120,7 @@ struct AdaptiveCustomPicker<Option: Hashable>: View {
     }
 
     @ViewBuilder
-    private func pickerHeader(title: LocalizedStringKey) -> some View {
+    private func pickerHeader(title: String) -> some View {
         HStack(alignment: .center) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
@@ -142,7 +142,7 @@ struct AdaptiveCustomPicker<Option: Hashable>: View {
         }
     }
 
-    private var selectedHeaderValueTitle: LocalizedStringKey {
+    private var selectedHeaderValueTitle: String {
         headerValueTitle?(selection) ?? title(selection)
     }
 }

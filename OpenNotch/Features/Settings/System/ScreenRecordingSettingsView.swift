@@ -17,10 +17,10 @@ struct ScreenRecordingSettingsView: View {
     }
 
     private var screenRecordingActivity: some View {
-        SettingsCard(title: "Screen Recording activity") {
+        SettingsCard(title: localized("Screen Recording activity")) {
             SettingsToggleRow(
-                title: "Screen Recording live activity",
-                description: "Show a red recording indicator in the notch while screen capture is active.",
+                title: localized("Screen Recording live activity"),
+                description: localized("Show a red recording indicator in the notch while screen capture is active."),
                 systemImage: "record.circle.fill",
                 color: .red,
                 isOn: $settings.isScreenRecordingLiveActivityEnabled,
@@ -33,13 +33,17 @@ struct ScreenRecordingSettingsView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
 
             SettingsStrokeToggleRow(
-                title: "Default stroke",
-                description: "Use the standard white notch stroke instead of the red recording stroke.",
+                title: localized("Default stroke"),
+                description: localized("Use the standard white notch stroke instead of the red recording stroke."),
                 isOn: $settings.isScreenRecordingDefaultStrokeEnabled,
                 accessibilityIdentifier: "settings.activities.live.screenRecording.defaultStroke"
             )
             .disabled(isDefaultStrokeLocked)
             .opacity(isDefaultStrokeLocked ? 0.5 : 1)
         }
+    }
+    
+    private func localized(_ key: String, fallback: String? = nil) -> String {
+        appearanceSettings.appLanguage.locale.dn(key, fallback: fallback ?? key)
     }
 }

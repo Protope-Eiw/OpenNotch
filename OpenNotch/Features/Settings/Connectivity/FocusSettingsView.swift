@@ -23,10 +23,10 @@ struct FocusSettingsView: View {
     }
     
     private var focusActivity: some View {
-        SettingsCard(title: "Focus activity") {
+        SettingsCard(title: localized("Focus activity")) {
             SettingsToggleRow(
-                title: "Focus live activity",
-                description: "Show a live activity while Focus mode is enabled.",
+                title: localized("Focus live activity"),
+                description: localized("Show a live activity while Focus mode is enabled."),
                 systemImage: "moon.fill",
                 color: .indigo,
                 isOn: $connectivitySettings.isFocusLiveActivityEnabled,
@@ -39,8 +39,8 @@ struct FocusSettingsView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
             
             SettingsToggleRow(
-                title: "Focus off activity",
-                description: "Show a short notification when Focus mode turns off.",
+                title: localized("Focus off activity"),
+                description: localized("Show a short notification when Focus mode turns off."),
                 systemImage: "moon.stars.fill",
                 color: .indigo,
                 isOn: $connectivitySettings.isFocusOffTemporaryActivityEnabled,
@@ -50,10 +50,10 @@ struct FocusSettingsView: View {
     }
     
     private var focusDuration: some View {
-        SettingsCard(title: "Focus duration") {
+        SettingsCard(title: localized("Focus duration")) {
             SettingsSliderRow(
-                title: "Focus off duration",
-                description: "Choose how long the Focus off notification stays visible.",
+                title: localized("Focus off duration"),
+                description: localized("Choose how long the Focus off notification stays visible."),
                 range: temporaryActivityDurationRange,
                 step: 1,
                 fractionLength: 0,
@@ -70,13 +70,13 @@ struct FocusSettingsView: View {
     }
     
     private var focusAppearance: some View {
-        SettingsCard(title: "Focus appearance") {
+        SettingsCard(title: localized("Focus appearance")) {
             CustomPicker(
                 selection: $connectivitySettings.focusAppearanceStyle,
                 options: Array(FocusAppearanceStyle.allCases),
-                title: { $0.title },
-                headerTitle: "Focus style",
-                headerDescription: "Choose whether Focus shows the On and Off labels or only the moon icon.",
+                title: { localized($0.title) },
+                headerTitle: localized("Focus style"),
+                headerDescription: localized("Choose whether Focus shows the On and Off labels or only the moon icon."),
                 itemHeight: 72,
                 lightBackgroundImage: Image("backgroundLight"),
                 darkBackgroundImage: Image("backgroundDark")
@@ -87,8 +87,8 @@ struct FocusSettingsView: View {
             SettingsDivider()
 
             SettingsStrokeToggleRow(
-                title: "Default stroke",
-                description: "Use the standard white notch stroke instead of the Focus accent stroke.",
+                title: localized("Default stroke"),
+                description: localized("Use the standard white notch stroke instead of the Focus accent stroke."),
                 isOn: $connectivitySettings.isFocusDefaultStrokeEnabled,
                 accessibilityIdentifier: "settings.activities.focus.defaultStroke"
             )
@@ -144,5 +144,9 @@ struct FocusSettingsView: View {
         }
 
         return .indigo.opacity(0.3)
+    }
+    
+    private func localized(_ key: String, fallback: String? = nil) -> String {
+        appearanceSettings.appLanguage.locale.dn(key, fallback: fallback ?? key)
     }
 }

@@ -62,6 +62,7 @@ enum GeneralSettingsStorage {
         static let screenRecordingLiveActivityEnabled = "settings.live.screenRecording"
         static let screenRecordingDefaultStrokeEnabled = "settings.live.screenRecording.defaultStroke"
         static let legacyFileTransfersLiveActivityEnabled = "settings.live.fileTransfers"
+        static let batteryTemporaryActivityEnabled = "settings.temporary.battery"
         static let chargerTemporaryActivityEnabled = "settings.temporary.charger"
         static let lowPowerTemporaryActivityEnabled = "settings.temporary.lowPower"
         static let fullPowerTemporaryActivityEnabled = "settings.temporary.fullPower"
@@ -169,6 +170,7 @@ enum GeneralSettingsStorage {
         LockScreenSettings.widgetTintStyleKey: LockScreenWidgetTintStyle.neutral.rawValue,
         LockScreenSettings.widgetBackgroundBrightnessKey: 1.0,
         LockScreenSettings.mediaPanelBackgroundStyleKey: LockScreenMediaPanelBackgroundStyle.animatedArtwork.rawValue,
+        Keys.batteryTemporaryActivityEnabled: true,
         Keys.chargerTemporaryActivityEnabled: true,
         Keys.temporaryActivityDurationScale: 1.0,
         Keys.chargerTemporaryActivityDuration: 4,
@@ -180,23 +182,23 @@ enum GeneralSettingsStorage {
         Keys.fullPowerNotificationThreshold: 100,
         Keys.lowPowerNotificationStyle: BatteryNotificationStyle.standard.rawValue,
         Keys.fullPowerNotificationStyle: BatteryNotificationStyle.standard.rawValue,
-        Keys.bluetoothTemporaryActivityEnabled: true,
+        Keys.bluetoothTemporaryActivityEnabled: false,
         Keys.bluetoothTemporaryActivityDuration: 5,
         Keys.bluetoothAppearanceStyle: BluetoothAppearanceStyle.compact.rawValue,
         Keys.bluetoothBatteryStrokeEnabled: false,
         Keys.bluetoothBatteryIndicatorStyle: BluetoothBatteryIndicatorStyle.percent.rawValue,
-        Keys.wifiTemporaryActivityEnabled: true,
+        Keys.wifiTemporaryActivityEnabled: false,
         Keys.wifiTemporaryActivityDuration: 3,
-        Keys.vpnTemporaryActivityEnabled: true,
+        Keys.vpnTemporaryActivityEnabled: false,
         Keys.vpnTemporaryActivityDuration: 5,
-        Keys.noInternetTemporaryActivityEnabled: true,
+        Keys.noInternetTemporaryActivityEnabled: false,
         Keys.hotspotAppearanceStyle: HotspotAppearanceStyle.minimal.rawValue,
         Keys.networkShowVPNDetail: false,
         Keys.networkShowVPNTimer: true,
         Keys.networkOnlyNotifyOnChange: false,
-        Keys.focusOffTemporaryActivityEnabled: true,
+        Keys.focusOffTemporaryActivityEnabled: false,
         Keys.focusOffTemporaryActivityDuration: 3,
-        Keys.notchSizeTemporaryActivityEnabled: true,
+        Keys.notchSizeTemporaryActivityEnabled: false,
         Keys.notchSizeTemporaryActivityDuration: 2,
         Keys.focusDefaultStrokeEnabled: false,
         Keys.hotspotDefaultStrokeEnabled: false,

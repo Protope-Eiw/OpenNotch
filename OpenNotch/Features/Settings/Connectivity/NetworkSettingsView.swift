@@ -51,10 +51,10 @@ struct NetworkSettingsView: View {
     }
     
     private var networkActivity: some View {
-        SettingsCard(title: "Network activity") {
+        SettingsCard(title: localized("Network activity")) {
             SettingsToggleRow(
-                title: "Wi-Fi temporary activity",
-                description: "Show a short notification when Wi-Fi reconnects.",
+                title: localized("Wi-Fi temporary activity"),
+                description: localized("Show a short notification when Wi-Fi reconnects."),
                 systemImage: "wifi",
                 color: .blue,
                 isOn: $connectivitySettings.isWifiTemporaryActivityEnabled,
@@ -66,8 +66,8 @@ struct NetworkSettingsView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
             
             SettingsToggleRow(
-                title: "VPN temporary activity",
-                description: "Show a short notification when a VPN connection becomes active.",
+                title: localized("VPN temporary activity"),
+                description: localized("Show a short notification when a VPN connection becomes active."),
                 systemImage: "network",
                 color: .blue,
                 isOn: $connectivitySettings.isVpnTemporaryActivityEnabled,
@@ -79,8 +79,8 @@ struct NetworkSettingsView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
 
             SettingsToggleRow(
-                title: "No internet temporary activity",
-                description: "Show a short notification when your Mac loses internet access.",
+                title: localized("No internet temporary activity"),
+                description: localized("Show a short notification when your Mac loses internet access."),
                 systemImage: "wifi.slash",
                 color: .red,
                 isOn: $connectivitySettings.isNoInternetTemporaryActivityEnabled,
@@ -92,8 +92,8 @@ struct NetworkSettingsView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
             
             SettingsToggleRow(
-                title: "Personal Hotspot live activity",
-                description: "Show a live activity while Personal Hotspot is enabled.",
+                title: localized("Personal Hotspot live activity"),
+                description: localized("Show a live activity while Personal Hotspot is enabled."),
                 systemImage: "personalhotspot",
                 color: .green,
                 isOn: $connectivitySettings.isHotspotLiveActivityEnabled,
@@ -103,10 +103,10 @@ struct NetworkSettingsView: View {
     }
     
     private var networkDuration: some View {
-        SettingsCard(title: "Network duration") {
+        SettingsCard(title: localized("Network duration")) {
             SettingsSliderRow(
-                title: "Wi-Fi duration",
-                description: "Choose how long the Wi-Fi reconnect notification stays visible.",
+                title: localized("Wi-Fi duration"),
+                description: localized("Choose how long the Wi-Fi reconnect notification stays visible."),
                 range: temporaryActivityDurationRange,
                 step: 1,
                 fractionLength: 0,
@@ -123,8 +123,8 @@ struct NetworkSettingsView: View {
             SettingsDivider()
             
             SettingsSliderRow(
-                title: "VPN duration",
-                description: "Choose how long the VPN connection notification stays visible.",
+                title: localized("VPN duration"),
+                description: localized("Choose how long the VPN connection notification stays visible."),
                 range: temporaryActivityDurationRange,
                 step: 1,
                 fractionLength: 0,
@@ -141,13 +141,13 @@ struct NetworkSettingsView: View {
     }
     
     private var vpnAppearance: some View {
-        SettingsCard(title: "VPN appearance") {
+        SettingsCard(title: localized("VPN appearance")) {
             CustomPicker(
                 selection: vpnAppearanceStyle,
                 options: Array(VPNAppearanceStyle.allCases),
-                title: { $0.title },
-                headerTitle: "VPN style",
-                headerDescription: "Choose whether the VPN activity stays compact or shows tunnel details.",
+                title: { localized($0.title) },
+                headerTitle: localized("VPN style"),
+                headerDescription: localized("Choose whether the VPN activity stays compact or shows tunnel details."),
                 itemHeight: 72,
                 lightBackgroundImage: Image("backgroundLight"),
                 darkBackgroundImage: Image("backgroundDark")
@@ -161,8 +161,8 @@ struct NetworkSettingsView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
             
             SettingsToggleRow(
-                title: "Only notify on network change",
-                description: "Only show Wi-Fi or VPN notifications when the connected network actually changes.",
+                title: localized("Only notify on network change"),
+                description: localized("Only show Wi-Fi or VPN notifications when the connected network actually changes."),
                 systemImage: "point.3.connected.trianglepath.dotted",
                 color: .red,
                 isOn: $connectivitySettings.isOnlyNotifyOnNetworkChangeEnabled,
@@ -172,13 +172,13 @@ struct NetworkSettingsView: View {
     }
     
     private var hotspotAppearance: some View {
-        SettingsCard(title: "Hotspot appearance") {
+        SettingsCard(title: localized("Hotspot appearance")) {
             CustomPicker(
                 selection: $connectivitySettings.hotspotAppearanceStyle,
                 options: Array(HotspotAppearanceStyle.allCases),
-                title: { $0.title },
-                headerTitle: "Appearance",
-                headerDescription: "Choose whether the hotspot activity stays minimal or shows more status.",
+                title: { localized($0.title) },
+                headerTitle: localized("Appearance"),
+                headerDescription: localized("Choose whether the hotspot activity stays minimal or shows more status."),
                 itemHeight: 72,
                 lightBackgroundImage: Image("backgroundLight"),
                 darkBackgroundImage: Image("backgroundDark")
@@ -189,8 +189,8 @@ struct NetworkSettingsView: View {
             SettingsDivider()
 
             SettingsStrokeToggleRow(
-                title: "Default stroke",
-                description: "Use the standard white notch stroke instead of the hotspot accent stroke.",
+                title: localized("Default stroke"),
+                description: localized("Use the standard white notch stroke instead of the hotspot accent stroke."),
                 isOn: $connectivitySettings.isHotspotDefaultStrokeEnabled,
                 accessibilityIdentifier: "settings.activities.live.hotspot.defaultStroke"
             )
@@ -253,7 +253,7 @@ struct NetworkSettingsView: View {
                                 .font(.system(size: 10))
                                 .foregroundStyle(.white.opacity(0.4))
                             
-                            Text("WireGuard VPN")
+                            Text(localized("WireGuard VPN"))
                                 .lineLimit(1)
                                 .font(.system(size: 12))
                                 .foregroundStyle(.white.opacity(0.8))
@@ -262,7 +262,7 @@ struct NetworkSettingsView: View {
                     
                     Spacer()
                 
-                    Text("00:10")
+                    Text(localized("00:10"))
                         .font(.system(size: 14, design: .rounded))
                         .foregroundStyle(.orange)
                         .monospacedDigit()
@@ -324,5 +324,9 @@ struct NetworkSettingsView: View {
             .frame(width: 160, height: 30)
             .scaleEffect(isSelected ? 1 : 0.97)
         }
+    }
+    
+    private func localized(_ key: String, fallback: String? = nil) -> String {
+        appearanceSettings.appLanguage.locale.dn(key, fallback: fallback ?? key)
     }
 }

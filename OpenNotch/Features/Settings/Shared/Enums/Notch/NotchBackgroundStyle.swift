@@ -13,7 +13,7 @@ enum NotchBackgroundStyle: String, CaseIterable {
         return [.black, .ultraThickMaterial]
     }
 
-    var title: LocalizedStringKey {
+    var title: String {
         switch self {
         case .black:
             return "Black"

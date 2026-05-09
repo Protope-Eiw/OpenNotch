@@ -48,10 +48,10 @@ struct GeneralSettingsView: View {
     }
     
     private var systemCard: some View {
-        SettingsCard(title: "System") {
+        SettingsCard(title: localized("System")) {
             SettingsToggleRow(
-                title: "Launch at login",
-                description: "Launch Dynamic Notch automatically when you sign in.",
+                title: localized("Launch at login"),
+                description: localized("Launch OpenNotch automatically when you sign in."),
                 systemImage: "power",
                 color: .red,
                 isOn: $applicationSettings.isLaunchAtLoginEnabled,
@@ -64,8 +64,8 @@ struct GeneralSettingsView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
             
             SettingsToggleRow(
-                title: "Show Dock icon",
-                description: "Keep the app visible in the Dock for faster switching and window access.",
+                title: localized("Show Dock icon"),
+                description: localized("Keep the app visible in the Dock for faster switching and window access."),
                 systemImage: "dock.rectangle",
                 color: .orange,
                 isOn: $applicationSettings.isDockIconVisible,
@@ -79,8 +79,8 @@ struct GeneralSettingsView: View {
             
             VStack(alignment: .leading, spacing: 14) {
                 SettingsToggleRow(
-                    title: "Show menu bar icon",
-                    description: "Show a menu bar shortcut for quick access to Settings and Quit.",
+                    title: localized("Show menu bar icon"),
+                    description: localized("Show a menu bar shortcut for quick access to Settings and Quit."),
                     systemImage: "menubar.rectangle",
                     color: .blue,
                     isOn: $applicationSettings.isMenuBarIconVisible,
@@ -92,7 +92,7 @@ struct GeneralSettingsView: View {
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundStyle(Color.yellow)
                         
-                        Text("You can access the menu by right-clicking on the notch area.")
+                        Text(localized("You can access the menu by right-clicking on the notch area."))
                             .font(.system(size: 10))
                             .foregroundStyle(Color.secondary)
                     }
@@ -102,13 +102,13 @@ struct GeneralSettingsView: View {
     }
     
     private var themeCard: some View {
-        SettingsCard(title: "Appearance") {
+        SettingsCard(title: localized("Appearance")) {
             CustomPicker(
                 selection: $applicationSettings.appearanceMode,
                 options: Array(SettingsAppearanceMode.allCases),
-                title: { $0.title },
-                headerTitle: "Theme",
-                headerDescription: "Choose the interface appearance used by the app.",
+                title: { localized($0.title) },
+                headerTitle: localized("Theme"),
+                headerDescription: localized("Choose the interface appearance used by the app."),
                 itemHeight: 110,
                 lightBackgroundImage: Image("backgroundLight"),
                 darkBackgroundImage: Image("backgroundDark")
@@ -120,13 +120,13 @@ struct GeneralSettingsView: View {
     }
 
     private var displayCard: some View {
-        SettingsCard(title: "Location") {
+        SettingsCard(title: localized("Location")) {
             CustomPicker(
                 selection: $applicationSettings.displayLocation,
                 options: Array(NotchDisplayLocation.allCases),
-                title: { $0.title },
-                headerTitle: "Display",
-                headerDescription: "Choose which display Dynamic Notch should use.",
+                title: { localized($0.title) },
+                headerTitle: localized("Display"),
+                headerDescription: localized("Choose which display OpenNotch should use."),
                 symbolName: { $0.symbolName }
             )
             .accessibilityIdentifier("settings.general.displayLocation")
@@ -144,8 +144,8 @@ struct GeneralSettingsView: View {
                     .opacity(0.6)
 
                 SettingsToggleRow(
-                    title: "settings.general.display.autoSwitch.title",
-                    description: "settings.general.display.autoSwitch.description",
+                    title: localized("settings.general.display.autoSwitch.title"),
+                    description: localized("settings.general.display.autoSwitch.description"),
                     systemImage: "arrow.triangle.branch",
                     color: .teal,
                     isOn: $applicationSettings.isDisplayAutoSwitchEnabled,
@@ -170,8 +170,8 @@ struct GeneralSettingsView: View {
             }
 
             SettingsToggleRow(
-                title: "Hide live activity in full-screen mode",
-                description: "Automatically hide live activity while the selected display is showing a full-screen space.",
+                title: localized("Hide live activity in full-screen mode"),
+                description: localized("Automatically hide live activity while the selected display is showing a full-screen space."),
                 systemImage: "arrow.up.left.and.arrow.down.right",
                 color: .purple,
                 isOn: $applicationSettings.isNotchHiddenInFullscreenEnabled,
@@ -182,16 +182,16 @@ struct GeneralSettingsView: View {
     }
 
     private var languageCard: some View {
-        SettingsCard(title: "Localization") {
+        SettingsCard(title: localized("Localization")) {
             VStack(alignment: .leading, spacing: 12) {
                 AdaptiveCustomPicker(
                     selection: $applicationSettings.appLanguage,
                     options: Array(OpenNotchLanguage.allCases),
-                    headerTitle: "Language",
-                    headerDescription: "Choose the language used by the app interface.",
+                    headerTitle: localized("Language"),
+                    headerDescription: localized("Choose the language used by the app interface."),
                     minimumItemWidth: 88,
                     maximumItemWidth: 104,
-                    title: { $0.titleKey },
+                    title: { localized($0.titleKey) },
                     accessibilityIdentifier: { "settings.language.option.\($0.rawValue)" }
                 ) { language, isSelected in
                     
@@ -218,12 +218,16 @@ struct GeneralSettingsView: View {
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(Color.yellow)
 
-                    Text("Localization only works for settings, the notch remains in English.")
+                    Text(localized("Localization only works for settings, the notch remains in English."))
                         .font(.system(size: 10))
                         .foregroundStyle(Color.secondary)
                 }
             }
         }
+    }
+    
+    private func localized(_ key: String, fallback: String? = nil) -> String {
+        applicationSettings.appLanguage.locale.dn(key, fallback: fallback ?? key)
     }
 }
 
@@ -274,8 +278,8 @@ private struct SpecificDisplayPicker: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .center) {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("settings.general.display.specificPicker.title")
-                    Text("settings.general.display.specificPicker.description")
+                    Text(localized("settings.general.display.specificPicker.title"))
+                    Text(localized("settings.general.display.specificPicker.description"))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -343,22 +347,22 @@ private struct SpecificDisplayPicker: View {
                 .contentShape(shape)
                 
                 if !display.isAvailable {
-                    Text("settings.general.display.badge.unavailable")
+                    Text(localized("settings.general.display.badge.unavailable"))
                         .font(.system(size: 10))
                         .foregroundStyle(Color.orange)
                     
                 } else if display.isBuiltIn {
-                    Text("settings.general.display.badge.builtin")
+                    Text(localized("settings.general.display.badge.builtin"))
                         .font(.system(size: 10))
                         .foregroundStyle(isSelected ? Color.accentColor : Color.secondary)
                     
                 } else if display.isMain {
-                    Text("settings.general.display.badge.main")
+                    Text(localized("settings.general.display.badge.main"))
                         .font(.system(size: 10))
                         .foregroundStyle(isSelected ? Color.accentColor : Color.secondary)
                     
                 } else {
-                    Text("settings.general.display.badge.external")
+                    Text(localized("settings.general.display.badge.external"))
                         .font(.system(size: 10))
                         .foregroundStyle(isSelected ? Color.accentColor : Color.secondary)
                 }

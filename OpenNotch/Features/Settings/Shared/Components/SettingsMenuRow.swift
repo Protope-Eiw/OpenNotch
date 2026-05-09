@@ -1,19 +1,19 @@
 import SwiftUI
 
 struct SettingsMenuRow<Option: Hashable>: View {
-    let title: LocalizedStringKey
-    let description: LocalizedStringKey?
+    let title: String
+    let description: String?
     let options: [Option]
-    let optionTitle: (Option) -> LocalizedStringKey
+    let optionTitle: (Option) -> String
     let accessibilityIdentifier: String?
 
     @Binding var selection: Option
 
     init(
-        title: LocalizedStringKey,
-        description: LocalizedStringKey? = nil,
+        title: String,
+        description: String? = nil,
         options: [Option],
-        optionTitle: @escaping (Option) -> LocalizedStringKey,
+        optionTitle: @escaping (Option) -> String,
         accessibilityIdentifier: String? = nil,
         selection: Binding<Option>
     ) {

@@ -5,7 +5,7 @@ enum DragAndDropActivityMode: String, CaseIterable {
     case tray
     case combined
 
-    var title: LocalizedStringKey {
+    var title: String {
         switch self {
         case .airDrop:
             return "AirDrop"

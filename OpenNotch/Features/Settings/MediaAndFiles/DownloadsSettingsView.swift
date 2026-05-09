@@ -37,10 +37,10 @@ struct DownloadsSettingsView: View {
     }
     
     private var downloadActivity: some View {
-        SettingsCard(title: "Download activity") {
+        SettingsCard(title: localized("Download activity")) {
             SettingsToggleRow(
-                title: "Downloads live activity",
-                description: "Show a live activity while files are being downloaded to monitored folders like Downloads, Desktop, and Documents.",
+                title: localized("Downloads live activity"),
+                description: localized("Show a live activity while files are being downloaded to monitored folders like Downloads, Desktop, and Documents."),
                 systemImage: "arrow.down.doc.fill",
                 color: .purple,
                 isOn: $mediaSettings.isDownloadsLiveActivityEnabled,
@@ -50,13 +50,13 @@ struct DownloadsSettingsView: View {
     }
     
     private var downloadAppearance: some View {
-        SettingsCard(title: "Download appearance") {
+        SettingsCard(title: localized("Download appearance")) {
             CustomPicker(
                 selection: $mediaSettings.downloadsAppearanceStyle,
                 options: Array(DownloadAppearanceStyle.allCases),
-                title: { $0.title },
-                headerTitle: "Download style",
-                headerDescription: "Choose how much information the download activity shows at a glance.",
+                title: { localized($0.title) },
+                headerTitle: localized("Download style"),
+                headerDescription: localized("Choose how much information the download activity shows at a glance."),
                 itemHeight: 82,
                 lightBackgroundImage: Image("backgroundLight"),
                 darkBackgroundImage: Image("backgroundDark")
@@ -68,10 +68,10 @@ struct DownloadsSettingsView: View {
             SettingsDivider()
             
             SettingsMenuRow(
-                title: "Progress indicator",
-                description: "Choose whether download progress uses a percentage label or a circular ring.",
+                title: localized("Progress indicator"),
+                description: localized("Choose whether download progress uses a percentage label or a circular ring."),
                 options: Array(DownloadProgressIndicatorStyle.allCases),
-                optionTitle: { $0.title },
+                optionTitle: { localized($0.title) },
                 accessibilityIdentifier: "settings.activities.live.downloads.progressIndicator",
                 selection: $mediaSettings.downloadsProgressIndicatorStyle
             )
@@ -79,8 +79,8 @@ struct DownloadsSettingsView: View {
             SettingsDivider()
             
             SettingsStrokeToggleRow(
-                title: "Default stroke",
-                description: "Use the standard white notch stroke instead of the accent-colored download stroke.",
+                title: localized("Default stroke"),
+                description: localized("Use the standard white notch stroke instead of the accent-colored download stroke."),
                 isOn: $mediaSettings.isDownloadsDefaultStrokeEnabled,
                 accessibilityIdentifier: "settings.activities.live.downloads.defaultStroke"
             )
@@ -192,6 +192,12 @@ struct DownloadsSettingsView: View {
         formatter.isAdaptive = true
         return formatter
     }()
+}
+
+extension DownloadsSettingsView {
+    private func localized(_ key: String, fallback: String? = nil) -> String {
+        appearanceSettings.appLanguage.locale.dn(key, fallback: fallback ?? key)
+    }
 }
 
 private struct DownloadSettingsPreviewModel {

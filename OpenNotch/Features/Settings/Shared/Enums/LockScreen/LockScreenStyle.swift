@@ -4,7 +4,7 @@ enum LockScreenStyle: String, CaseIterable {
     case enlarged
     case compact
 
-    var title: LocalizedStringKey {
+    var title: String {
         switch self {
         case .enlarged:
             return "Enlarged"

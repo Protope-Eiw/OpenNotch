@@ -30,10 +30,10 @@ struct NowPlayingSettingsView: View {
     }
     
     private var playbackActivity: some View {
-        SettingsCard(title: "Playback activity") {
+        SettingsCard(title: localized("Playback activity")) {
             SettingsToggleRow(
-                title: "Now Playing live activity",
-                description: "Show the Now Playing live activity while audio or video playback is active.",
+                title: localized("Now Playing live activity"),
+                description: localized("Show the Now Playing live activity while audio or video playback is active."),
                 systemImage: "music.note",
                 color: .red,
                 isOn: $settings.isNowPlayingLiveActivityEnabled,
@@ -43,10 +43,10 @@ struct NowPlayingSettingsView: View {
     }
 
     private var pausedPlaybackBehavior: some View {
-        SettingsCard(title: "Paused playback") {
+        SettingsCard(title: localized("Paused playback")) {
             SettingsToggleRow(
-                title: "Without close timer",
-                description: "Keep Now Playing visible in the notch while playback is paused.",
+                title: localized("Without close timer"),
+                description: localized("Keep Now Playing visible in the notch while playback is paused."),
                 systemImage: "pause.circle",
                 color: .orange,
                 isOn: isWithoutCloseTimer,
@@ -56,8 +56,8 @@ struct NowPlayingSettingsView: View {
             SettingsDivider()
 
             SettingsSliderRow(
-                title: "Close delay",
-                description: "Choose how long the paused player stays visible before the notch closes.",
+                title: localized("Close delay"),
+                description: localized("Choose how long the paused player stays visible before the notch closes."),
                 range: temporaryActivityDurationRange,
                 step: 1,
                 fractionLength: 0,
@@ -74,7 +74,7 @@ struct NowPlayingSettingsView: View {
     }
     
     private var playerAppearance: some View {
-        SettingsCard(title: "Player appearance") {
+        SettingsCard(title: localized("Player appearance")) {
             NowPlayingAppearancePreview(
                 settings: settings,
                 applicationSettings: applicationSettings
@@ -83,8 +83,8 @@ struct NowPlayingSettingsView: View {
             SettingsDivider()
 
             SettingsToggleRow(
-                title: "Hide favorite",
-                description: "Remove the favorite button from the expanded player controls.",
+                title: localized("Hide favorite"),
+                description: localized("Remove the favorite button from the expanded player controls."),
                 systemImage: "star.slash.fill",
                 color: .pink,
                 isOn: Binding(
@@ -100,8 +100,8 @@ struct NowPlayingSettingsView: View {
                 .frame(maxWidth: .infinity, alignment: .trailing)
             
             SettingsToggleRow(
-                title: "Hide output device",
-                description: "Remove the output device button from the expanded player controls.",
+                title: localized("Hide output device"),
+                description: localized("Remove the output device button from the expanded player controls."),
                 systemImage: "airplay.audio",
                 color: .blue,
                 isOn: Binding(
@@ -117,8 +117,8 @@ struct NowPlayingSettingsView: View {
                 .frame(maxWidth: .infinity, alignment: .trailing)
             
             SettingsToggleRow(
-                title: "Artwork-tinted progress",
-                description: "Color the progress bar and timer labels using the current artwork palette.",
+                title: localized("Artwork-tinted progress"),
+                description: localized("Color the progress bar and timer labels using the current artwork palette."),
                 systemImage: "paintbrush.pointed.fill",
                 color: Color(red: 1, green: 0.73, blue: 0.32),
                 isOn: $settings.isNowPlayingArtworkTintEnabled,
@@ -131,14 +131,18 @@ struct NowPlayingSettingsView: View {
                 .frame(maxWidth: .infinity, alignment: .trailing)
 
             SettingsStrokeToggleRow(
-                title: "Artwork-tinted stroke",
-                description: "Color the notch stroke using the current artwork palette.",
+                title: localized("Artwork-tinted stroke"),
+                description: localized("Color the notch stroke using the current artwork palette."),
                 isOn: $settings.isNowPlayingArtworkStrokeEnabled,
                 accessibilityIdentifier: "settings.activities.live.nowPlaying.artworkStroke"
             )
             .disabled(isArtworkStrokeLocked)
             .opacity(isArtworkStrokeLocked ? 0.5 : 1)
         }
+    }
+    
+    private func localized(_ key: String, fallback: String? = nil) -> String {
+        applicationSettings.appLanguage.locale.dn(key, fallback: fallback ?? key)
     }
 }
 
@@ -195,7 +199,7 @@ private struct NowPlayingAppearancePreview: View {
                     
                     VStack(alignment: .leading, spacing: 2) {
                         HStack(alignment: .center, spacing: 8) {
-                            Text("Midnight Echoes")
+                            Text(localized("Midnight Echoes"))
                                 .font(.system(size: 15, weight: .medium))
                                 .foregroundStyle(.white.opacity(0.85))
                                 .lineLimit(1)
@@ -219,7 +223,7 @@ private struct NowPlayingAppearancePreview: View {
                             .frame(height: 15, alignment: .bottom)
                             
                         }
-                        Text("Debug Ensemble")
+                        Text(localized("Debug Ensemble"))
                             .font(.system(size: 13))
                             .foregroundStyle(.white.opacity(0.5))
                             .lineLimit(1)
@@ -227,7 +231,7 @@ private struct NowPlayingAppearancePreview: View {
                 }
                 
                 HStack(spacing: 8) {
-                    Text("01:21")
+                    Text(localized("01:21"))
                         .font(.system(size: 10, weight: .medium, design: .rounded))
                         .monospacedDigit()
                         .foregroundStyle(appearance.usesArtworkTint ? highlightColor : .white.opacity(0.4))
@@ -248,7 +252,7 @@ private struct NowPlayingAppearancePreview: View {
                     }
                     .frame(height: 14)
                     
-                    Text("03:34")
+                    Text(localized("03:34"))
                         .font(.system(size: 10, weight: .medium, design: .rounded))
                         .monospacedDigit()
                         .foregroundStyle(appearance.usesArtworkTint ? baseColor : .white.opacity(0.4))
@@ -299,4 +303,9 @@ private struct NowPlayingAppearancePreview: View {
         }
         .frame(width: 34, height: 34)
     }
+
+    private func localized(_ key: String, fallback: String? = nil) -> String {
+        applicationSettings.appLanguage.locale.dn(key, fallback: fallback)
+    }
+
 }

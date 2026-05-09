@@ -215,6 +215,10 @@ private extension NotchView {
                 HStack(spacing: 0) {
                     Color.clear.frame(width: outerPad)
                     pillLeftWidgetView
+                    .onTapGesture {
+                        openWindow(id: WindowsScene.settings)
+                        SettingsWindowCoordinator.activate()
+                    }
                     .opacity(dashboardOpen ? 0 : 1)
                     .scaleEffect(dashboardOpen ? 0.72 : 1, anchor: .leading)
                     .allowsHitTesting(!dashboardOpen)
@@ -307,6 +311,10 @@ private extension NotchView {
                     Spacer(minLength: 0)
                     ZStack(alignment: .trailing) {
                         pillRightWidgetView
+                        .onTapGesture {
+                            openWindow(id: WindowsScene.settings)
+                            SettingsWindowCoordinator.activate()
+                        }
                         .opacity(dashboardOpen ? 0 : 1)
                         .scaleEffect(dashboardOpen ? 0.72 : 1, anchor: .trailing)
                         .allowsHitTesting(!dashboardOpen)
@@ -459,20 +467,7 @@ private extension NotchView {
         }
     }
 
-    func pillColor(_ v: Double, warn: Double, danger: Double) -> Color {
-        v >= danger ? .red : v >= warn ? .orange : .green.opacity(0.9)
-    }
 
-    // Speed colour: green(idle) → cyan → blue → orange → red(saturated)
-    func speedColor(_ bytesPerSec: Double) -> Color {
-        switch bytesPerSec {
-        case ..<50_000:           return .cyan
-        case ..<500_000:          return .mint
-        case ..<5_000_000:        return .green
-        case ..<20_000_000:       return .yellow
-        default:                  return .orange
-        }
-    }
 
     @ViewBuilder
     private var pillLeftWidgetView: some View {
@@ -530,17 +525,17 @@ private extension NotchView {
             .font(.system(size: 10, weight: .medium, design: .monospaced))
         case .cpu:
             ProgressRing(progress: systemMonitorViewModel.cpuUsage,
-                         color: pillColor(systemMonitorViewModel.cpuUsage, warn: 50, danger: 80),
+                         color: Color.pillColor(systemMonitorViewModel.cpuUsage, warn: 50, danger: 80),
                          label: "CPU")
                 .frame(width: ringSize, height: ringSize)
         case .memory:
             ProgressRing(progress: systemMonitorViewModel.memoryUsage,
-                         color: pillColor(systemMonitorViewModel.memoryUsage, warn: 70, danger: 85),
+                         color: Color.pillColor(systemMonitorViewModel.memoryUsage, warn: 70, danger: 85),
                          label: "MEM")
                 .frame(width: ringSize, height: ringSize)
         case .disk:
             ProgressRing(progress: systemMonitorViewModel.diskUsage,
-                         color: pillColor(systemMonitorViewModel.diskUsage, warn: 80, danger: 90),
+                         color: Color.pillColor(systemMonitorViewModel.diskUsage, warn: 80, danger: 90),
                          label: "DSK")
                 .frame(width: ringSize, height: ringSize)
         }
@@ -805,7 +800,7 @@ enum DashboardTab: String, CaseIterable {
         }
     }
 
-    var title: LocalizedStringKey {
+    var title: String {
         switch self {
         case .overview: return "Overview"
         case .music:    return "Music"
@@ -944,11 +939,11 @@ private struct DashboardPanelView: View {
                     gaugeCard(title: "CPU",
                               value: systemMonitorViewModel.cpuUsage,
                               valueText: "\(Int(systemMonitorViewModel.cpuUsage))%",
-                              color: usageColor(systemMonitorViewModel.cpuUsage, warn: 50, danger: 80))
+                              color: Color.thresholdColor(systemMonitorViewModel.cpuUsage, warn: 50, danger: 80))
                     gaugeCard(title: "MEM",
                               value: systemMonitorViewModel.memoryUsage,
                               valueText: "\(Int(systemMonitorViewModel.memoryUsage))%",
-                              color: usageColor(systemMonitorViewModel.memoryUsage, warn: 70, danger: 85))
+                              color: Color.thresholdColor(systemMonitorViewModel.memoryUsage, warn: 70, danger: 85))
                     speedCard(sfSymbol: "arrow.up",
                               speed: systemMonitorViewModel.uploadSpeed,
                               label: "Upload")
@@ -957,11 +952,11 @@ private struct DashboardPanelView: View {
                     gaugeCard(title: "DISK",
                               value: systemMonitorViewModel.diskUsage,
                               valueText: "\(Int(systemMonitorViewModel.diskUsage))%",
-                              color: usageColor(systemMonitorViewModel.diskUsage, warn: 80, danger: 90))
+                              color: Color.thresholdColor(systemMonitorViewModel.diskUsage, warn: 80, danger: 90))
                     gaugeCard(title: systemMonitorViewModel.isCharging ? "BAT⚡" : "BAT",
                               value: Double(systemMonitorViewModel.batteryLevel),
                               valueText: "\(systemMonitorViewModel.batteryLevel)%",
-                              color: batteryColor(systemMonitorViewModel.batteryLevel,
+                              color: Color.batteryColor(systemMonitorViewModel.batteryLevel,
                                                   isCharging: systemMonitorViewModel.isCharging))
                     speedCard(sfSymbol: "arrow.down",
                               speed: systemMonitorViewModel.downloadSpeed,
@@ -1001,10 +996,10 @@ private struct DashboardPanelView: View {
         VStack(spacing: 3) {
             Image(systemName: sfSymbol)
                 .font(.system(size: 10, weight: .bold))
-                .foregroundStyle(netSpeedColor(speed))
+                .foregroundStyle(Color.netSpeedColor(speed))
             Text(systemMonitorViewModel.formattedSpeed(speed))
                 .font(.system(size: 13, weight: .semibold, design: .monospaced))
-                .foregroundStyle(netSpeedColor(speed))
+                .foregroundStyle(Color.netSpeedColor(speed))
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
             Text(label)
@@ -1029,29 +1024,6 @@ private struct DashboardPanelView: View {
         }
     }
 
-    // MARK: Helpers
-
-    private func usageColor(_ v: Double, warn: Double, danger: Double) -> Color {
-        v >= danger ? .red : v >= warn ? .orange : .green.opacity(0.9)
-    }
-
-    private func batteryColor(_ level: Int, isCharging: Bool) -> Color {
-        if isCharging { return .green }
-        if level <= 20 { return .red }
-        if level <= 40 { return .orange }
-        return .green.opacity(0.9)
-    }
-
-    private func netSpeedColor(_ bps: Double) -> Color {
-        switch bps {
-        case ..<50_000:     return .cyan
-        case ..<500_000:    return .mint
-        case ..<2_000_000:  return .green
-        case ..<10_000_000: return .yellow
-        case ..<50_000_000: return .orange
-        default:            return .red
-        }
-    }
 }
 
 // MARK: - OverviewView
@@ -1230,11 +1202,11 @@ private struct OverviewView: View {
         VStack(spacing: 6) {
             HStack(spacing: 14) {
                 statBlock("\(Int(systemMonitorViewModel.cpuUsage))%",  "CPU",
-                          usageColor(systemMonitorViewModel.cpuUsage,  warn: 50, danger: 80))
+                          Color.thresholdColor(systemMonitorViewModel.cpuUsage,  warn: 50, danger: 80))
                 statBlock("\(Int(systemMonitorViewModel.memoryUsage))%", "RAM",
-                          usageColor(systemMonitorViewModel.memoryUsage, warn: 70, danger: 85))
+                          Color.thresholdColor(systemMonitorViewModel.memoryUsage, warn: 70, danger: 85))
                 statBlock("\(Int(systemMonitorViewModel.diskUsage))%",  "DISK",
-                          usageColor(systemMonitorViewModel.diskUsage,  warn: 80, danger: 90))
+                          Color.thresholdColor(systemMonitorViewModel.diskUsage,  warn: 80, danger: 90))
             }
             HStack(spacing: 3) {
                 Image(systemName: "internaldrive").font(.system(size: 9))
@@ -1255,10 +1227,6 @@ private struct OverviewView: View {
                 .font(.system(size: 8, weight: .medium))
                 .foregroundStyle(.white.opacity(0.4))
         }
-    }
-
-    private func usageColor(_ v: Double, warn: Double, danger: Double) -> Color {
-        v >= danger ? .red : v >= warn ? .orange : .green.opacity(0.9)
     }
 
     // MARK: – 番茄计时器列
@@ -1460,108 +1428,6 @@ private struct OverviewAppPickerView: View {
         }
         .frame(width: 300)
         .onAppear { allApps.loadIfNeeded() }
-    }
-}
-
-// MARK: - PomodoroInlineView
-
-private struct PomodoroInlineView: View {
-    enum PomodoroState { case idle, work, rest }
-
-    @AppStorage(AppStorageKeys.Overview.pomodoroDuration) private var workMinutes = 25
-    @State private var state: PomodoroState = .idle
-    @State private var remaining: Int = 0
-    @State private var timerTask: Task<Void, Never>? = nil
-
-    private var displayTime: String {
-        let m = remaining / 60, s = remaining % 60
-        return String(format: "%02d:%02d", m, s)
-    }
-
-    var body: some View {
-        HStack(spacing: 8) {
-            Image(systemName: state == .idle ? "timer" : state == .work ? "flame.fill" : "cup.and.heat.waves.fill")
-                .font(.system(size: 10))
-                .foregroundStyle(state == .work ? .orange : state == .rest ? .mint : .white.opacity(0.4))
-            if state == .idle {
-                Text("专注 \(workMinutes) 分钟")
-                    .font(.system(size: 10))
-                    .foregroundStyle(.white.opacity(0.45))
-                Spacer()
-                Button { start() } label: {
-                    Text("开始")
-                        .font(.system(size: 10, weight: .medium))
-                        .foregroundStyle(.orange)
-                }
-                .buttonStyle(.plain)
-            } else {
-                Text(displayTime)
-                    .font(.system(size: 12, weight: .semibold, design: .monospaced))
-                    .foregroundStyle(state == .work ? .orange : .mint)
-                Text(state == .work ? "专注中" : "休息中")
-                    .font(.system(size: 9))
-                    .foregroundStyle(.white.opacity(0.4))
-                Spacer()
-                Button { stop() } label: {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 9))
-                        .foregroundStyle(.white.opacity(0.4))
-                }
-                .buttonStyle(.plain)
-            }
-        }
-    }
-
-    private func start() {
-        remaining = workMinutes * 60
-        state = .work
-        timerTask?.cancel()
-        timerTask = Task {
-            while !Task.isCancelled, remaining > 0 {
-                try? await Task.sleep(for: .seconds(1))
-                if !Task.isCancelled { remaining -= 1 }
-            }
-            if !Task.isCancelled { state = .idle }
-        }
-    }
-
-    private func stop() {
-        timerTask?.cancel()
-        timerTask = nil
-        state = .idle
-    }
-}
-
-// MARK: - StatBar
-
-private struct StatBar: View {
-    let label: String
-    let fraction: Double
-    let valueText: String
-    let color: Color
-
-    var body: some View {
-        HStack(spacing: 10) {
-            Text(label)
-                .font(.system(size: 10, weight: .medium, design: .monospaced))
-                .foregroundStyle(.white.opacity(0.45))
-                .frame(width: 44, alignment: .leading)
-
-            GeometryReader { geo in
-                ZStack(alignment: .leading) {
-                    Capsule().fill(Color.white.opacity(0.1))
-                    Capsule().fill(color)
-                        .frame(width: max(4, geo.size.width * CGFloat(min(fraction, 1))))
-                        .animation(.easeInOut(duration: 0.4), value: fraction)
-                }
-            }
-            .frame(height: 4)
-
-            Text(valueText)
-                .font(.system(size: 10, weight: .semibold, design: .monospaced))
-                .foregroundStyle(.white)
-                .frame(width: 48, alignment: .trailing)
-        }
     }
 }
 
@@ -2390,8 +2256,6 @@ private struct SwipeEventMonitor: NSViewRepresentable {
         private var monitor: Any?
         private var accumX: CGFloat = 0
         private var didFire = false
-        private var lastFiredAt: Date = .distantPast
-        private let cooldown: TimeInterval = 0.45
 
         func start(left: @escaping () -> Void, right: @escaping () -> Void) {
             onSwipeLeft = left
@@ -2409,8 +2273,7 @@ private struct SwipeEventMonitor: NSViewRepresentable {
         private func handle(_ event: NSEvent) -> NSEvent? {
             if event.phase == .began {
                 accumX = 0
-                // 冷却期内忽略新手势
-                didFire = Date().timeIntervalSince(lastFiredAt) < cooldown
+                didFire = false
             }
             if event.phase == .ended || event.phase == .cancelled {
                 accumX = 0
@@ -2427,13 +2290,11 @@ private struct SwipeEventMonitor: NSViewRepresentable {
             if accumX < -55 {
                 didFire = true
                 accumX = 0
-                lastFiredAt = Date()
                 DispatchQueue.main.async { self.onSwipeLeft?() }
                 return nil
             } else if accumX > 55 {
                 didFire = true
                 accumX = 0
-                lastFiredAt = Date()
                 DispatchQueue.main.async { self.onSwipeRight?() }
                 return nil
             }

@@ -123,7 +123,7 @@ private enum SettingsSectionCatalog {
         case .interface:
             return .init(
                 titleKey: "settings.section.interface.title",
-                fallbackTitle: "界面",
+                fallbackTitle: "Interface",
                 subtitleKey: "settings.section.interface.subtitle",
                 fallbackSubtitle: "Dashboard layout, app grid, and overview customization.",
                 searchKeywords: [

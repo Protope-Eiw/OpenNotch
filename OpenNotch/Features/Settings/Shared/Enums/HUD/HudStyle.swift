@@ -5,7 +5,7 @@ enum HudStyle: String, CaseIterable {
     case compact
     case minimal
 
-    var title: LocalizedStringKey {
+    var title: String {
         switch self {
         case .standard:
             return "settings.hud.style.standard"

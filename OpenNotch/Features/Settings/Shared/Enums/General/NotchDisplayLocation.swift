@@ -13,7 +13,7 @@ enum NotchDisplayLocation: String, CaseIterable {
     case builtIn
     case specific
 
-    var title: LocalizedStringKey {
+    var title: String {
         switch self {
         case .main:
             return "settings.general.display.main"

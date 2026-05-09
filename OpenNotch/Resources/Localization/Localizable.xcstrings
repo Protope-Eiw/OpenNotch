@@ -116,9 +116,6 @@
         }
       }
     },
-    "%lld 分钟" : {
-
-    },
     "%lld%%" : {
       "localizations" : {
         "en" : {
@@ -156,9 +153,6 @@
     "↓%@" : {
 
     },
-    "00:10" : {
-
-    },
     "00:13:06" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -189,6 +183,7 @@
       }
     },
     "1:21" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -217,6 +212,7 @@
       }
     },
     "01:21" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -244,10 +240,8 @@
         }
       }
     },
-    "1.2 MB" : {
-
-    },
     "3:34" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -276,6 +270,7 @@
       }
     },
     "03:34" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -302,9 +297,6 @@
           }
         }
       }
-    },
-    "3.8 MB" : {
-
     },
     "20%" : {
       "localizations" : {
@@ -363,9 +355,6 @@
         }
       }
     },
-    "78%" : {
-
-    },
     "100%" : {
       "localizations" : {
         "en" : {
@@ -395,6 +384,7 @@
       }
     },
     "Accent" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -423,6 +413,7 @@
       }
     },
     "Accent tint" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -451,6 +442,7 @@
       }
     },
     "Adjust how quickly the notch press peaks and hold-to-expand triggers." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -479,6 +471,7 @@
       }
     },
     "Adjust the thickness of the notch outline." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -507,6 +500,7 @@
       }
     },
     "AirDrop" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -621,13 +615,11 @@
         }
       }
     },
-    "AirPods Pro" : {
-
-    },
     "All" : {
 
     },
     "Allow gestures to bring back the most recently dismissed activity." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -656,6 +648,7 @@
       }
     },
     "Allow gestures to hide the currently visible live or temporary activity." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -684,6 +677,7 @@
       }
     },
     "Allow the selected notch gesture to open the expanded live activity layout when supported." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -712,6 +706,7 @@
       }
     },
     "Animated background" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -740,6 +735,7 @@
       }
     },
     "Animation" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -768,6 +764,7 @@
       }
     },
     "Animation speed" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -795,10 +792,8 @@
         }
       }
     },
-    "App Launcher" : {
-
-    },
     "Appearance" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -914,6 +909,7 @@
       }
     },
     "Apply the standard white stroke to supported activities instead of feature accent colors." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -942,6 +938,7 @@
       }
     },
     "Artwork-tinted progress" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -970,6 +967,7 @@
       }
     },
     "Artwork-tinted stroke" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1027,6 +1025,7 @@
       }
     },
     "Automatically hide live activity while the selected display is showing a full-screen space." : {
+      "extractionState" : "stale",
       "localizations" : {
         "es" : {
           "stringUnit" : {
@@ -1049,6 +1048,7 @@
       }
     },
     "Background" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1077,6 +1077,7 @@
       }
     },
     "Background brightness" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1105,6 +1106,7 @@
       }
     },
     "Bar" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1133,6 +1135,7 @@
       }
     },
     "Battery activity" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1161,6 +1164,7 @@
       }
     },
     "Battery duration" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1189,6 +1193,7 @@
       }
     },
     "Battery indicator" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1246,6 +1251,7 @@
       }
     },
     "Battery-colored stroke" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1274,6 +1280,7 @@
       }
     },
     "Black" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1302,6 +1309,7 @@
       }
     },
     "Black background" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1330,6 +1338,7 @@
       }
     },
     "Blend the app accent color into the lock-screen widget background." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1416,6 +1425,7 @@
       }
     },
     "Bluetooth activity" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1444,6 +1454,7 @@
       }
     },
     "Bluetooth appearance" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1501,6 +1512,7 @@
       }
     },
     "Bluetooth duration" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1529,6 +1541,7 @@
       }
     },
     "Bluetooth style" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1557,6 +1570,7 @@
       }
     },
     "Bluetooth temporary activity" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1585,6 +1599,7 @@
       }
     },
     "Brighten or darken the widget background without changing the selected material style." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1613,6 +1628,7 @@
       }
     },
     "Brightness duration" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1641,6 +1657,7 @@
       }
     },
     "Brightness HUD" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1755,9 +1772,6 @@
         }
       }
     },
-    "Calendar" : {
-
-    },
     "Carry notch context and media playback into the lock screen transition for a more cohesive experience." : {
       "localizations" : {
         "en" : {
@@ -1815,6 +1829,7 @@
       }
     },
     "Charging" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1843,6 +1858,7 @@
       }
     },
     "Charging duration" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1928,6 +1944,7 @@
       }
     },
     "Choose between a device-focused layout or full device details." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2014,6 +2031,7 @@
       }
     },
     "Choose how long the Bluetooth connection notification stays visible." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2042,6 +2060,7 @@
       }
     },
     "Choose how long the brightness HUD stays visible." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2070,6 +2089,7 @@
       }
     },
     "Choose how long the charging notification stays visible." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2098,6 +2118,7 @@
       }
     },
     "Choose how long the Focus off notification stays visible." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2126,6 +2147,7 @@
       }
     },
     "Choose how long the full battery notification stays visible." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2154,6 +2176,7 @@
       }
     },
     "Choose how long the keyboard backlight HUD stays visible." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2182,6 +2205,7 @@
       }
     },
     "Choose how long the low battery notification stays visible." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2210,6 +2234,7 @@
       }
     },
     "Choose how long the paused player stays visible before the notch closes." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2238,6 +2263,7 @@
       }
     },
     "Choose how long the volume HUD stays visible." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2266,6 +2292,7 @@
       }
     },
     "Choose how long the VPN connection notification stays visible." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2294,6 +2321,7 @@
       }
     },
     "Choose how long the Wi-Fi reconnect notification stays visible." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2322,6 +2350,7 @@
       }
     },
     "Choose how much information the download activity shows at a glance." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2524,6 +2553,7 @@
       }
     },
     "Choose the background color used across the notch." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2581,6 +2611,7 @@
       }
     },
     "Choose the battery percentage that triggers the full charge notification." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2609,6 +2640,7 @@
       }
     },
     "Choose the battery percentage that triggers the low battery notification." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2637,6 +2669,7 @@
       }
     },
     "Choose the interface appearance used by the app." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2665,6 +2698,7 @@
       }
     },
     "Choose the language used by the app interface." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2809,6 +2843,7 @@
       }
     },
     "Choose whether Bluetooth battery information is shown as a percentage or a circular indicator." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2837,6 +2872,7 @@
       }
     },
     "Choose whether download progress uses a percentage label or a circular ring." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2865,6 +2901,7 @@
       }
     },
     "Choose whether expanded content opens on click or after holding the notch." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2893,6 +2930,7 @@
       }
     },
     "Choose whether Focus shows the On and Off labels or only the moon icon." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2950,6 +2988,7 @@
       }
     },
     "Choose whether the alert uses the current detailed card or a compact charging-like layout." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2978,6 +3017,7 @@
       }
     },
     "Choose whether the hotspot activity stays minimal or shows more status." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3006,6 +3046,7 @@
       }
     },
     "Choose whether the HUD level uses a bar or a circular ring." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3034,6 +3075,7 @@
       }
     },
     "Choose whether the VPN activity stays compact or shows tunnel details." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3061,10 +3103,8 @@
         }
       }
     },
-    "Choose which background will be displayed when playing media." : {
-
-    },
     "Choose which display Dynamic Notch should use." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3151,6 +3191,7 @@
       }
     },
     "Choose which target appears while files are dragged over the notch." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3179,6 +3220,7 @@
       }
     },
     "Circle" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3236,6 +3278,7 @@
       }
     },
     "Click" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3293,6 +3336,7 @@
       }
     },
     "Close delay" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3321,6 +3365,7 @@
       }
     },
     "Color the notch stroke using the current artwork palette." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3349,6 +3394,7 @@
       }
     },
     "Color the progress bar and timer labels using the current artwork palette." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3377,6 +3423,7 @@
       }
     },
     "Colored level tint" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3405,6 +3452,7 @@
       }
     },
     "Combined" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3462,6 +3510,7 @@
       }
     },
     "Compact" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3902,6 +3951,7 @@
 
     },
     "Debug Ensemble" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3959,6 +4009,7 @@
       }
     },
     "Default" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4016,6 +4067,7 @@
       }
     },
     "Default stroke" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4044,6 +4096,7 @@
       }
     },
     "Detailed" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4130,6 +4183,7 @@
       }
     },
     "Display" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4158,6 +4212,7 @@
       }
     },
     "Download activity" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4186,6 +4241,7 @@
       }
     },
     "Download appearance" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4214,6 +4270,7 @@
       }
     },
     "Download style" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4271,6 +4328,7 @@
       }
     },
     "Downloads live activity" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4299,6 +4357,7 @@
       }
     },
     "Drag&Drop activity" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4327,6 +4386,7 @@
       }
     },
     "Drag&Drop live activity" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4355,6 +4415,7 @@
       }
     },
     "Drag&Drop target" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4498,6 +4559,7 @@
       }
     },
     "Enlarged" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4555,6 +4617,7 @@
       }
     },
     "Expand gesture" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4583,6 +4646,7 @@
       }
     },
     "Expand live activity" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4669,6 +4733,7 @@
       }
     },
     "Fine-tune the notch height to better match your display cutout." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4697,6 +4762,7 @@
       }
     },
     "Fine-tune the notch width to better match your display cutout." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4725,6 +4791,7 @@
       }
     },
     "Focus activity" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4753,6 +4820,7 @@
       }
     },
     "Focus appearance" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4781,6 +4849,7 @@
       }
     },
     "Focus duration" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4809,6 +4878,7 @@
       }
     },
     "Focus live activity" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4866,6 +4936,7 @@
       }
     },
     "Focus off activity" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4894,6 +4965,7 @@
       }
     },
     "Focus off duration" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4951,6 +5023,7 @@
       }
     },
     "Focus style" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4979,6 +5052,7 @@
       }
     },
     "Full battery" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5036,6 +5110,7 @@
       }
     },
     "Full battery duration" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5064,6 +5139,7 @@
       }
     },
     "Full battery style" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5092,6 +5168,7 @@
       }
     },
     "Full charge threshold" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5120,6 +5197,7 @@
       }
     },
     "Fully Charged" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5148,6 +5226,7 @@
       }
     },
     "Gestures" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5292,6 +5371,7 @@
       }
     },
     "Hide favorite" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5320,6 +5400,7 @@
       }
     },
     "Hide live activity in full-screen mode" : {
+      "extractionState" : "stale",
       "localizations" : {
         "es" : {
           "stringUnit" : {
@@ -5371,6 +5452,7 @@
       }
     },
     "Hide output device" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5457,6 +5539,7 @@
       }
     },
     "Hotspot appearance" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5485,6 +5568,7 @@
       }
     },
     "Hover" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5542,6 +5626,7 @@
       }
     },
     "HUD activity" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5570,6 +5655,7 @@
       }
     },
     "HUD appearance" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5598,6 +5684,7 @@
       }
     },
     "HUD duration" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5713,6 +5800,7 @@
       }
     },
     "Icons Only" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5770,6 +5858,7 @@
       }
     },
     "Keep Now Playing visible in the notch while playback is paused." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5827,6 +5916,7 @@
       }
     },
     "Keep the app visible in the Dock for faster switching and window access." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5884,6 +5974,7 @@
       }
     },
     "Keyboard duration" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5912,6 +6003,7 @@
       }
     },
     "Keyboard HUD" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5940,6 +6032,7 @@
       }
     },
     "Language" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5968,6 +6061,7 @@
       }
     },
     "Launch at login" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5996,6 +6090,7 @@
       }
     },
     "Launch Dynamic Notch automatically when you sign in." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6024,6 +6119,7 @@
       }
     },
     "Level indicator" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6052,6 +6148,7 @@
       }
     },
     "Level-based stroke color" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6080,6 +6177,7 @@
       }
     },
     "Liquid Glass" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6136,6 +6234,7 @@
       }
     },
     "Localization" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6164,6 +6263,7 @@
       }
     },
     "Localization only works for settings, the notch remains in English." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6192,6 +6292,7 @@
       }
     },
     "Location" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6248,6 +6349,7 @@
       }
     },
     "Lock screen activity" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6305,6 +6407,7 @@
       }
     },
     "Lock screen live activity" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6333,6 +6436,7 @@
       }
     },
     "Lock screen media panel" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6361,6 +6465,7 @@
       }
     },
     "Lock screen sound" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6447,6 +6552,7 @@
       }
     },
     "Low battery" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6475,6 +6581,7 @@
       }
     },
     "Low battery duration" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6503,6 +6610,7 @@
       }
     },
     "Low battery style" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6531,6 +6639,7 @@
       }
     },
     "Low battery threshold" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6559,6 +6668,7 @@
       }
     },
     "Low Power" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6673,6 +6783,7 @@
       }
     },
     "Material" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6701,6 +6812,7 @@
       }
     },
     "Media panel background" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6732,6 +6844,7 @@
 
     },
     "Midnight Echoes" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6760,6 +6873,7 @@
       }
     },
     "Minimal" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6788,6 +6902,7 @@
       }
     },
     "Motion animation" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6816,6 +6931,7 @@
       }
     },
     "Mouse drag gestures" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6843,13 +6959,11 @@
         }
       }
     },
-    "Music" : {
-
-    },
     "Music player with playback controls and progress bar." : {
 
     },
     "Network activity" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6878,6 +6992,7 @@
       }
     },
     "Network duration" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6967,6 +7082,7 @@
       }
     },
     "No internet temporary activity" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -7024,6 +7140,7 @@
       }
     },
     "Notch appearance" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -7051,10 +7168,8 @@
         }
       }
     },
-    "Notch Bar Display" : {
-
-    },
     "Notch height" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -7112,6 +7227,7 @@
       }
     },
     "Notch width" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -7259,6 +7375,7 @@
       }
     },
     "Now Playing live activity" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -7402,6 +7519,7 @@
       }
     },
     "Only notify on network change" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -7430,6 +7548,7 @@
       }
     },
     "Only show Wi-Fi or VPN notifications when the connected network actually changes." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -7515,10 +7634,8 @@
         }
       }
     },
-    "Overview" : {
-
-    },
     "Paused playback" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -7547,6 +7664,7 @@
       }
     },
     "Percent" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -7632,6 +7750,7 @@
       }
     },
     "Personal Hotspot live activity" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -7689,6 +7808,7 @@
       }
     },
     "Play a sound when locking or unlocking your Mac." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -7775,6 +7895,7 @@
       }
     },
     "Play animation of cell movement when hovering a file over an area." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -7803,6 +7924,7 @@
       }
     },
     "Playback activity" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -7889,6 +8011,7 @@
       }
     },
     "Player appearance" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -7946,6 +8069,7 @@
       }
     },
     "Press and hold" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -7974,6 +8098,7 @@
       }
     },
     "Press and hold timing" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -8089,6 +8214,7 @@
       }
     },
     "Progress indicator" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -8210,6 +8336,7 @@
       }
     },
     "Remove the favorite button from the expanded player controls." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -8238,6 +8365,7 @@
       }
     },
     "Remove the output device button from the expanded player controls." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -8294,9 +8422,6 @@
         }
       }
     },
-    "Replace the keyboard backlight HUD with OpenNotch HUD." : {
-
-    },
     "Replace the system brightness HUD with DynamicNotch HUD." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -8325,9 +8450,6 @@
           }
         }
       }
-    },
-    "Replace the system brightness HUD with OpenNotch HUD." : {
-
     },
     "Replace the system volume HUD with DynamicNotch HUD." : {
       "extractionState" : "stale",
@@ -8358,10 +8480,8 @@
         }
       }
     },
-    "Replace the system volume HUD with OpenNotch HUD." : {
-
-    },
     "Reset" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -8535,6 +8655,7 @@
       }
     },
     "Screen Recording activity" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -8563,6 +8684,7 @@
       }
     },
     "Screen Recording live activity" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -8594,6 +8716,7 @@
 
     },
     "Set a global motion parameter that controls the speed of the animation." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -8941,6 +9064,7 @@
       }
     },
     "settings.general.animation.balanced" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -8969,6 +9093,7 @@
       }
     },
     "settings.general.animation.fast" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -8997,6 +9122,7 @@
       }
     },
     "settings.general.animation.faster" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -9025,6 +9151,7 @@
       }
     },
     "settings.general.animation.slow" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -9053,6 +9180,7 @@
       }
     },
     "settings.general.animation.slower" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -9081,6 +9209,7 @@
       }
     },
     "settings.general.appearance.dark" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -9109,6 +9238,7 @@
       }
     },
     "settings.general.appearance.light" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -9166,6 +9296,7 @@
       }
     },
     "settings.general.appearance.system" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -9223,6 +9354,7 @@
       }
     },
     "settings.general.display.autoSwitch.description" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -9251,6 +9383,7 @@
       }
     },
     "settings.general.display.autoSwitch.title" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -9279,6 +9412,7 @@
       }
     },
     "settings.general.display.badge.builtin" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -9307,6 +9441,7 @@
       }
     },
     "settings.general.display.badge.external" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -9335,6 +9470,7 @@
       }
     },
     "settings.general.display.badge.main" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -9363,6 +9499,7 @@
       }
     },
     "settings.general.display.badge.unavailable" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -9391,6 +9528,7 @@
       }
     },
     "settings.general.display.builtin" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -9419,6 +9557,7 @@
       }
     },
     "settings.general.display.main" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -9447,6 +9586,7 @@
       }
     },
     "settings.general.display.specific" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -9475,6 +9615,7 @@
       }
     },
     "settings.general.display.specificPicker.description" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -9503,6 +9644,7 @@
       }
     },
     "settings.general.display.specificPicker.title" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -10399,6 +10541,7 @@
       }
     },
     "settings.hud.style.compact" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -10427,6 +10570,7 @@
       }
     },
     "settings.hud.style.minimal" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -10455,6 +10599,7 @@
       }
     },
     "settings.hud.style.standard" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -11092,6 +11237,7 @@
       }
     },
     "settings.notch.priorities.customOrder.description" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -11120,6 +11266,7 @@
       }
     },
     "settings.notch.priorities.customOrder.title" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -11177,6 +11324,7 @@
       }
     },
     "settings.notch.priorities.reset" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -11430,6 +11578,7 @@
       }
     },
     "settings.notch.priorities.title" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -11951,6 +12100,7 @@
       }
     },
     "settings.permissions.card.title" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -13486,6 +13636,7 @@
       }
     },
     "Show a live activity while files are being downloaded to monitored folders like Downloads, Desktop, and Documents." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -13514,6 +13665,7 @@
       }
     },
     "Show a live activity while Focus mode is enabled." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -13542,6 +13694,7 @@
       }
     },
     "Show a live activity while Personal Hotspot is enabled." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -13570,6 +13723,7 @@
       }
     },
     "Show a menu bar shortcut for quick access to Settings and Quit." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -13598,6 +13752,7 @@
       }
     },
     "Show a red recording indicator in the notch while screen capture is active." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -13655,6 +13810,7 @@
       }
     },
     "Show a short notification when a VPN connection becomes active." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -13712,6 +13868,7 @@
       }
     },
     "Show a short notification when Focus mode turns off." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -13740,6 +13897,7 @@
       }
     },
     "Show a short notification when Wi-Fi reconnects." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -13768,6 +13926,7 @@
       }
     },
     "Show a short notification when your Mac loses internet access." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -13796,6 +13955,7 @@
       }
     },
     "Show a subtle outline that adapts to the active content color." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -13824,6 +13984,7 @@
       }
     },
     "Show a temporary activity when a Bluetooth accessory connects." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -13881,6 +14042,7 @@
       }
     },
     "Show a temporary activity when the battery reaches the selected full charge level." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -13909,6 +14071,7 @@
       }
     },
     "Show a temporary activity when your Mac starts charging." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -13937,6 +14100,7 @@
       }
     },
     "Show a warning when Low Power Mode is enabled or the battery is critically low." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -13965,6 +14129,7 @@
       }
     },
     "Show AirDrop and Tray targets when you drag files over the notch." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -13993,6 +14158,7 @@
       }
     },
     "Show Dock icon" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -14079,6 +14245,7 @@
       }
     },
     "Show menu bar icon" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -14107,6 +14274,7 @@
       }
     },
     "Show notch stroke" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -14164,6 +14332,7 @@
       }
     },
     "Show the active Clock timer in the notch." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -14279,6 +14448,7 @@
       }
     },
     "Show the detached media panel on the lock screen while playback is active." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -14423,6 +14593,7 @@
       }
     },
     "Show the lock-screen live activity during lock and unlock transitions." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -14480,6 +14651,7 @@
       }
     },
     "Show the Now Playing live activity while audio or video playback is active." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -14537,6 +14709,7 @@
       }
     },
     "Show the pinned file tray after files are dropped into Tray." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -14739,6 +14912,7 @@
       }
     },
     "Soft" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -14767,6 +14941,7 @@
       }
     },
     "Solid" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -14795,6 +14970,7 @@
       }
     },
     "Standard" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -14852,6 +15028,7 @@
       }
     },
     "Static background" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -14909,6 +15086,7 @@
       }
     },
     "Stroke width" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -14966,6 +15144,7 @@
       }
     },
     "Swipe down to restore" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -14994,6 +15173,7 @@
       }
     },
     "Swipe up to dismiss" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -15022,6 +15202,7 @@
       }
     },
     "System" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -15048,9 +15229,6 @@
           }
         }
       }
-    },
-    "System Status" : {
-
     },
     "Tap to expand live activity" : {
       "extractionState" : "stale",
@@ -15082,6 +15260,7 @@
       }
     },
     "Target mode" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -15225,6 +15404,7 @@
       }
     },
     "Theme" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -15281,6 +15461,7 @@
       }
     },
     "Timer activity" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -15309,6 +15490,7 @@
       }
     },
     "Timer live activity" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -15366,6 +15548,7 @@
       }
     },
     "Tint Bluetooth battery styles using the current battery level color." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -15394,6 +15577,7 @@
       }
     },
     "Tint the notch stroke using the current HUD level color instead of the default white stroke." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -15454,6 +15638,7 @@
       }
     },
     "Trackpad swipe gestures" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -15482,6 +15667,7 @@
       }
     },
     "Tray" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -15510,6 +15696,7 @@
       }
     },
     "Tray live activity" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -15741,6 +15928,7 @@
       }
     },
     "Use click-and-drag over the notch to preview dismiss and restore interactions." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -15769,6 +15957,7 @@
       }
     },
     "Use default activity stroke color" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -15826,6 +16015,7 @@
       }
     },
     "Use the dynamic green-to-red fill for the HUD level indicator instead of a plain white fill." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -15854,6 +16044,7 @@
       }
     },
     "Use the standard white notch stroke instead of the accent-colored download stroke." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -15911,6 +16102,7 @@
       }
     },
     "Use the standard white notch stroke instead of the Drag&Drop accent stroke." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -15968,6 +16160,7 @@
       }
     },
     "Use the standard white notch stroke instead of the Focus accent stroke." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -15996,6 +16189,7 @@
       }
     },
     "Use the standard white notch stroke instead of the full battery alert color." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -16024,6 +16218,7 @@
       }
     },
     "Use the standard white notch stroke instead of the hotspot accent stroke." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -16052,6 +16247,7 @@
       }
     },
     "Use the standard white notch stroke instead of the low battery alert color." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -16080,6 +16276,7 @@
       }
     },
     "Use the standard white notch stroke instead of the orange timer stroke." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -16108,6 +16305,7 @@
       }
     },
     "Use the standard white notch stroke instead of the red recording stroke." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -16136,6 +16334,7 @@
       }
     },
     "Use vertical two-finger scrolling over the notch to dismiss or restore the latest activity." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -16251,6 +16450,7 @@
       }
     },
     "Volume duration" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -16279,6 +16479,7 @@
       }
     },
     "Volume HUD" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -16336,6 +16537,7 @@
       }
     },
     "VPN appearance" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -16393,6 +16595,7 @@
       }
     },
     "VPN duration" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -16421,6 +16624,7 @@
       }
     },
     "VPN style" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -16449,6 +16653,7 @@
       }
     },
     "VPN temporary activity" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -16564,6 +16769,7 @@
       }
     },
     "Wi-Fi duration" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -16592,6 +16798,7 @@
       }
     },
     "Wi-Fi temporary activity" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -16620,6 +16827,7 @@
       }
     },
     "Widget appearance" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -16676,10 +16884,8 @@
         }
       }
     },
-    "WireGuard VPN" : {
-
-    },
     "Without close timer" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -16708,6 +16914,7 @@
       }
     },
     "You can access the menu by right-clicking on the notch area." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -16793,12 +17000,6 @@
         }
       }
     },
-    "不显示组件" : {
-
-    },
-    "专注 %lld 分钟" : {
-
-    },
     "专注中" : {
 
     },
@@ -16806,9 +17007,6 @@
 
     },
     "从快速启动移除" : {
-
-    },
-    "仪表盘" : {
 
     },
     "休息中" : {
@@ -16835,22 +17033,7 @@
     "发送失败，请稍后重试" : {
 
     },
-    "可见标签" : {
-
-    },
     "喜欢就请我喝杯咖啡，完全随意☕️" : {
-
-    },
-    "在概览网格中显示的应用。" : {
-
-    },
-    "天气" : {
-
-    },
-    "完成" : {
-
-    },
-    "工作时长" : {
 
     },
     "已发送，谢谢！" : {
@@ -16859,28 +17042,7 @@
     "已固定 %lld / 12 个应用" : {
 
     },
-    "应用启动器" : {
-
-    },
-    "应用快速启动" : {
-
-    },
-    "开始" : {
-
-    },
-    "快进/快退 15 秒" : {
-
-    },
-    "快速启动应用" : {
-
-    },
     "所有应用都已添加" : {
-
-    },
-    "打开仪表盘时显示的标签页。" : {
-
-    },
-    "打开方式" : {
 
     },
     "提交反馈或建议" : {
@@ -16889,37 +17051,16 @@
     "搜索应用" : {
 
     },
-    "日历" : {
-
-    },
-    "时间与日期" : {
-
-    },
     "有什么想说的？功能建议、使用问题都欢迎……" : {
 
     },
     "未找到匹配应用" : {
 
     },
-    "概览" : {
-
-    },
     "没有日程" : {
 
     },
-    "添加" : {
-
-    },
     "点击 + 添加应用" : {
-
-    },
-    "番茄计时器" : {
-
-    },
-    "系统信息" : {
-
-    },
-    "系统状态" : {
 
     },
     "联系方式（可选）" : {
@@ -16928,28 +17069,7 @@
     "获取天气中…" : {
 
     },
-    "记住上次" : {
-
-    },
-    "选择应用" : {
-
-    },
     "邮箱或微信，方便回复你" : {
-
-    },
-    "隐藏刘海左右两侧的所有 widget。" : {
-
-    },
-    "隐藏应用名称" : {
-
-    },
-    "音乐" : {
-
-    },
-    "音频频谱可视化" : {
-
-    },
-    "默认标签" : {
 
     }
   },

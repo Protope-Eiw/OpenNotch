@@ -53,9 +53,9 @@ struct SystemMonitorBarView: View {
     private var rightPill: some View {
         HStack(spacing: 5) {
             Text("CPU \(Int(viewModel.cpuUsage))%")
-                .foregroundStyle(usageColor(viewModel.cpuUsage, warn: 50, danger: 80))
+                .foregroundStyle(Color.thresholdColor(viewModel.cpuUsage, warn: 50, danger: 80))
             Text("MEM \(Int(viewModel.memoryUsage))%")
-                .foregroundStyle(usageColor(viewModel.memoryUsage, warn: 70, danger: 85))
+                .foregroundStyle(Color.thresholdColor(viewModel.memoryUsage, warn: 70, danger: 85))
             Spacer(minLength: 0)
         }
         .font(.system(size: 11, weight: .medium, design: .monospaced))
@@ -73,9 +73,4 @@ struct SystemMonitorBarView: View {
         )
     }
 
-    private func usageColor(_ value: Double, warn: Double, danger: Double) -> Color {
-        if value >= danger { return .red }
-        if value >= warn   { return .orange }
-        return .green.opacity(0.9)
-    }
 }

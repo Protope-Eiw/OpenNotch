@@ -18,10 +18,10 @@ struct DropSettingsView: View {
     }
     
     private var dragAndDropActivity: some View {
-        SettingsCard(title: "Drag&Drop activity") {
+        SettingsCard(title: localized("Drag&Drop activity")) {
             SettingsToggleRow(
-                title: "Drag&Drop live activity",
-                description: "Show AirDrop and Tray targets when you drag files over the notch.",
+                title: localized("Drag&Drop live activity"),
+                description: localized("Show AirDrop and Tray targets when you drag files over the notch."),
                 systemImage: "tray.and.arrow.down.fill",
                 color: .blue,
                 isOn: $mediaSettings.isDragAndDropLiveActivityEnabled,
@@ -34,8 +34,8 @@ struct DropSettingsView: View {
                 .frame(maxWidth: .infinity, alignment: .trailing)
 
             SettingsToggleRow(
-                title: "Tray live activity",
-                description: "Show the pinned file tray after files are dropped into Tray.",
+                title: localized("Tray live activity"),
+                description: localized("Show the pinned file tray after files are dropped into Tray."),
                 systemImage: "tray.full.fill",
                 color: .black,
                 isOn: $mediaSettings.isTrayLiveActivityEnabled,
@@ -45,7 +45,7 @@ struct DropSettingsView: View {
     }
 
     private var dragAndDropMode: some View {
-        SettingsCard(title: "Drag&Drop target") {
+        SettingsCard(title: localized("Drag&Drop target")) {
             SettingsNotchPreview(
                 width: dragAndDropPreviewNotchWidth,
                 height: 148,
@@ -65,10 +65,10 @@ struct DropSettingsView: View {
             SettingsDivider()
 
             SettingsMenuRow(
-                title: "Target mode",
-                description: "Choose which target appears while files are dragged over the notch.",
+                title: localized("Target mode"),
+                description: localized("Choose which target appears while files are dragged over the notch."),
                 options: Array(DragAndDropActivityMode.allCases),
-                optionTitle: { $0.title },
+                optionTitle: { localized($0.title) },
                 accessibilityIdentifier: "settings.activities.live.drop.mode",
                 selection: $mediaSettings.dragAndDropActivityMode
             )
@@ -76,8 +76,8 @@ struct DropSettingsView: View {
             SettingsDivider()
 
             SettingsStrokeToggleRow(
-                title: "Default stroke",
-                description: "Use the standard white notch stroke instead of the Drag&Drop accent stroke.",
+                title: localized("Default stroke"),
+                description: localized("Use the standard white notch stroke instead of the Drag&Drop accent stroke."),
                 isOn: $mediaSettings.isDragAndDropDefaultStrokeEnabled,
                 accessibilityIdentifier: "settings.activities.live.drop.defaultStroke"
             )
@@ -90,8 +90,8 @@ struct DropSettingsView: View {
                 .frame(maxWidth: .infinity, alignment: .trailing)
             
             SettingsToggleRow(
-                title: "Motion animation",
-                description: "Play animation of cell movement when hovering a file over an area.",
+                title: localized("Motion animation"),
+                description: localized("Play animation of cell movement when hovering a file over an area."),
                 systemImage: "cursorarrow.motionlines",
                 color: .pink,
                 isOn: $mediaSettings.isDropMotionAnimationEnabled,
@@ -139,5 +139,9 @@ struct DropSettingsView: View {
     private func dragAndDropPreviewTarget(_ target: DragAndDropTarget) -> some View {
         DragAndDropDropZoneContent(target: target, isTargeted: false)
             .frame(maxWidth: .infinity)
+    }
+    
+    private func localized(_ key: String, fallback: String? = nil) -> String {
+        appearanceSettings.appLanguage.locale.dn(key, fallback: fallback ?? key)
     }
 }

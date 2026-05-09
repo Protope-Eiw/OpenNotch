@@ -12,7 +12,7 @@ enum SettingsAppearanceMode: String, CaseIterable {
     case light
     case dark
 
-    var title: LocalizedStringKey {
+    var title: String {
         switch self {
         case .system:
             return "settings.general.appearance.system"

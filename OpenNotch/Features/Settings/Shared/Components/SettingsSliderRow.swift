@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct SettingsSliderRow: View {
-    let title: LocalizedStringKey
-    let description: LocalizedStringKey?
+    let title: String
+    let description: String?
     let range: ClosedRange<Double>
     let step: Double
     let fractionLength: Int

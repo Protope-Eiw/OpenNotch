@@ -1,15 +1,15 @@
 import SwiftUI
 
 struct SettingsStrokeToggleRow: View {
-    let title: LocalizedStringKey
-    let description: LocalizedStringKey
+    let title: String
+    let description: String
     let accessibilityIdentifier: String?
 
     @Binding var isOn: Bool
 
     init(
-        title: LocalizedStringKey,
-        description: LocalizedStringKey,
+        title: String,
+        description: String,
         isOn: Binding<Bool>,
         accessibilityIdentifier: String? = nil
     ) {

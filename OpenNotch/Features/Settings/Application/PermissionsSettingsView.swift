@@ -4,8 +4,8 @@ struct PermissionsSettingsView: View {
     @ObservedObject var permissionController: SettingsPermissionController
     @ObservedObject var applicationSettings: ApplicationSettingsStore
 
-    private func localized(_ key: String, fallback: String) -> String {
-        applicationSettings.appLanguage.locale.dn(key, fallback: fallback)
+    private func localized(_ key: String, fallback: String? = nil) -> String {
+        applicationSettings.appLanguage.locale.dn(key, fallback: fallback ?? key)
     }
 
     var body: some View {
@@ -18,7 +18,7 @@ struct PermissionsSettingsView: View {
     }
 
     private var permissionsCard: some View {
-        SettingsCard(title: "settings.permissions.card.title") {
+        SettingsCard(title: localized("settings.permissions.card.title")) {
             ForEach(Array(permissionController.permissionItems.enumerated()), id: \.element.id) { index, item in
                 permissionRow(for: item)
 

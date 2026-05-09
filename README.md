@@ -19,7 +19,7 @@
   <img src="https://img.shields.io/badge/UI-SwiftUI%20%2B%20AppKit-0A84FF" alt="SwiftUI and AppKit" />
   <img src="https://img.shields.io/badge/Swift-5-F05138?logo=swift&logoColor=white" alt="Swift 5" />
   <a href="LICENSE">
-    <img src="https://img.shields.io/github/license/jackson-storm/DynamicNotch" alt="License" />
+    <img src="https://img.shields.io/github/license/Protope-Eiw/OpenNotch" alt="License" />
   </a>
 </p>
 
@@ -65,7 +65,7 @@ The dashboard opens when you hover over the notch. Inside it:
 | System Info | Live CPU, RAM, and disk usage at a glance. |
 | Pomodoro Timer | Inline work session countdown with +/− duration controls. |
 
-Each section can be individually enabled or disabled in **Settings → 界面**.
+Each section can be individually enabled or disabled in **Settings → Interface**.
 
 ## Settings
 
@@ -75,7 +75,7 @@ Settings are organized into four groups:
 - General — startup, display placement, language, appearance
 - Permissions — accessibility, Bluetooth, media control access
 - Notch — background, stroke, animation, resize feedback
-- 界面 — dashboard layout, app grid, pinned apps, overview visibility
+- Interface — dashboard layout, app grid, pinned apps, overview visibility
 
 **Media & Files**
 - Now Playing, Downloads, Drag & Drop
@@ -105,17 +105,17 @@ Settings are organized into four groups:
 ## Build From Source
 
 ```bash
-git clone https://github.com/jackson-storm/DynamicNotch.git
-cd DynamicNotch
-open DynamicNotch.xcodeproj
+git clone https://github.com/Protope-Eiw/OpenNotch.git
+cd OpenNotch
+open OpenNotch.xcodeproj
 ```
 
-Run the `DynamicNotch` scheme from Xcode. Swift Package Manager dependencies are resolved automatically.
+Run the `OpenNotch` scheme from Xcode. Swift Package Manager dependencies are resolved automatically.
 
 ## Repository Layout
 
 ```text
-DynamicNotch/
+OpenNotch/
 ├── Application/        # App entry point, app delegate, window setup, and settings shell
 ├── Core/               # Shared models, protocols, services, and infrastructure
 ├── Features/
@@ -136,8 +136,8 @@ DynamicNotch/
 ├── Resources/          # Assets, localization, bundled media
 └── Shared/             # Shared UI, helpers, and extensions
 
-DynamicNotchTests/
-DynamicNotchUITest/
+OpenNotchTests/
+OpenNotchUITest/
 ```
 
 ## Architecture at a Glance

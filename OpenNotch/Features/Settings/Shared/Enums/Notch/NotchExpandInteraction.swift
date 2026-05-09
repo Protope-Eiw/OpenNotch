@@ -4,7 +4,7 @@ enum NotchExpandInteraction: String, CaseIterable {
     case click
     case pressAndHold
 
-    var title: LocalizedStringKey {
+    var title: String {
         switch self {
         case .click:
             return "Click"

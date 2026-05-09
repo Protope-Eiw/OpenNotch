@@ -13,6 +13,10 @@ struct InterfaceSettingsView: View {
     @AppStorage(AppStorageKeys.Music.showSkipButtons)       private var showSkipButtons    = true
     @AppStorage(AppStorageKeys.Music.showVisualizer)        private var showVisualizer     = true
 
+    private func localized(_ key: String, fallback: String? = nil) -> String {
+        applicationSettings.appLanguage.locale.dn(key, fallback: fallback)
+    }
+
     private var enabledTabs: [DashboardTab] {
         DashboardTab.allCases.filter { !applicationSettings.dashboardDisabledTabs.contains($0.rawValue) }
     }
@@ -21,15 +25,15 @@ struct InterfaceSettingsView: View {
         ["last"] + enabledTabs.map(\.rawValue)
     }
 
-    private func defaultTabOptionTitle(_ value: String) -> LocalizedStringKey {
-        if value == "last" { return "记住上次" }
+    private func defaultTabOptionTitle(_ value: String) -> String {
+        if value == "last" { return localized("settings.interface.defaultTab.last", fallback: "Last Used") }
         switch DashboardTab(rawValue: value) {
-        case .overview: return "概览"
-        case .music:    return "音乐"
-        case .system:   return "系统状态"
-        case .calendar: return "日历"
-        case .apps:     return "应用启动器"
-        case nil:       return LocalizedStringKey(value)
+        case .overview: return localized("settings.interface.defaultTab.overview", fallback: "Overview")
+        case .music:    return localized("settings.interface.defaultTab.music", fallback: "Music")
+        case .system:   return localized("settings.interface.defaultTab.system", fallback: "System")
+        case .calendar: return localized("settings.interface.defaultTab.calendar", fallback: "Calendar")
+        case .apps:     return localized("settings.interface.defaultTab.apps", fallback: "App Launcher")
+        case nil:       return value
         }
     }
 
@@ -43,11 +47,11 @@ struct InterfaceSettingsView: View {
     // MARK: - Dashboard Card
 
     private var dashboardCard: some View {
-        SettingsCard(title: "仪表盘") {
+        SettingsCard(title: localized("settings.interface.dashboardCard", fallback: "Dashboard")) {
             SettingsMenuRow(
-                title: "打开方式",
+                title: localized("settings.interface.openMode", fallback: "Open Mode"),
                 options: Array(DashboardOpenMode.allCases),
-                optionTitle: { $0.title },
+                optionTitle: { localized($0.title) },
                 accessibilityIdentifier: "settings.general.dashboardOpenMode",
                 selection: $applicationSettings.dashboardOpenMode
             )
@@ -55,8 +59,8 @@ struct InterfaceSettingsView: View {
             SettingsDivider()
 
             SettingsMenuRow(
-                title: "默认标签",
-                description: "打开仪表盘时显示的标签页。",
+                title: localized("settings.interface.defaultTab", fallback: "Default Tab"),
+                description: localized("settings.interface.defaultTab.description", fallback: "Default tab opened when dashboard opens."),
                 options: defaultTabOptions,
                 optionTitle: { defaultTabOptionTitle($0) },
                 accessibilityIdentifier: AppStorageKeys.General.dashboardDefaultTab,
@@ -65,7 +69,7 @@ struct InterfaceSettingsView: View {
 
             SettingsDivider()
 
-            Text("可见标签")
+            Text(localized("settings.interface.visibleTabs", fallback: "Visible Tabs"))
                 .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(.primary)
                 .padding(.top, 4)
@@ -93,7 +97,7 @@ struct InterfaceSettingsView: View {
                 SettingsDivider(indented: true)
 
                 SettingsToggleRow(
-                    title: tab.title,
+                    title: localized(tab.title),
                     systemImage: tab.icon,
                     color: tab.settingsColor,
                     isOn: tabEnabled,
@@ -116,14 +120,14 @@ struct InterfaceSettingsView: View {
         VStack(spacing: 0) {
             Divider().opacity(0.4).padding(.leading, 43)
             SubToggleRow(
-                title: "快进/快退 15 秒",
+                title: localized("settings.interface.music.skipButtons", fallback: "Skip Buttons"),
                 isOn: $showSkipButtons,
                 accessibilityIdentifier: AppStorageKeys.Music.showSkipButtons
             )
 
             Divider().opacity(0.4).padding(.leading, 43)
             SubToggleRow(
-                title: "音频频谱可视化",
+                title: localized("settings.interface.music.visualizer", fallback: "Audio Visualizer"),
                 isOn: $showVisualizer,
                 accessibilityIdentifier: AppStorageKeys.Music.showVisualizer
             )
@@ -141,7 +145,7 @@ struct InterfaceSettingsView: View {
             // App launcher
             Divider().opacity(0.4).padding(.leading, 56)
             SettingsToggleRow(
-                title: "应用快速启动",
+                title: localized("settings.interface.overview.apps", fallback: "App Launcher"),
                 systemImage: "square.grid.2x2.fill",
                 color: .blue,
                 isOn: $showApps,
@@ -152,14 +156,20 @@ struct InterfaceSettingsView: View {
             if showApps {
                 Divider().opacity(0.3).padding(.leading, 72)
                 SubToggleRow(
-                    title: "隐藏应用名称",
+                    title: localized("settings.interface.overview.hideAppNames", fallback: "Hide App Names"),
                     isOn: $hideAppNames,
                     accessibilityIdentifier: AppStorageKeys.Overview.hideAppNames
                 )
                 .padding(.leading, 32)
 
                 Divider().opacity(0.3).padding(.leading, 72)
-                PinnedAppsSettingsRow()
+                PinnedAppsSettingsRow(
+                    title: localized("settings.interface.pinnedApps.title", fallback: "Pinned Apps"),
+                    description: localized("settings.interface.pinnedApps.description", fallback: "Quick-access apps in the overview."),
+                    addButton: localized("settings.interface.pinnedApps.add", fallback: "Add"),
+                    pickerTitle: localized("settings.interface.pinnedApps.pickerTitle", fallback: "Choose an App"),
+                    doneButton: localized("settings.interface.pinnedApps.done", fallback: "Done")
+                )
                     .padding(.leading, 32)
                     .padding(.vertical, 2)
             }
@@ -167,7 +177,7 @@ struct InterfaceSettingsView: View {
             // Time & date
             Divider().opacity(0.4).padding(.leading, 56)
             SettingsToggleRow(
-                title: "时间与日期",
+                title: localized("settings.interface.overview.timeDate", fallback: "Time & Date"),
                 systemImage: "clock.fill",
                 color: .orange,
                 isOn: $showTimeDate,
@@ -178,7 +188,7 @@ struct InterfaceSettingsView: View {
             if showTimeDate {
                 Divider().opacity(0.3).padding(.leading, 72)
                 SubToggleRow(
-                    title: "天气",
+                    title: localized("settings.interface.overview.weather", fallback: "Weather"),
                     isOn: $showWeather,
                     accessibilityIdentifier: AppStorageKeys.Overview.showWeather
                 )
@@ -188,7 +198,7 @@ struct InterfaceSettingsView: View {
             // System info
             Divider().opacity(0.4).padding(.leading, 56)
             SettingsToggleRow(
-                title: "系统信息",
+                title: localized("settings.interface.overview.systemInfo", fallback: "System Info"),
                 systemImage: "cpu.fill",
                 color: .green,
                 isOn: $showSystemInfo,
@@ -199,7 +209,7 @@ struct InterfaceSettingsView: View {
             // Pomodoro
             Divider().opacity(0.4).padding(.leading, 56)
             SettingsToggleRow(
-                title: "番茄计时器",
+                title: localized("settings.interface.overview.pomodoro", fallback: "Pomodoro"),
                 systemImage: "timer",
                 color: .red,
                 isOn: $showPomodoro,
@@ -210,10 +220,10 @@ struct InterfaceSettingsView: View {
             if showPomodoro {
                 Divider().opacity(0.3).padding(.leading, 72)
                 HStack {
-                    Text("工作时长")
+                    Text(localized("settings.interface.overview.workDuration", fallback: "Work Duration"))
                         .font(.system(size: 13, weight: .medium))
                     Spacer()
-                    Text("\(applicationSettings.overviewPomodoroDuration) 分钟")
+                    Text(localized("settings.interface.overview.workDurationValue", fallback: "\(applicationSettings.overviewPomodoroDuration) min"))
                         .font(.system(size: 13))
                         .foregroundStyle(.secondary)
                     Stepper("", value: $applicationSettings.overviewPomodoroDuration, in: 1...120)
@@ -234,7 +244,7 @@ struct InterfaceSettingsView: View {
 // MARK: - Sub-level Toggle Row (no icon)
 
 private struct SubToggleRow: View {
-    let title: LocalizedStringKey
+    let title: String
     @Binding var isOn: Bool
     var accessibilityIdentifier: String? = nil
 
@@ -254,6 +264,12 @@ private struct SubToggleRow: View {
 // MARK: - Pinned Apps Settings Row
 
 private struct PinnedAppsSettingsRow: View {
+    let title: String
+    let description: String
+    let addButton: String
+    let pickerTitle: String
+    let doneButton: String
+
     @StateObject private var store = PinnedAppsStore()
     @StateObject private var allAppsStore = AppLauncherStore()
     @State private var showingPicker = false
@@ -268,14 +284,14 @@ private struct PinnedAppsSettingsRow: View {
                     .foregroundStyle(.teal)
                     .font(.system(size: 14))
                 VStack(alignment: .leading, spacing: 1) {
-                    Text("快速启动应用")
+                    Text(title)
                         .font(.system(size: 13, weight: .medium))
-                    Text("在概览网格中显示的应用。")
+                    Text(description)
                         .font(.system(size: 11))
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
-                Button("添加") {
+                Button(addButton) {
                     allAppsStore.loadIfNeeded()
                     showingPicker = true
                 }
@@ -325,9 +341,9 @@ private struct PinnedAppsSettingsRow: View {
     private var appPickerContent: some View {
         VStack(spacing: 0) {
             HStack {
-                Text("选择应用").font(.system(size: 14, weight: .semibold))
+                Text(pickerTitle).font(.system(size: 14, weight: .semibold))
                 Spacer()
-                Button("完成") { showingPicker = false }
+                Button(doneButton) { showingPicker = false }
                     .buttonStyle(.plain).foregroundStyle(.secondary)
             }
             .padding(.horizontal, 16).padding(.top, 14).padding(.bottom, 10)

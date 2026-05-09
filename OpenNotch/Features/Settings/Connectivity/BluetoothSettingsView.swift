@@ -40,10 +40,10 @@ struct BluetoothSettingsView: View {
     }
     
     private var bluetoothActivity: some View {
-        SettingsCard(title: "Bluetooth activity") {
+        SettingsCard(title: localized("Bluetooth activity")) {
             SettingsToggleRow(
-                title: "Bluetooth temporary activity",
-                description: "Show a temporary activity when a Bluetooth accessory connects.",
+                title: localized("Bluetooth temporary activity"),
+                description: localized("Show a temporary activity when a Bluetooth accessory connects."),
                 imageName: "bluetooth.white",
                 color: .blue,
                 isOn: $settings.isBluetoothTemporaryActivityEnabled,
@@ -53,10 +53,10 @@ struct BluetoothSettingsView: View {
     }
     
     private var bluetoothDuration: some View {
-        SettingsCard(title: "Bluetooth duration") {
+        SettingsCard(title: localized("Bluetooth duration")) {
             SettingsSliderRow(
-                title: "Bluetooth duration",
-                description: "Choose how long the Bluetooth connection notification stays visible.",
+                title: localized("Bluetooth duration"),
+                description: localized("Choose how long the Bluetooth connection notification stays visible."),
                 range: temporaryActivityDurationRange,
                 step: 1,
                 fractionLength: 0,
@@ -73,13 +73,13 @@ struct BluetoothSettingsView: View {
     }
     
     private var bluetoothAppearance: some View {
-        SettingsCard(title: "Bluetooth appearance") {
+        SettingsCard(title: localized("Bluetooth appearance")) {
             CustomPicker(
                 selection: $settings.bluetoothAppearanceStyle,
                 options: Array(BluetoothAppearanceStyle.allCases),
-                title: { $0.title },
-                headerTitle: "Bluetooth style",
-                headerDescription: "Choose between a device-focused layout or full device details.",
+                title: { localized($0.title) },
+                headerTitle: localized("Bluetooth style"),
+                headerDescription: localized("Choose between a device-focused layout or full device details."),
                 itemHeight: 72,
                 lightBackgroundImage: Image("backgroundLight"),
                 darkBackgroundImage: Image("backgroundDark")
@@ -91,10 +91,10 @@ struct BluetoothSettingsView: View {
             SettingsDivider()
 
             SettingsMenuRow(
-                title: "Battery indicator",
-                description: "Choose whether Bluetooth battery information is shown as a percentage or a circular indicator.",
+                title: localized("Battery indicator"),
+                description: localized("Choose whether Bluetooth battery information is shown as a percentage or a circular indicator."),
                 options: Array(BluetoothBatteryIndicatorStyle.allCases),
-                optionTitle: { $0.title },
+                optionTitle: { localized($0.title) },
                 accessibilityIdentifier: "settings.activities.temporary.bluetooth.batteryIndicator",
                 selection: $settings.bluetoothBatteryIndicatorStyle
             )
@@ -102,8 +102,8 @@ struct BluetoothSettingsView: View {
             SettingsDivider()
             
             SettingsStrokeToggleRow(
-                title: "Battery-colored stroke",
-                description: "Tint Bluetooth battery styles using the current battery level color.",
+                title: localized("Battery-colored stroke"),
+                description: localized("Tint Bluetooth battery styles using the current battery level color."),
                 isOn: $settings.isBluetoothBatteryStrokeEnabled,
                 accessibilityIdentifier: "settings.activities.temporary.bluetooth.batteryStroke"
             )
@@ -138,7 +138,7 @@ struct BluetoothSettingsView: View {
                             usesTintedTrackStroke: isBatteryStrokeActive
                         )
                     } else {
-                        Text("78%")
+                        Text(localized("78%"))
                             .foregroundStyle(.green.gradient)
                             .font(.system(size: 12))
                     }
@@ -169,7 +169,7 @@ struct BluetoothSettingsView: View {
                                 .font(.system(size: 10))
                                 .foregroundStyle(.white.opacity(0.4))
                             
-                            Text("AirPods Pro")
+                            Text(localized("AirPods Pro"))
                                 .lineLimit(1)
                                 .font(.system(size: 12))
                                 .foregroundStyle(.white.opacity(0.8))
@@ -203,4 +203,9 @@ struct BluetoothSettingsView: View {
         if level < 50 { return .yellow }
         return .green
     }
+
+    private func localized(_ key: String, fallback: String? = nil) -> String {
+        applicationSettings.appLanguage.locale.dn(key, fallback: fallback)
+    }
+
 }

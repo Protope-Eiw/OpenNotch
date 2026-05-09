@@ -338,11 +338,11 @@ final class SettingsViewModel: ObservableObject, NotchSettingsProviding {
     func isTemporaryActivityEnabled(_ preference: TemporaryActivityPreference) -> Bool {
         switch preference {
         case .charger:
-            return battery.isChargerTemporaryActivityEnabled
+            return battery.isBatteryTemporaryActivityEnabled && battery.isChargerTemporaryActivityEnabled
         case .lowPower:
-            return battery.isLowPowerTemporaryActivityEnabled
+            return battery.isBatteryTemporaryActivityEnabled && battery.isLowPowerTemporaryActivityEnabled
         case .fullPower:
-            return battery.isFullPowerTemporaryActivityEnabled
+            return battery.isBatteryTemporaryActivityEnabled && battery.isFullPowerTemporaryActivityEnabled
         case .bluetooth:
             return connectivity.isBluetoothTemporaryActivityEnabled
         case .wifi:

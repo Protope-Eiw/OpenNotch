@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct SettingsToggleRow: View {
-    let title: LocalizedStringKey
-    let description: LocalizedStringKey?
+    let title: String
+    let description: String?
     let systemImage: String?
     let imageName: String?
     let color: Color
@@ -18,8 +18,8 @@ struct SettingsToggleRow: View {
     @Binding var isOn: Bool
 
     init(
-        title: LocalizedStringKey,
-        description: LocalizedStringKey? = nil,
+        title: String,
+        description: String? = nil,
         systemImage: String,
         color: Color,
         isOn: Binding<Bool>,
@@ -35,8 +35,8 @@ struct SettingsToggleRow: View {
     }
 
     init(
-        title: LocalizedStringKey,
-        description: LocalizedStringKey? = nil,
+        title: String,
+        description: String? = nil,
         imageName: String,
         color: Color,
         isOn: Binding<Bool>,

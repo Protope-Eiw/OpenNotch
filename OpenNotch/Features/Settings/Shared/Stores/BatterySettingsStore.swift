@@ -7,6 +7,12 @@ final class BatterySettingsStore: SettingsStoreBase {
     static let fullPowerThresholdRange: ClosedRange<Int> = 50...100
     private static let legacyBatteryDefaultStrokeKey = "settings.battery.defaultStroke"
 
+    @Published var isBatteryTemporaryActivityEnabled: Bool {
+        didSet {
+            persist(isBatteryTemporaryActivityEnabled, for: GeneralSettingsStorage.Keys.batteryTemporaryActivityEnabled)
+        }
+    }
+
     @Published var isChargerTemporaryActivityEnabled: Bool {
         didSet {
             persist(isChargerTemporaryActivityEnabled, for: GeneralSettingsStorage.Keys.chargerTemporaryActivityEnabled)
@@ -111,6 +117,8 @@ final class BatterySettingsStore: SettingsStoreBase {
 
     override init(defaults: UserDefaults) {
         Self.migrateLegacyDefaultStrokeIfNeeded(defaults: defaults)
+        self.isBatteryTemporaryActivityEnabled = defaults.object(forKey: GeneralSettingsStorage.Keys.batteryTemporaryActivityEnabled) as? Bool ??
+            (GeneralSettingsStorage.defaultValues[GeneralSettingsStorage.Keys.batteryTemporaryActivityEnabled] as? Bool ?? true)
         self.isChargerTemporaryActivityEnabled = defaults.bool(forKey: GeneralSettingsStorage.Keys.chargerTemporaryActivityEnabled)
         self.chargerTemporaryActivityDuration = Self.clampTemporaryActivityDuration(
             defaults.object(forKey: GeneralSettingsStorage.Keys.chargerTemporaryActivityDuration) as? Int ??
@@ -152,6 +160,7 @@ final class BatterySettingsStore: SettingsStoreBase {
     }
 
     func reset() {
+        isBatteryTemporaryActivityEnabled = defaultBool(for: GeneralSettingsStorage.Keys.batteryTemporaryActivityEnabled)
         isChargerTemporaryActivityEnabled = defaultBool(for: GeneralSettingsStorage.Keys.chargerTemporaryActivityEnabled)
         chargerTemporaryActivityDuration = Self.clampTemporaryActivityDuration(
             defaultInt(for: GeneralSettingsStorage.Keys.chargerTemporaryActivityDuration)

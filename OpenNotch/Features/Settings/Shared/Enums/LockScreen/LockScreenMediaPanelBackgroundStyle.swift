@@ -5,7 +5,7 @@ enum LockScreenMediaPanelBackgroundStyle: String, CaseIterable {
     case staticArtwork
     case black
 
-    var title: LocalizedStringKey {
+    var title: String {
         switch self {
         case .animatedArtwork:
             return "Animated background"

@@ -45,8 +45,8 @@ enum OpenNotchLanguage: String, CaseIterable, Identifiable {
         }
     }
 
-    var titleKey: LocalizedStringKey {
-        LocalizedStringKey(titleKeyString)
+    var titleKey: String {
+        titleKeyString
     }
 
     var flagAssetName: String? {

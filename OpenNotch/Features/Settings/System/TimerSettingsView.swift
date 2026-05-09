@@ -17,10 +17,10 @@ struct TimerSettingsView: View {
     }
 
     private var timerActivity: some View {
-        SettingsCard(title: "Timer activity") {
+        SettingsCard(title: localized("Timer activity")) {
             SettingsToggleRow(
-                title: "Timer live activity",
-                description: "Show the active Clock timer in the notch.",
+                title: localized("Timer live activity"),
+                description: localized("Show the active Clock timer in the notch."),
                 systemImage: "timer",
                 color: .orange,
                 isOn: $mediaSettings.isTimerLiveActivityEnabled,
@@ -33,13 +33,17 @@ struct TimerSettingsView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
 
             SettingsStrokeToggleRow(
-                title: "Default stroke",
-                description: "Use the standard white notch stroke instead of the orange timer stroke.",
+                title: localized("Default stroke"),
+                description: localized("Use the standard white notch stroke instead of the orange timer stroke."),
                 isOn: $mediaSettings.isTimerDefaultStrokeEnabled,
                 accessibilityIdentifier: "settings.activities.live.timer.defaultStroke"
             )
             .disabled(isDefaultStrokeLocked)
             .opacity(isDefaultStrokeLocked ? 0.5 : 1)
         }
+    }
+    
+    private func localized(_ key: String, fallback: String? = nil) -> String {
+        appearanceSettings.appLanguage.locale.dn(key, fallback: fallback ?? key)
     }
 }

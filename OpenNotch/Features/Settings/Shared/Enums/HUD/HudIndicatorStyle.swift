@@ -4,7 +4,7 @@ enum HudIndicatorStyle: String, CaseIterable {
     case bar
     case circle
 
-    var title: LocalizedStringKey {
+    var title: String {
         switch self {
         case .bar:
             return "Bar"

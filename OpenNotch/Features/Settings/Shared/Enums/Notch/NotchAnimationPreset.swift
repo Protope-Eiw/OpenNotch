@@ -8,7 +8,7 @@ enum NotchAnimationPreset: String, CaseIterable {
     case slow
     case relaxed
 
-    var title: LocalizedStringKey {
+    var title: String {
         switch self {
         case .snappy:
             return "settings.general.animation.faster"

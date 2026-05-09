@@ -68,7 +68,7 @@ Grid column logic lives in `gridColumnCount(_ count: Int) -> Int`.
 ## Settings sidebar structure
 
 The settings window uses an icon-only left sidebar (64px wide, nookx-inspired) with 8 sections:
-General · Permissions · Notch · 界面 · Media · Connectivity · System · Lock Screen
+General · Permissions · Notch · Interface · Media · Connectivity · System · Lock Screen
 
 The bottom of the sidebar has a donation placeholder (heart icon, currently does nothing).
 

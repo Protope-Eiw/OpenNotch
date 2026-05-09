@@ -4,7 +4,7 @@ enum DownloadAppearanceStyle: String, CaseIterable {
     case minimal
     case detailed
 
-    var title: LocalizedStringKey {
+    var title: String {
         switch self {
         case .minimal:
             return "Minimal"

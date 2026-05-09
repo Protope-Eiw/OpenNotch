@@ -4,7 +4,7 @@ enum FocusAppearanceStyle: String, CaseIterable {
     case standard
     case iconsOnly
 
-    var title: LocalizedStringKey {
+    var title: String {
         switch self {
         case .standard:
             return "Default"

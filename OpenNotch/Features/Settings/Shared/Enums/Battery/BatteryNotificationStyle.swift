@@ -4,7 +4,7 @@ enum BatteryNotificationStyle: String, CaseIterable {
     case standard
     case compact
 
-    var title: LocalizedStringKey {
+    var title: String {
         switch self {
         case .standard:
             return "Standard"

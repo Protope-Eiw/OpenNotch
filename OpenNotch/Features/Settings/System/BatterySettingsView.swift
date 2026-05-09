@@ -29,51 +29,64 @@ struct BatterySettingsView: View {
     }
 
     private var batteryActivity: some View {
-        SettingsCard(title: "Battery activity") {
+        SettingsCard(title: localized("Battery activity")) {
             SettingsToggleRow(
-                title: "Charging",
-                description: "Show a temporary activity when your Mac starts charging.",
-                systemImage: "bolt.fill",
+                title: localized("Battery notifications"),
+                description: localized("Master switch for all battery-related temporary notifications."),
+                systemImage: "battery.100.bolt",
                 color: .green,
-                isOn: $batterySettings.isChargerTemporaryActivityEnabled,
-                accessibilityIdentifier: "settings.activities.temporary.charger"
+                isOn: $batterySettings.isBatteryTemporaryActivityEnabled,
+                accessibilityIdentifier: "settings.activities.temporary.batteryMaster"
             )
 
-            Divider()
-                .opacity(0.6)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
+            VStack(spacing: 0) {
+                SettingsDivider()
 
-            SettingsToggleRow(
-                title: "Low Power",
-                description: "Show a warning when Low Power Mode is enabled or the battery is critically low.",
-                systemImage: "battery.25",
-                color: .green,
-                isOn: $batterySettings.isLowPowerTemporaryActivityEnabled,
-                accessibilityIdentifier: "settings.activities.temporary.lowPower"
-            )
+                SettingsToggleRow(
+                    title: localized("Charging"),
+                    description: localized("Show a temporary activity when your Mac starts charging."),
+                    systemImage: "bolt.fill",
+                    color: .green,
+                    isOn: $batterySettings.isChargerTemporaryActivityEnabled,
+                    accessibilityIdentifier: "settings.activities.temporary.charger"
+                )
+                .disabled(!batterySettings.isBatteryTemporaryActivityEnabled)
+                .opacity(batterySettings.isBatteryTemporaryActivityEnabled ? 1 : 0.5)
 
-            Divider()
-                .opacity(0.6)
-                .padding(.leading, 43)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
+                SettingsDivider()
 
-            SettingsToggleRow(
-                title: "Fully Charged",
-                description: "Show a temporary activity when the battery reaches the selected full charge level.",
-                systemImage: "battery.100",
-                color: .green,
-                isOn: $batterySettings.isFullPowerTemporaryActivityEnabled,
-                accessibilityIdentifier: "settings.activities.temporary.fullPower"
-            )
+                SettingsToggleRow(
+                    title: localized("Low Power"),
+                    description: localized("Show a warning when Low Power Mode is enabled or the battery is critically low."),
+                    systemImage: "battery.25",
+                    color: .green,
+                    isOn: $batterySettings.isLowPowerTemporaryActivityEnabled,
+                    accessibilityIdentifier: "settings.activities.temporary.lowPower"
+                )
+                .disabled(!batterySettings.isBatteryTemporaryActivityEnabled)
+                .opacity(batterySettings.isBatteryTemporaryActivityEnabled ? 1 : 0.5)
 
+                SettingsDivider()
+
+                SettingsToggleRow(
+                    title: localized("Fully Charged"),
+                    description: localized("Show a temporary activity when the battery reaches the selected full charge level."),
+                    systemImage: "battery.100",
+                    color: .green,
+                    isOn: $batterySettings.isFullPowerTemporaryActivityEnabled,
+                    accessibilityIdentifier: "settings.activities.temporary.fullPower"
+                )
+                .disabled(!batterySettings.isBatteryTemporaryActivityEnabled)
+                .opacity(batterySettings.isBatteryTemporaryActivityEnabled ? 1 : 0.5)
+            }
         }
     }
 
     private var batteryDuration: some View {
-        SettingsCard(title: "Battery duration") {
+        SettingsCard(title: localized("Battery duration")) {
             SettingsSliderRow(
-                title: "Charging duration",
-                description: "Choose how long the charging notification stays visible.",
+                title: localized("Charging duration"),
+                description: localized("Choose how long the charging notification stays visible."),
                 range: temporaryActivityDurationRange,
                 step: 1,
                 fractionLength: 0,
@@ -84,14 +97,14 @@ struct BatterySettingsView: View {
                     set: { batterySettings.chargerTemporaryActivityDuration = Int($0.rounded()) }
                 )
             )
-            .disabled(!batterySettings.isChargerTemporaryActivityEnabled)
-            .opacity(batterySettings.isChargerTemporaryActivityEnabled ? 1 : 0.5)
+            .disabled(!batterySettings.isBatteryTemporaryActivityEnabled || !batterySettings.isChargerTemporaryActivityEnabled)
+            .opacity(batterySettings.isBatteryTemporaryActivityEnabled && batterySettings.isChargerTemporaryActivityEnabled ? 1 : 0.5)
 
             SettingsDivider()
 
             SettingsSliderRow(
-                title: "Low battery duration",
-                description: "Choose how long the low battery notification stays visible.",
+                title: localized("Low battery duration"),
+                description: localized("Choose how long the low battery notification stays visible."),
                 range: temporaryActivityDurationRange,
                 step: 1,
                 fractionLength: 0,
@@ -102,14 +115,14 @@ struct BatterySettingsView: View {
                     set: { batterySettings.lowPowerTemporaryActivityDuration = Int($0.rounded()) }
                 )
             )
-            .disabled(!batterySettings.isLowPowerTemporaryActivityEnabled)
-            .opacity(batterySettings.isLowPowerTemporaryActivityEnabled ? 1 : 0.5)
+            .disabled(!batterySettings.isBatteryTemporaryActivityEnabled || !batterySettings.isLowPowerTemporaryActivityEnabled)
+            .opacity(batterySettings.isBatteryTemporaryActivityEnabled && batterySettings.isLowPowerTemporaryActivityEnabled ? 1 : 0.5)
 
             SettingsDivider()
 
             SettingsSliderRow(
-                title: "Full battery duration",
-                description: "Choose how long the full battery notification stays visible.",
+                title: localized("Full battery duration"),
+                description: localized("Choose how long the full battery notification stays visible."),
                 range: temporaryActivityDurationRange,
                 step: 1,
                 fractionLength: 0,
@@ -120,19 +133,19 @@ struct BatterySettingsView: View {
                     set: { batterySettings.fullPowerTemporaryActivityDuration = Int($0.rounded()) }
                 )
             )
-            .disabled(!batterySettings.isFullPowerTemporaryActivityEnabled)
-            .opacity(batterySettings.isFullPowerTemporaryActivityEnabled ? 1 : 0.5)
+            .disabled(!batterySettings.isBatteryTemporaryActivityEnabled || !batterySettings.isFullPowerTemporaryActivityEnabled)
+            .opacity(batterySettings.isBatteryTemporaryActivityEnabled && batterySettings.isFullPowerTemporaryActivityEnabled ? 1 : 0.5)
         }
     }
 
     private var lowBattery: some View {
-        SettingsCard(title: "Low battery") {
+        SettingsCard(title: localized("Low battery")) {
             CustomPicker(
                 selection: $batterySettings.lowPowerStyle,
                 options: Array(BatteryNotificationStyle.allCases),
-                title: { $0.title },
-                headerTitle: "Low battery style",
-                headerDescription: "Choose whether the alert uses the current detailed card or a compact charging-like layout.",
+                title: { localized($0.title) },
+                headerTitle: localized("Low battery style"),
+                headerDescription: localized("Choose whether the alert uses the current detailed card or a compact charging-like layout."),
                 itemHeight: 82,
                 lightBackgroundImage: Image("backgroundLight"),
                 darkBackgroundImage: Image("backgroundDark")
@@ -147,8 +160,8 @@ struct BatterySettingsView: View {
             SettingsDivider()
 
             SettingsStrokeToggleRow(
-                title: "Default stroke",
-                description: "Use the standard white notch stroke instead of the low battery alert color.",
+                title: localized("Default stroke"),
+                description: localized("Use the standard white notch stroke instead of the low battery alert color."),
                 isOn: $batterySettings.isLowPowerDefaultStrokeEnabled,
                 accessibilityIdentifier: "settings.activities.temporary.lowPower.defaultStroke"
             )
@@ -158,8 +171,8 @@ struct BatterySettingsView: View {
             SettingsDivider()
             
             SettingsSliderRow(
-                title: "Low battery threshold",
-                description: "Choose the battery percentage that triggers the low battery notification.",
+                title: localized("Low battery threshold"),
+                description: localized("Choose the battery percentage that triggers the low battery notification."),
                 range: Double(BatterySettingsStore.lowPowerThresholdRange.lowerBound)...Double(BatterySettingsStore.lowPowerThresholdRange.upperBound),
                 step: 1,
                 fractionLength: 0,
@@ -174,13 +187,13 @@ struct BatterySettingsView: View {
     }
 
     private var fullBattery: some View {
-        SettingsCard(title: "Full battery") {
+        SettingsCard(title: localized("Full battery")) {
             CustomPicker(
                 selection: $batterySettings.fullPowerStyle,
                 options: Array(BatteryNotificationStyle.allCases),
-                title: { $0.title },
-                headerTitle: "Full battery style",
-                headerDescription: "Choose whether the alert uses the current detailed card or a compact charging-like layout.",
+                title: { localized($0.title) },
+                headerTitle: localized("Full battery style"),
+                headerDescription: localized("Choose whether the alert uses the current detailed card or a compact charging-like layout."),
                 itemHeight: 82,
                 lightBackgroundImage: Image("backgroundLight"),
                 darkBackgroundImage: Image("backgroundDark")
@@ -195,8 +208,8 @@ struct BatterySettingsView: View {
             SettingsDivider()
 
             SettingsStrokeToggleRow(
-                title: "Default stroke",
-                description: "Use the standard white notch stroke instead of the full battery alert color.",
+                title: localized("Default stroke"),
+                description: localized("Use the standard white notch stroke instead of the full battery alert color."),
                 isOn: $batterySettings.isFullPowerDefaultStrokeEnabled,
                 accessibilityIdentifier: "settings.activities.temporary.fullPower.defaultStroke"
             )
@@ -206,8 +219,8 @@ struct BatterySettingsView: View {
             SettingsDivider()
             
             SettingsSliderRow(
-                title: "Full charge threshold",
-                description: "Choose the battery percentage that triggers the full charge notification.",
+                title: localized("Full charge threshold"),
+                description: localized("Choose the battery percentage that triggers the full charge notification."),
                 range: Double(BatterySettingsStore.fullPowerThresholdRange.lowerBound)...Double(BatterySettingsStore.fullPowerThresholdRange.upperBound),
                 step: 1,
                 fractionLength: 0,
@@ -293,7 +306,7 @@ struct BatterySettingsView: View {
                 Spacer(minLength: 8)
 
                 HStack(spacing: 6) {
-                    Text("\(batteryLevel)%")
+                    Text(localized("\(batteryLevel)%"))
                         .font(.system(size: 12, weight: .medium, design: .rounded))
                         .foregroundStyle(tint)
 
@@ -434,5 +447,9 @@ struct BatterySettingsView: View {
         case .full:
             return batterySettings.isFullPowerDefaultStrokeEnabled
         }
+    }
+    
+    private func localized(_ key: String, fallback: String? = nil) -> String {
+        appearanceSettings.appLanguage.locale.dn(key, fallback: fallback ?? key)
     }
 }
