@@ -39,12 +39,15 @@ struct DashboardPanelView: View {
 
     private var pageContent: some View {
         GeometryReader { geo in
-            HStack(spacing: 0) {
+            ZStack {
                 ForEach(enabledTabs, id: \.self) { tab in
-                    tabPage(for: tab).frame(width: geo.size.width)
+                    if tab == selectedTab {
+                        tabPage(for: tab)
+                            .frame(width: geo.size.width)
+                            .transition(.opacity)
+                    }
                 }
             }
-            .offset(x: -CGFloat(selectedIndex) * geo.size.width)
             .animation(.spring(response: 0.35, dampingFraction: 0.85), value: selectedTab)
         }
         .mask(Rectangle())

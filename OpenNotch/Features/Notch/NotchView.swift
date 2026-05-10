@@ -199,8 +199,11 @@ private extension NotchView {
     // One unified black strip: [left content | notch bridge | right content]
     // The notch body renders on top — the bridge section is invisible (black on black).
     var pillStrip: some View {
+        let notchWidth = dashboardOpen
+            ? notchViewModel.notchModel.baseWidth
+            : notchViewModel.presentedNotchSize.width
         let notchBridgeWidth = max(0,
-            notchViewModel.presentedNotchSize.width - 2 * notchViewModel.interactiveCornerRadius.top
+            notchWidth - 2 * notchViewModel.interactiveCornerRadius.top
         )
         let spring: Animation = dashboardOpen
             ? .spring(response: 0.22, dampingFraction: 0.8)
@@ -661,6 +664,9 @@ private extension NotchView {
     func renderedContentView(for content: NotchContentProtocol) -> some View {
         if notchViewModel.isDisplayingExpandedLiveActivity {
             content.makeExpandedView()
+        } else if dashboardOpen {
+            Color.clear
+                .frame(width: notchViewModel.notchModel.baseWidth, height: notchViewModel.notchModel.baseHeight)
         } else {
             content.makeView()
         }
