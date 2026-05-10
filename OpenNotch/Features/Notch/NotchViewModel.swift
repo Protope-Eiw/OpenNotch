@@ -58,7 +58,6 @@ final class NotchViewModel: ObservableObject {
     private var expansionTransitionTask: Task<Void, Never>?
     private var swipeStretchResetWorkItem: DispatchWorkItem?
     private var isClosingHeightStaged = false
-    private var isDisplayTransitioning = false
 
     var animations: NotchAnimations {
         engine.animations
@@ -310,9 +309,10 @@ final class NotchViewModel: ObservableObject {
     }
     
     func updateDimensionsForDisplayTransition() {
-        isDisplayTransitioning = true
         updateDimensions()
-        isDisplayTransitioning = false
+        stagedHeightTask?.cancel()
+        isClosingHeightStaged = false
+        stagedNotchHeight = interactiveNotchSize.height
     }
 
     func send(_ notchState: NotchState) {
@@ -456,17 +456,8 @@ final class NotchViewModel: ObservableObject {
         engine.$notchModel
             .dropFirst()
             .sink { [weak self] in
-                guard let self else { return }
-
-                if isDisplayTransitioning {
-                    stagedHeightTask?.cancel()
-                    isClosingHeightStaged = false
-                    stagedNotchHeight = $0.size.height
-                    notchModel = $0
-                } else {
-                    scheduleStagedHeightUpdate(to: $0.size.height)
-                    notchModel = $0
-                }
+                self?.scheduleStagedHeightUpdate(to: $0.size.height)
+                self?.notchModel = $0
             }
             .store(in: &cancellables)
         
