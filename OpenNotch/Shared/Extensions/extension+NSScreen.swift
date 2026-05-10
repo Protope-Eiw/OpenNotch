@@ -260,6 +260,7 @@ extension NSScreen {
     }
 
     var isBuiltInDisplay: Bool {
+        if notchSize != nil { return true }
         guard let displayID else { return false }
         return CGDisplayIsBuiltin(displayID) != 0
     }
