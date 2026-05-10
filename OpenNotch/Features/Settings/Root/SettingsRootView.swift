@@ -96,7 +96,7 @@ struct SettingsRootView: View {
 
     private var iconSidebar: some View {
         VStack(spacing: 0) {
-            VStack(spacing: 4) {
+            VStack(spacing: 0) {
                 ForEach(SettingsRootViewModel.Section.allCases.filter { $0 != .donation }) { section in
                     sidebarIconButton(for: section)
                 }
@@ -118,8 +118,12 @@ struct SettingsRootView: View {
                     .font(.system(size: 16, weight: .medium))
                     .foregroundStyle(selectedSection == .donation ? .pink : Color.secondary)
                     .frame(width: 40, height: 40)
+                    .frame(maxWidth: .infinity, minHeight: 48)
+                    .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            .frame(maxWidth: .infinity, minHeight: 48)
+            .contentShape(Rectangle())
             .padding(.bottom, 10)
         }
         .frame(width: SettingsWindowLayout.sidebarWidth)
@@ -149,10 +153,12 @@ struct SettingsRootView: View {
                 isSelected ? Color.accentColor.opacity(0.12) : Color.clear,
                 in: RoundedRectangle(cornerRadius: 10)
             )
-            .frame(maxWidth: .infinity, minHeight: 44)
+            .frame(maxWidth: .infinity, minHeight: 48)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .frame(maxWidth: .infinity, minHeight: 48)
+        .contentShape(Rectangle())
         .help(localized(section.titleKey, fallback: section.fallbackTitle))
         .accessibilityIdentifier("settings.sidebar.\(section.rawValue)")
     }

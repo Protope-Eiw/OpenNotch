@@ -203,6 +203,13 @@ Artwork falls back to `NSWorkspace.shared.icon(forFile:)` when no `artworkData` 
 
 ## TODOs
 
+### Dashboard 滑动溢出 & 快速双指滑动识别
+dashboard 的 HStack + offset 滑动模式在切换 tab 时会有内容溢出（不超过一个图标宽度）。已确认该问题在所有历史版本中均存在：
+- 68417b3 / 8bcef9c / 3e7f4c4 / b4e4aa4 / 当前 slide 模式——所有使用 HStack+offset 的版本都有溢出
+- 唯一不溢出的是 0c64aba 的 ZStack+opacity 方案（即现在的 fade 模式）
+- 溢出根因尚未定位：spring overshoot 理论不成立（临界阻尼仍有溢出）
+- 快速双指同方向滑动两下时，第二次滑动识别不到（SwipeEventMonitor 的 didFire 可能未正确重置）
+
 ### Dashboard 打开速度差异
 点击 notch 区域打开 dashboard 非常丝滑快捷，而点击两侧 widget 区域打开则明显变慢。需要排查 gesture 响应链路中的延迟原因。
 
@@ -210,7 +217,27 @@ Artwork falls back to `NSWorkspace.shared.icon(forFile:)` when no `artworkData` 
 设置 → 权限 页面中，各权限的状态（Accessibility、Bluetooth、Screen Recording、Calendar）不是实时刷新的。当前依靠 `NSApplication.didBecomeActiveNotification` 和 2 秒轮询，但用户从系统设置授权后切回来时可能存在 TCC 延迟，且 2 秒轮询间隔内 UI 不会更新。需要更可靠的刷新机制。
 
 ### 设置侧边栏点击判定区域过小
-设置窗口左侧 icon-only 导航栏（64px 宽）需要精确点到图标才能切换，判定区域太小。应当适当增大点击命中区域。
+设置窗口左侧 icon-only 导航栏（64px 宽）需要精确点到图标才能切换，判定区域太小。
+
+**已修复：** `VStack(spacing: 4)` → `spacing: 0`，button `minHeight: 44` → `48` 吸收间距，label 和 Button 两层都加 `.frame(maxWidth: .infinity, minHeight: 48).contentShape(Rectangle())`，确保整列无死区。
+
+### 翻译问题
+设置界面一/二/三级标题及各个选项的文案不统一，且不跟随设置中选择的语言走。需要排查 `locale.dn(_:fallback:)` 的使用范围，确保所有用户可见字符串都走 i18n 流程。
+
+### 设置选项行间距与图标冗余
+设置中有些选项行与行之间排列紧密，且部分图标意义不大或不必要。需要整体梳理 settings 各页面的间距和 icon 使用，移除冗余图标。
+
+### 下拉菜单改为左右胶囊切换
+Interface → 仪表盘中的"打开模式"（dashboardOpenMode）和 "Transition Style" 等只有两个选项的下拉菜单，不如改成类似左右胶囊的切换控件（segmented control），用户单击即可切换，减少操作步骤。
+
+### Connectivity 页面功能测试
+Connectivity 界面中的 Bluetooth、Network、Focus 等功能尚未进行充分测试。需要确认各功能的状态读取是否正确、交互是否正常。
+
+### Dashboard 日历排版
+Dashboard 的日历部分排版有问题——日历太靠近 dashboard 区域左侧。不过日历后续还有大改（加功能），可以一并处理。
+
+### 上方常驻播放器界面
+如何实现部分用户想要的上方常驻播放器界面（类似菜单栏播放器）？感觉和现有的 NowPlaying 功能有重叠，需要评估是否复用现有 music tab / live activity 的方案，还是另起新入口。
 
 ---
 

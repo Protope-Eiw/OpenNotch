@@ -147,7 +147,7 @@ extension AppDelegate {
     private func updateAutoWindowFrame() {
         guard let window else { return }
 
-        notchViewModel.updateDimensions()
+        notchViewModel.updateDimensionsForDisplayTransition()
 
         guard let screen = NSScreen.screenWithMouse ?? NSScreen.screens.first else {
             clearNowPlayingPrimaryWindowPresentationState()
@@ -242,10 +242,10 @@ extension AppDelegate {
 
     private func updateManualWindowFrames() {
         let screens = NSScreen.preferredNotchScreens(for: settingsViewModel)
-        let currentIDs = Set(screens.compactMap(\.displayID))
-        let existingIDs = Set(notchWindows.keys)
+        let currentIDs = Set(notchWindows.keys)
+        let existingIDs = Set(screens.compactMap(\.displayID))
 
-        for removedID in existingIDs.subtracting(currentIDs) {
+        for removedID in currentIDs.subtracting(existingIDs) {
             notchWindows[removedID]?.orderOut(nil)
             notchWindows[removedID]?.contentView = nil
             notchWindows.removeValue(forKey: removedID)
@@ -257,13 +257,14 @@ extension AppDelegate {
 
             if let existingWindow = notchWindows[displayID] {
                 let viewModel = notchViewModels[displayID] ?? notchViewModel
-                viewModel.updateDimensions()
+                viewModel.updateDimensionsForDisplayTransition()
 
                 let targetFrame = OverlayWindowLayout.topAnchoredFrame(
                     on: screen,
                     size: existingWindow.frame.size
                 )
                 existingWindow.setFrame(targetFrame, display: true, animate: false)
+                existingWindow.orderFrontRegardless()
             } else {
                 let frame = OverlayWindowLayout.topAnchoredFrame(
                     on: screen,
@@ -305,6 +306,8 @@ extension AppDelegate {
                     includesFullscreenAuxiliary: true
                 )
                 SkyLightOperator.shared.delegateWindow(window, to: .notchSurface)
+
+                window.orderFrontRegardless()
 
                 notchWindows[displayID] = window
                 notchViewModels[displayID] = viewModel

@@ -99,6 +99,13 @@ extension AppDelegate {
                 self?.updateWindowFrame()
             }
             .store(in: &cancellables)
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(updateWindowFrame),
+            name: UserDefaults.didChangeNotification,
+            object: nil
+        )
     }
 
     func observeFullscreenVisibilityChanges() {
