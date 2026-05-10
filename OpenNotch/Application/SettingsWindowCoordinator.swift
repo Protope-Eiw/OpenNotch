@@ -8,6 +8,10 @@ enum SettingsWindowCoordinator {
         window.identifier = identifier
     }
 
+    static var exists: Bool {
+        NSApp.windows.contains(where: { $0.identifier == identifier })
+    }
+
     static func activate(attempts: Int = 6) {
         NSApp.activate(ignoringOtherApps: true)
         focusWindow(attempts: attempts)

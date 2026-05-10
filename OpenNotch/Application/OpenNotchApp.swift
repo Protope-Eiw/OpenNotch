@@ -59,7 +59,9 @@ private struct MenuBarMenu: View {
             Divider()
             
             Button {
-                openWindow(id: WindowsScene.settings)
+                if !SettingsWindowCoordinator.exists {
+                    openWindow(id: WindowsScene.settings)
+                }
                 SettingsWindowCoordinator.activate()
             } label: {
                 Image(systemName: "gearshape")
