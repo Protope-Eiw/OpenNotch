@@ -11,7 +11,6 @@ enum OnboardingSteps: String, Equatable, CaseIterable {
     case first
     case second
     case third
-    case fourth
     
     static let stackID = NotchContentRegistry.Onboarding.stackID
     
@@ -45,8 +44,6 @@ enum OnboardingSteps: String, Equatable, CaseIterable {
             return -80
         case .third:
             return -80
-        case .fourth:
-            return -80
         }
     }
     
@@ -57,8 +54,6 @@ enum OnboardingSteps: String, Equatable, CaseIterable {
         case .second:
             .init(width: baseWidth + 160, height: baseHeight + 140)
         case .third:
-            .init(width: baseWidth + 160, height: baseHeight + 140)
-        case .fourth:
             .init(width: baseWidth + 160, height: baseHeight + 140)
         }
     }
