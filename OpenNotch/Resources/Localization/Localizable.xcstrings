@@ -4532,6 +4532,7 @@
       }
     },
     "Dynamic Notch" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

@@ -1546,8 +1546,8 @@ private struct MusicPlayerView: View {
             if let img = artwork {
                 Image(nsImage: img)
                     .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .aspectRatio(1, contentMode: .fit)
+                    .frame(maxHeight: .infinity)
                     .scaleEffect(x: 1.4, y: 1.5)
                     .rotationEffect(.degrees(92))
                     .blur(radius: 22)
@@ -1560,7 +1560,6 @@ private struct MusicPlayerView: View {
                     Image(nsImage: img)
                         .resizable()
                         .aspectRatio(contentMode: .fill)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     Color.white.opacity(0.07)
                         .overlay {
