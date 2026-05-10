@@ -14,11 +14,7 @@ struct FocusOffNotchContent: NotchContentProtocol {
     let settingsViewModel: SettingsViewModel
     private var appearanceStyle: FocusAppearanceStyle { settingsViewModel.connectivity.focusAppearanceStyle}
     
-    var strokeColor: Color {
-        settingsViewModel.isDefaultActivityStrokeEnabled || settingsViewModel.connectivity.isFocusDefaultStrokeEnabled ?
-        .white.opacity(0.2) :
-        .gray.opacity(0.3)
-    }
+    var strokeColor: Color { .white.opacity(0.2) }
     
     func size(baseWidth: CGFloat, baseHeight: CGFloat) -> CGSize {
         return .init(

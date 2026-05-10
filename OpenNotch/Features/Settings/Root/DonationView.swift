@@ -13,8 +13,8 @@ struct DonationView: View {
 
         var label: String {
             switch self {
-            case .wechat: return "微信"
-            case .alipay: return "支付宝"
+            case .wechat: return L10n.app("donation.method.wechat", fallback: "WeChat")
+            case .alipay: return L10n.app("donation.method.alipay", fallback: "Alipay")
             case .paypal: return "PayPal"
             }
         }
@@ -40,7 +40,7 @@ struct DonationView: View {
 
             qrPanel
 
-            Text("喜欢就请我喝杯咖啡，完全随意☕️")
+            Text(L10n.app("donation.buyCoffee", fallback: "Buy me a coffee, totally optional ☕️"))
                 .font(.system(size: 13))
                 .foregroundStyle(.secondary)
 
@@ -50,7 +50,7 @@ struct DonationView: View {
                 HStack(spacing: 6) {
                     Image(systemName: "envelope")
                         .font(.system(size: 12))
-                    Text("提交反馈或建议")
+                    Text(L10n.app("donation.sendFeedback", fallback: "Send feedback or suggestions"))
                         .font(.system(size: 13))
                 }
                 .foregroundStyle(.secondary)
@@ -78,7 +78,7 @@ struct DonationView: View {
                     .foregroundStyle(selectedMethod == method ? method.accentColor : (method.available ? .primary : .secondary))
 
                 if !method.available {
-                    Text("即将支持")
+                    Text(L10n.app("donation.comingSoon", fallback: "Coming soon"))
                         .font(.system(size: 10))
                         .foregroundStyle(.tertiary)
                 }
@@ -130,7 +130,7 @@ struct DonationView: View {
                     Image(systemName: "clock.badge.questionmark")
                         .font(.system(size: 40))
                         .foregroundStyle(.secondary)
-                    Text("即将支持")
+                    Text(L10n.app("donation.comingSoon", fallback: "Coming soon"))
                         .font(.system(size: 13))
                         .foregroundStyle(.secondary)
                 }
@@ -156,10 +156,10 @@ private struct FeedbackSheet: View {
         VStack(alignment: .leading, spacing: 0) {
             // Header
             HStack {
-                Text("反馈与建议")
+                Text(L10n.app("feedback.title", fallback: "Feedback & Suggestions"))
                     .font(.system(size: 14, weight: .semibold))
                 Spacer()
-                Button("关闭") { dismiss() }
+                Button(L10n.app("feedback.close", fallback: "Close")) { dismiss() }
                     .buttonStyle(.plain)
                     .foregroundStyle(.secondary)
                     .font(.system(size: 13))
@@ -174,7 +174,7 @@ private struct FeedbackSheet: View {
                 VStack(alignment: .leading, spacing: 16) {
                     // Message
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("你的反馈")
+                        Text(L10n.app("feedback.yourFeedback", fallback: "Your Feedback"))
                             .font(.system(size: 12, weight: .medium))
                             .foregroundStyle(.secondary)
                         ZStack(alignment: .topLeading) {
@@ -186,7 +186,7 @@ private struct FeedbackSheet: View {
                                     if v.count > maxLength { message = String(v.prefix(maxLength)) }
                                 }
                             if message.isEmpty {
-                                Text("有什么想说的？功能建议、使用问题都欢迎……")
+                                Text(L10n.app("feedback.placeholder", fallback: "Anything to share? Feature suggestions, issues, all welcome…"))
                                     .font(.system(size: 13))
                                     .foregroundStyle(.tertiary)
                                     .allowsHitTesting(false)
@@ -207,10 +207,10 @@ private struct FeedbackSheet: View {
 
                     // Contact (optional)
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("联系方式（可选）")
+                        Text(L10n.app("feedback.contact", fallback: "Contact Info (optional)"))
                             .font(.system(size: 12, weight: .medium))
                             .foregroundStyle(.secondary)
-                        TextField("邮箱或微信，方便回复你", text: $contactInfo)
+                        TextField(L10n.app("feedback.contactPlaceholder", fallback: "Email or WeChat for reply"), text: $contactInfo)
                             .textFieldStyle(.plain)
                             .font(.system(size: 13))
                             .padding(10)
@@ -222,7 +222,7 @@ private struct FeedbackSheet: View {
                         Spacer()
                         switch state {
                         case .idle:
-                            Button("发送") { submit() }
+                            Button(L10n.app("feedback.send", fallback: "Send")) { submit() }
                                 .buttonStyle(.plain)
                                 .font(.system(size: 13, weight: .medium))
                                 .foregroundStyle(.white)
@@ -234,11 +234,11 @@ private struct FeedbackSheet: View {
                         case .sending:
                             ProgressView().controlSize(.small)
                         case .success:
-                            Label("已发送，谢谢！", systemImage: "checkmark.circle.fill")
+                            Label(L10n.app("feedback.sent", fallback: "Sent, thank you!"), systemImage: "checkmark.circle.fill")
                                 .font(.system(size: 13))
                                 .foregroundStyle(.green)
                         case .failure:
-                            Label("发送失败，请稍后重试", systemImage: "exclamationmark.circle")
+                            Label(L10n.app("feedback.failed", fallback: "Send failed, please try again later"), systemImage: "exclamationmark.circle")
                                 .font(.system(size: 13))
                                 .foregroundStyle(.red)
                         }
@@ -256,7 +256,7 @@ private struct FeedbackSheet: View {
 
         var body: [String: String] = [
             "access_key": "bf1500a5-f080-4407-b40d-3d949dd5272f",
-            "subject":    "OpenNotch 用户反馈",
+            "subject":    "OpenNotch User Feedback",
             "message":    message
         ]
         if !contactInfo.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {

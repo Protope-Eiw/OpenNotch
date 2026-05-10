@@ -5,7 +5,7 @@ struct DropSettingsView: View {
     @ObservedObject var appearanceSettings: ApplicationSettingsStore
 
     private var isDefaultStrokeLocked: Bool {
-        appearanceSettings.isDefaultActivityStrokeEnabled
+        true
     }
     
     @ViewBuilder var cards: some View {
@@ -52,10 +52,6 @@ struct DropSettingsView: View {
                 previewHeight: 166,
                 topCornerRadius: 24,
                 bottomCornerRadius: 36,
-                backgroundStyle: .black,
-                showsStroke: appearanceSettings.isShowNotchStrokeEnabled,
-                strokeColor: dragAndDropPreviewStrokeColor,
-                strokeWidth: appearanceSettings.notchStrokeWidth,
                 lightBackgroundImage: Image("backgroundLight"),
                 darkBackgroundImage: Image("backgroundDark")
             ) {
@@ -125,15 +121,7 @@ struct DropSettingsView: View {
     }
 
     private var dragAndDropPreviewStrokeColor: Color {
-        guard appearanceSettings.isShowNotchStrokeEnabled else {
-            return .clear
-        }
-
-        if appearanceSettings.isDefaultActivityStrokeEnabled || mediaSettings.isDragAndDropDefaultStrokeEnabled {
-            return .white.opacity(0.2)
-        }
-
-        return mediaSettings.dragAndDropActivityMode == .tray ? .white.opacity(0.2) : Color.accentColor.opacity(0.3)
+        return .clear
     }
 
     private func dragAndDropPreviewTarget(_ target: DragAndDropTarget) -> some View {

@@ -393,23 +393,15 @@ private struct LockScreenLiveActivityOverlayView: View {
             .scaleEffect(animator.scale)
             .opacity(animator.opacity)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-            .animation(notchViewModel.animations.strokeVisibility, value: settingsViewModel.isShowNotchStrokeEnabled)
             .animation(notchViewModel.animations.notchVisibility, value: notchViewModel.showNotch)
     }
     
     @ViewBuilder
     private var notchSurface: some View {
         NotchBackgroundSurface(
-            style: settingsViewModel.application.notchBackgroundStyle,
             topCornerRadius: notchViewModel.interactiveCornerRadius.top,
-            bottomCornerRadius: notchViewModel.interactiveCornerRadius.bottom,
-            strokeColor: settingsViewModel.isShowNotchStrokeEnabled ? visibleStrokeColor : .clear,
-            strokeWidth: settingsViewModel.notchStrokeWidth
+            bottomCornerRadius: notchViewModel.interactiveCornerRadius.bottom
         )
-    }
-    
-    private var visibleStrokeColor: Color {
-        notchViewModel.notchModel.content?.strokeColor ?? notchViewModel.cachedStrokeColor
     }
     
     @ViewBuilder

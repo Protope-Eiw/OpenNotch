@@ -186,57 +186,6 @@ struct NotchSettingsView: View {
 
     private var appearanceCard: some View {
         SettingsCard(title: localized("Notch appearance")) {
-            CustomPicker(
-                selection: $applicationSettings.notchBackgroundStyle,
-                options: NotchBackgroundStyle.availableOptions,
-                title: { localized($0.title) },
-                headerTitle: localized("Background"),
-                headerDescription: localized("Choose the background color used across the notch."),
-                lightBackgroundImage: Image("backgroundLight"),
-                darkBackgroundImage: Image("backgroundDark")
-            ) { style, isSelected in
-                backgroundPickerContent(for: style, isSelected: isSelected)
-            }
-            .accessibilityIdentifier("settings.notch.backgroundStyle")
-
-            SettingsDivider()
-
-            SettingsToggleRow(
-                title: localized("Show notch stroke"),
-                description: localized("Show a subtle outline that adapts to the active content color."),
-                systemImage: "square.on.square.squareshape.controlhandles",
-                color: .green,
-                isOn: $applicationSettings.isShowNotchStrokeEnabled,
-                accessibilityIdentifier: "settings.general.showNotchStroke"
-            )
-
-            Divider()
-                .opacity(0.6)
-                .padding(.leading, 43)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
-
-            SettingsToggleRow(
-                title: localized("Use default activity stroke color"),
-                description: localized("Apply the standard white stroke to supported activities instead of feature accent colors."),
-                systemImage: "paintbrush.pointed.fill",
-                color: .purple,
-                isOn: $applicationSettings.isDefaultActivityStrokeEnabled,
-                accessibilityIdentifier: "settings.general.defaultActivityStroke"
-            )
-
-            SettingsDivider()
-
-            SettingsSliderRow(
-                title: localized("Stroke width"),
-                description: localized("Adjust the thickness of the notch outline."),
-                range: 1...3,
-                step: 0.5,
-                fractionLength: 1,
-                suffix: "px",
-                accessibilityIdentifier: "settings.general.notchStrokeWidth",
-                value: $applicationSettings.notchStrokeWidth
-            )
-
             SettingsSliderRow(
                 title: localized("Notch width"),
                 description: localized("Fine-tune the notch width to better match your display cutout."),
@@ -416,79 +365,6 @@ struct NotchSettingsView: View {
                 cornerRadius: 9
             )
         }
-    }
-
-    @ViewBuilder
-    private func backgroundPickerContent(for style: NotchBackgroundStyle, isSelected: Bool) -> some View {
-        ZStack {
-            previewCapsule(for: style)
-                .frame(width: 116, height: 30)
-        }
-        .environment(\.colorScheme, .dark)
-        .scaleEffect(isSelected ? 1 : 0.97)
-    }
-
-    @ViewBuilder
-    private func previewCapsule(for style: NotchBackgroundStyle) -> some View {
-        switch style {
-        case .black:
-            Capsule()
-                .fill(.black)
-                .overlay {
-                    Capsule()
-                        .stroke(previewStrokeColor, lineWidth: previewStrokeWidth)
-                }
-
-        case .ultraThickMaterial:
-            ZStack {
-                Capsule()
-                    .fill(Color.white.opacity(0.05))
-
-                Capsule()
-                    .fill(.ultraThinMaterial)
-                    .overlay {
-                        Capsule()
-                            .fill(
-                                LinearGradient(
-                                    colors: [
-                                        Color.white.opacity(0.10),
-                                        Color.white.opacity(0.02)
-                                    ],
-                                    startPoint: .top,
-                                    endPoint: .bottom
-                                )
-                            )
-                    }
-                    .overlay {
-                        Capsule()
-                            .stroke(previewStrokeColor, lineWidth: previewStrokeWidth)
-                    }
-            }
-
-        case .liquidGlass:
-            if #available(macOS 26.0, *) {
-                Color.clear
-                    .glassEffect(.regular, in: Capsule())
-                    .overlay {
-                        Capsule()
-                            .stroke(previewStrokeColor, lineWidth: previewStrokeWidth)
-                    }
-            }
-        }
-    }
-
-    private var previewStrokeColor: Color {
-        guard applicationSettings.isShowNotchStrokeEnabled else {
-            return .clear
-        }
-
-        return applicationSettings.isDefaultActivityStrokeEnabled ?
-            .white.opacity(0.2) :
-            .green.opacity(0.3)
-    }
-
-    private var previewStrokeWidth: CGFloat {
-        applicationSettings.isShowNotchStrokeEnabled ? CGFloat(applicationSettings.notchStrokeWidth) : 0
     }
 
     private func localized(_ key: String, fallback: String? = nil) -> String {

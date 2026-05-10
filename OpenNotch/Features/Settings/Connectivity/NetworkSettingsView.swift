@@ -20,23 +20,15 @@ struct NetworkSettingsView: View {
     }
 
     private var isHotspotDefaultStrokeLocked: Bool {
-        appearanceSettings.isDefaultActivityStrokeEnabled
+        true
     }
 
     private var hotspotPreviewStrokeColor: Color {
-        guard appearanceSettings.isShowNotchStrokeEnabled else {
-            return .clear
-        }
-
-        if appearanceSettings.isDefaultActivityStrokeEnabled || connectivitySettings.isHotspotDefaultStrokeEnabled {
-            return .white.opacity(0.2)
-        }
-
-        return .green.opacity(0.2)
+        return .clear
     }
 
     private var vpnPreviewStrokeColor: Color {
-        appearanceSettings.isShowNotchStrokeEnabled ? .white.opacity(0.2) : .clear
+        .clear
     }
     
     @ViewBuilder var cards: some View {

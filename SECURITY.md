@@ -18,7 +18,7 @@ Please do not open a public GitHub issue for suspected security vulnerabilities.
 
 Instead, send a report to **evgeniy.petrukovich@icloud.com** with the subject line:
 
-`DynamicNotch Security Report`
+`OpenNotch Security Report`
 
 Please include:
 

@@ -100,21 +100,6 @@ final class SettingsViewModel: ObservableObject, NotchSettingsProviding {
         set { application.isMenuBarIconVisible = newValue }
     }
 
-    var isShowNotchStrokeEnabled: Bool {
-        get { application.isShowNotchStrokeEnabled }
-        set { application.isShowNotchStrokeEnabled = newValue }
-    }
-
-    var isDefaultActivityStrokeEnabled: Bool {
-        get { application.isDefaultActivityStrokeEnabled }
-        set { application.isDefaultActivityStrokeEnabled = newValue }
-    }
-
-    var notchStrokeWidth: Double {
-        get { application.notchStrokeWidth }
-        set { application.notchStrokeWidth = newValue }
-    }
-
     var displayLocation: NotchDisplayLocation {
         get { application.displayLocation }
         set { application.displayLocation = newValue }
@@ -209,7 +194,7 @@ final class SettingsViewModel: ObservableObject, NotchSettingsProviding {
     }
 
     var isHUDColoredLevelStrokeEnabled: Bool {
-        get { application.isDefaultActivityStrokeEnabled ? false : hud.isColoredLevelStrokeEnabled }
+        get { hud.isColoredLevelStrokeEnabled }
         set { hud.isColoredLevelStrokeEnabled = newValue }
     }
 

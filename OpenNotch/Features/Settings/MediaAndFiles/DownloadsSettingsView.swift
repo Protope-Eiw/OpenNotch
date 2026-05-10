@@ -4,20 +4,10 @@ struct DownloadsSettingsView: View {
     @ObservedObject var mediaSettings: MediaAndFilesSettingsStore
     @ObservedObject var appearanceSettings: ApplicationSettingsStore
     
-    private var isDefaultStrokeLocked: Bool {
-        appearanceSettings.isDefaultActivityStrokeEnabled
-    }
-    
+    private var isDefaultStrokeLocked: Bool { true }
+
     private var downloadPreviewStrokeColor: Color {
-        guard appearanceSettings.isShowNotchStrokeEnabled else {
-            return .clear
-        }
-        
-        if appearanceSettings.isDefaultActivityStrokeEnabled || mediaSettings.isDownloadsDefaultStrokeEnabled {
-            return .white.opacity(0.2)
-        }
-        
-        return .accentColor.opacity(0.3)
+        return .clear
     }
     
     private let previewDownload = DownloadSettingsPreviewModel.settingsPreview

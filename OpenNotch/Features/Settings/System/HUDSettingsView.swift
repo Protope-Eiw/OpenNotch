@@ -9,7 +9,7 @@ struct HUDSettingsView: View {
     }
 
     private var isLevelStrokeLocked: Bool {
-        applicationSettings.isDefaultActivityStrokeEnabled
+        true
     }
 
     @ViewBuilder var cards: some View {
@@ -254,13 +254,7 @@ struct HUDSettingsView: View {
     }
 
     private var pickerStrokeColor: Color {
-        guard applicationSettings.isShowNotchStrokeEnabled else {
-            return .clear
-        }
-
-        return HudLevelStyling.previewStrokeTint(
-            isEnabled: settings.isColoredLevelStrokeEnabled && !isLevelStrokeLocked
-        )
+        return .clear
     }
 
     private func localized(_ key: String, fallback: String? = nil) -> String {

@@ -596,7 +596,6 @@ private extension NotchView {
                 contextMenuItem
             }
             .environment(\.colorScheme, .dark)
-            .animation(notchViewModel.animations.strokeVisibility, value: settingsViewModel.isShowNotchStrokeEnabled)
             .animation(notchViewModel.animations.notchVisibility, value: notchViewModel.showNotch)
             .simultaneousGesture(
                 DragGesture(minimumDistance: 0)
@@ -624,24 +623,12 @@ private extension NotchView {
         )
     }
     
-    var visibleStrokeColor: Color {
-        notchViewModel.displayedContent?.strokeColor ?? notchViewModel.cachedStrokeColor
-    }
-    
     @ViewBuilder
     var notchSurface: some View {
         NotchBackgroundSurface(
-            style: settingsViewModel.application.notchBackgroundStyle,
             topCornerRadius: notchViewModel.interactiveCornerRadius.top,
-            bottomCornerRadius: notchViewModel.interactiveCornerRadius.bottom,
-            strokeColor: shouldShowStroke ? visibleStrokeColor : .clear,
-            strokeWidth: settingsViewModel.notchStrokeWidth
+            bottomCornerRadius: notchViewModel.interactiveCornerRadius.bottom
         )
-    }
-    
-    var shouldShowStroke: Bool {
-        settingsViewModel.isShowNotchStrokeEnabled &&
-        notchViewModel.displayedContent != nil
     }
     
     @ViewBuilder
@@ -1101,7 +1088,7 @@ private struct OverviewView: View {
                         Image(systemName: "square.grid.2x2")
                             .font(.system(size: 18))
                             .foregroundStyle(.white.opacity(0.12))
-                        Text("点击 + 添加应用")
+                        Text(L10n.app("appLauncher.tapToAdd", fallback: "Tap + to add apps"))
                             .font(.system(size: 8))
                             .multilineTextAlignment(.center)
                             .foregroundStyle(.white.opacity(0.2))
@@ -1136,7 +1123,7 @@ private struct OverviewView: View {
                                 Button(role: .destructive) {
                                     pinnedAppsStore.remove(url)
                                 } label: {
-                                    Label("从快速启动移除", systemImage: "trash")
+                                    Label(L10n.app("appLauncher.remove", fallback: "Remove from Quick Launch"), systemImage: "trash")
                                 }
                             }
                         }
@@ -1193,7 +1180,7 @@ private struct OverviewView: View {
                 } else {
                     HStack(spacing: 3) {
                         Image(systemName: "location.slash").font(.system(size: 9))
-                        Text("获取天气中…").font(.system(size: 9))
+                        Text(L10n.app("weather.fetching", fallback: "Fetching weather…")).font(.system(size: 9))
                     }
                     .foregroundStyle(.white.opacity(0.2))
                 }
@@ -1270,7 +1257,7 @@ private struct OverviewView: View {
                     .foregroundStyle(.white)
 
                 Text(isIdle ? "\(workMinutes)m"
-                     : pomodoroViewModel.phase == .work ? "专注中" : "休息中")
+                     : pomodoroViewModel.phase == .work ? L10n.app("pomodoro.focusing", fallback: "Focusing") : L10n.app("pomodoro.resting", fallback: "Resting"))
                     .font(.system(size: 9))
                     .foregroundStyle(isIdle ? .white.opacity(0.3) : accentColor.opacity(0.8))
 
@@ -1357,7 +1344,7 @@ private struct OverviewAppPickerView: View {
                 Image(systemName: "magnifyingglass")
                     .font(.system(size: 11))
                     .foregroundStyle(.secondary)
-                TextField("搜索应用", text: $searchText)
+                TextField("", text: $searchText, prompt: Text(L10n.app("appLauncher.search", fallback: "Search apps")))
                     .textFieldStyle(.plain)
                     .font(.system(size: 12))
                 if !searchText.isEmpty {
@@ -1383,7 +1370,7 @@ private struct OverviewAppPickerView: View {
                     Image(systemName: searchText.isEmpty ? "checkmark.circle" : "magnifyingglass")
                         .font(.system(size: 28))
                         .foregroundStyle(.secondary)
-                    Text(searchText.isEmpty ? "所有应用都已添加" : "未找到匹配应用")
+                    Text(searchText.isEmpty ? L10n.app("appLauncher.allAdded", fallback: "All apps already added") : L10n.app("appLauncher.noMatch", fallback: "No matching apps found"))
                         .font(.system(size: 12))
                         .foregroundStyle(.secondary)
                 }
@@ -1425,7 +1412,7 @@ private struct OverviewAppPickerView: View {
             Divider()
 
             HStack {
-                Text("已固定 \(store.apps.count) / 12 个应用")
+                Text(L10n.app("appLauncher.pinned", fallback: "Pinned \(store.apps.count) / 12 apps"))
                     .font(.system(size: 10))
                     .foregroundStyle(.secondary)
                 Spacer()
@@ -1554,15 +1541,13 @@ private struct MusicPlayerView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
-    // 封面：播放时发光光晕 + 全尺寸；暂停时缩小 + 暗色蒙层
     private var artworkView: some View {
         ZStack {
-            // 光晕层：封面旋转模糊，播放时可见
             if let img = artwork {
                 Image(nsImage: img)
                     .resizable()
-                    .aspectRatio(1, contentMode: .fit)
-                    .frame(maxHeight: .infinity)
+                    .aspectRatio(contentMode: .fill)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .scaleEffect(x: 1.4, y: 1.5)
                     .rotationEffect(.degrees(92))
                     .blur(radius: 22)
@@ -1570,12 +1555,12 @@ private struct MusicPlayerView: View {
                     .animation(.easeInOut(duration: 0.45), value: snapshot.isPlaying)
             }
 
-            // 主封面
             Group {
                 if let img = artwork {
                     Image(nsImage: img)
                         .resizable()
                         .aspectRatio(contentMode: .fill)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     Color.white.opacity(0.07)
                         .overlay {
@@ -1591,7 +1576,6 @@ private struct MusicPlayerView: View {
             .scaleEffect(snapshot.isPlaying ? 1.0 : 0.87)
             .animation(.spring(response: 0.4, dampingFraction: 0.75), value: snapshot.isPlaying)
 
-            // 暂停时的暗色蒙层
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color.black.opacity(snapshot.isPlaying ? 0 : 0.5))
                 .aspectRatio(1, contentMode: .fit)
@@ -1651,15 +1635,15 @@ private struct CalendarTabView: View {
         case .notDetermined:
             calendarPermissionView(
                 icon: "calendar",
-                message: "需要日历权限",
-                buttonLabel: "授权访问",
+                message: L10n.app("calendar.needPermission", fallback: "Calendar access needed"),
+                buttonLabel: L10n.app("calendar.grantAccess", fallback: "Grant Access"),
                 action: { store.requestAccess() }
             )
         case .denied, .restricted:
             calendarPermissionView(
                 icon: "calendar.badge.exclamationmark",
-                message: "日历访问被拒绝",
-                buttonLabel: "打开系统设置",
+                message: L10n.app("calendar.accessDenied", fallback: "Calendar access denied"),
+                buttonLabel: L10n.app("calendar.openSettings", fallback: "Open System Settings"),
                 action: { store.openPrivacySettings() }
             )
         default:
@@ -1875,7 +1859,7 @@ private struct CalendarEventPane: View {
                     Image(systemName: "calendar.badge.checkmark")
                         .font(.system(size: 16))
                         .foregroundStyle(.white.opacity(0.15))
-                    Text(Calendar.current.isDateInToday(date) ? "今天没有日程" : "没有日程")
+                    Text(Calendar.current.isDateInToday(date) ? L10n.app("calendar.noEventsToday", fallback: "No events today") : L10n.app("calendar.noEvents", fallback: "No events"))
                         .font(.system(size: 10))
                         .foregroundStyle(.white.opacity(0.25))
                 }
@@ -1903,12 +1887,14 @@ private struct CalendarEventPane: View {
 
     private var dateLabel: String {
         let c = Calendar.current
-        if c.isDateInToday(date)     { return "今天" }
-        if c.isDateInYesterday(date) { return "昨天" }
-        if c.isDateInTomorrow(date)  { return "明天" }
+        if c.isDateInToday(date)     { return L10n.app("calendar.today", fallback: "Today") }
+        if c.isDateInYesterday(date) { return L10n.app("calendar.yesterday", fallback: "Yesterday") }
+        if c.isDateInTomorrow(date)  { return L10n.app("calendar.tomorrow", fallback: "Tomorrow") }
         let f = DateFormatter()
-        f.dateFormat = c.component(.year, from: date) == c.component(.year, from: Date())
-            ? "M月d日" : "yyyy年M月d日"
+        f.dateFormat = DateFormatter.dateFormat(
+            fromTemplate: c.component(.year, from: date) == c.component(.year, from: Date()) ? "Md" : "yMd",
+            options: 0, locale: Locale(identifier: L10n.appLanguageIdentifier)
+        )
         return f.string(from: date)
     }
 
@@ -1952,7 +1938,7 @@ private struct CalendarEventRow: View {
 
             VStack(alignment: .trailing, spacing: 2) {
                 if event.isAllDay {
-                    Text("全天")
+                    Text(L10n.app("calendar.allDay", fallback: "All Day"))
                         .font(.system(size: 9, weight: .medium))
                         .foregroundStyle(.white.opacity(0.45))
                 } else {

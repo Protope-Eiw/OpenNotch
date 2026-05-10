@@ -11,7 +11,6 @@ struct BluetoothConnectedNotchView: View {
     @Environment(\.notchScale) var scale
     @ObservedObject var bluetoothViewModel: BluetoothViewModel
     @ObservedObject var settings: ConnectivitySettingsStore
-    @ObservedObject var applicationSettings: ApplicationSettingsStore
     
     private var appearanceStyle: BluetoothAppearanceStyle {
         settings.bluetoothAppearanceStyle
@@ -22,7 +21,7 @@ struct BluetoothConnectedNotchView: View {
     }
     
     private var isBatteryStrokeActive: Bool {
-        settings.isBluetoothBatteryStrokeEnabled && applicationSettings.isDefaultActivityStrokeEnabled == false
+        false
     }
     
     private var clampedLevel: Int? {

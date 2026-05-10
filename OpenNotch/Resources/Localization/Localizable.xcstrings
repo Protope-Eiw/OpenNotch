@@ -144,9 +144,6 @@
         }
       }
     },
-    "%lldm" : {
-
-    },
     "↑%@" : {
 
     },
@@ -7580,34 +7577,37 @@
         }
       }
     },
-    "Open the DynamicNotch website" : {
+    "Open the OpenNotch website" : {
       "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Open the DynamicNotch website"
+            "value" : "Open the OpenNotch website"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Abra el sitio web de DynamicNotch"
+            "value" : "Abra el sitio web de OpenNotch"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Открыть сайт DynamicNotch"
+            "value" : "Открыть сайт OpenNotch"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "打开 DynamicNotch 网站"
+            "value" : "打开 OpenNotch 网站"
           }
         }
       }
+    },
+    "OpenNotch" : {
+
     },
     "Orange" : {
       "extractionState" : "stale",
@@ -8397,89 +8397,89 @@
         }
       }
     },
-    "Replace the keyboard backlight HUD with DynamicNotch HUD." : {
+    "Replace the keyboard backlight HUD with OpenNotch HUD." : {
       "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Replace the keyboard backlight HUD with DynamicNotch HUD."
+            "value" : "Replace the keyboard backlight HUD with OpenNotch HUD."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Reemplace el HUD de retroiluminación del teclado con DynamicNotch HUD."
+            "value" : "Reemplace el HUD de retroiluminación del teclado con OpenNotch HUD."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Заменить HUD подсветки клавиатуры на HUD DynamicNotch."
+            "value" : "Заменить HUD подсветки клавиатуры на HUD OpenNotch."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "将键盘背光 HUD 替换为 DynamicNotch HUD。"
+            "value" : "将键盘背光 HUD 替换为 OpenNotch HUD。"
           }
         }
       }
     },
-    "Replace the system brightness HUD with DynamicNotch HUD." : {
+    "Replace the system brightness HUD with OpenNotch HUD." : {
       "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Replace the system brightness HUD with DynamicNotch HUD."
+            "value" : "Replace the system brightness HUD with OpenNotch HUD."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Reemplace el HUD de brillo del sistema con DynamicNotch HUD."
+            "value" : "Reemplace el HUD de brillo del sistema con OpenNotch HUD."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Заменить системный HUD яркости на HUD DynamicNotch."
+            "value" : "Заменить системный HUD яркости на HUD OpenNotch."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "将系统亮度 HUD 替换为 DynamicNotch HUD。"
+            "value" : "将系统亮度 HUD 替换为 OpenNotch HUD。"
           }
         }
       }
     },
-    "Replace the system volume HUD with DynamicNotch HUD." : {
+    "Replace the system volume HUD with OpenNotch HUD." : {
       "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Replace the system volume HUD with DynamicNotch HUD."
+            "value" : "Replace the system volume HUD with OpenNotch HUD."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Reemplace el HUD del volumen del sistema con DynamicNotch HUD."
+            "value" : "Reemplace el HUD del volumen del sistema con OpenNotch HUD."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Заменить системный HUD громкости на HUD DynamicNotch."
+            "value" : "Заменить системный HUD громкости на HUD OpenNotch."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "将系统音量 HUD 替换为 DynamicNotch HUD。"
+            "value" : "将系统音量 HUD 替换为 OpenNotch HUD。"
           }
         }
       }
@@ -18279,78 +18279,6 @@
           }
         }
       }
-    },
-    "专注中" : {
-
-    },
-    "今天没有日程" : {
-
-    },
-    "从快速启动移除" : {
-
-    },
-    "休息中" : {
-
-    },
-    "你的反馈" : {
-
-    },
-    "全天" : {
-
-    },
-    "关闭" : {
-
-    },
-    "即将支持" : {
-
-    },
-    "反馈与建议" : {
-
-    },
-    "发送" : {
-
-    },
-    "发送失败，请稍后重试" : {
-
-    },
-    "喜欢就请我喝杯咖啡，完全随意☕️" : {
-
-    },
-    "已发送，谢谢！" : {
-
-    },
-    "已固定 %lld / 12 个应用" : {
-
-    },
-    "所有应用都已添加" : {
-
-    },
-    "提交反馈或建议" : {
-
-    },
-    "搜索应用" : {
-
-    },
-    "有什么想说的？功能建议、使用问题都欢迎……" : {
-
-    },
-    "未找到匹配应用" : {
-
-    },
-    "没有日程" : {
-
-    },
-    "点击 + 添加应用" : {
-
-    },
-    "联系方式（可选）" : {
-
-    },
-    "获取天气中…" : {
-
-    },
-    "邮箱或微信，方便回复你" : {
-
     }
   },
   "version" : "1.1"

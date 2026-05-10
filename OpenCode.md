@@ -2,7 +2,7 @@
 
 ## App identity
 
-The app is called **OpenNotch**. The Xcode project and folder structure still uses `DynamicNotch` as the identifier/bundle prefix; do not rename those.
+The app is called **OpenNotch**.
 
 ## References
 

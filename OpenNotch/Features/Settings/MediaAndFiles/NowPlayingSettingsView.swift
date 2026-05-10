@@ -9,7 +9,7 @@ struct NowPlayingSettingsView: View {
     }
 
     private var isArtworkStrokeLocked: Bool {
-        applicationSettings.isDefaultActivityStrokeEnabled
+        true
     }
 
     private var isWithoutCloseTimer: Binding<Bool> {
@@ -154,11 +154,8 @@ private struct NowPlayingAppearancePreview: View {
     private let baseColor = Color(red: 0.96, green: 0.48, blue: 0.2)
     
     var body: some View {
-        let appearance = settings.resolvedNowPlayingAppearanceOptions(
-            isDefaultActivityStrokeEnabled: applicationSettings.isDefaultActivityStrokeEnabled
-        )
+        let appearance = settings.nowPlayingAppearanceOptions
         let previewEqualizerHeights: [CGFloat] = [8, 6, 9, 5, 9]
-        let showsNotchStroke = applicationSettings.isShowNotchStrokeEnabled
         let progressGradient = LinearGradient(
             colors: [highlightColor, baseColor],
             startPoint: .leading,
@@ -171,12 +168,6 @@ private struct NowPlayingAppearancePreview: View {
             previewHeight: 186,
             topCornerRadius: 28,
             bottomCornerRadius: 38,
-            backgroundStyle: .black,
-            showsStroke: showsNotchStroke,
-            strokeColor: showsNotchStroke
-            ? (appearance.usesArtworkStrokeTint ? baseColor.opacity(0.3) : .white.opacity(0.2))
-            : .clear,
-            strokeWidth: 1.5,
             lightBackgroundImage: Image("backgroundLight"),
             darkBackgroundImage: Image("backgroundDark")
         ) {

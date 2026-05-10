@@ -16,11 +16,7 @@ struct FocusOnNotchContent: NotchContentProtocol {
     }
     
     var priority: Int { NotchContentRegistry.Focus.active.priority }
-    var strokeColor: Color {
-        settingsViewModel.isDefaultActivityStrokeEnabled || settingsViewModel.connectivity.isFocusDefaultStrokeEnabled ?
-        .white.opacity(0.2) :
-        .indigo.opacity(0.3)
-    }
+    var strokeColor: Color { .white.opacity(0.2) }
     
     func size(baseWidth: CGFloat, baseHeight: CGFloat) -> CGSize {
         return .init(

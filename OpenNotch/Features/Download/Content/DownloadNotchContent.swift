@@ -16,11 +16,7 @@ struct DownloadNotchContent: NotchContentProtocol {
     var priority: Int { NotchContentRegistry.Media.download.priority }
     var isExpandable: Bool { true }
     
-    var strokeColor: Color {
-        settingsViewModel.isDefaultActivityStrokeEnabled || settingsViewModel.mediaAndFiles.isDownloadsDefaultStrokeEnabled ?
-        .white.opacity(0.2) :
-        .accentColor.opacity(0.30)
-    }
+    var strokeColor: Color { .white.opacity(0.2) }
     
     private var appearanceStyle: DownloadAppearanceStyle {
         settingsViewModel.mediaAndFiles.downloadsAppearanceStyle

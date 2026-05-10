@@ -12,18 +12,15 @@ struct NowPlayingNotchContent: NotchContentProtocol {
     
     let nowPlayingViewModel: NowPlayingViewModel
     let settings: MediaAndFilesSettingsStore
-    let applicationSettings: ApplicationSettingsStore
     let onOpenPlaybackSource: @MainActor () -> Void
 
     init(
         nowPlayingViewModel: NowPlayingViewModel,
         settings: MediaAndFilesSettingsStore,
-        applicationSettings: ApplicationSettingsStore,
         onOpenPlaybackSource: @escaping @MainActor () -> Void = {}
     ) {
         self.nowPlayingViewModel = nowPlayingViewModel
         self.settings = settings
-        self.applicationSettings = applicationSettings
         self.onOpenPlaybackSource = onOpenPlaybackSource
     }
     
@@ -38,13 +35,7 @@ struct NowPlayingNotchContent: NotchContentProtocol {
         }
     }
 
-    var strokeColor: Color {
-        guard settings.isNowPlayingArtworkStrokeEnabled,
-              applicationSettings.isDefaultActivityStrokeEnabled == false else {
-            return .white.opacity(0.2)
-        }
-        return Color(nsColor: nowPlayingViewModel.artworkPalette.equalizerBaseColor).opacity(0.4)
-    }
+    var strokeColor: Color { .white.opacity(0.2) }
     
     func size(baseWidth: CGFloat, baseHeight: CGFloat) -> CGSize {
         .init(width: baseWidth + 70, height: baseHeight)
@@ -73,7 +64,6 @@ struct NowPlayingNotchContent: NotchContentProtocol {
             NowPlayingExpandedNotchView(
                 nowPlayingViewModel: nowPlayingViewModel,
                 settings: settings,
-                applicationSettings: applicationSettings,
                 onOpenPlaybackSource: onOpenPlaybackSource
             )
         )

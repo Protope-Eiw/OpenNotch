@@ -288,7 +288,7 @@ final class NotchEventCoordinator: ObservableObject {
         case .started:
             notchViewModel.send(
                 .showLiveActivity(
-                    ScreenRecordingContent(settingsViewModel: settingsViewModel)
+                    ScreenRecordingContent()
                 )
             )
 

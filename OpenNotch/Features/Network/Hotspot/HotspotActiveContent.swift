@@ -14,11 +14,7 @@ struct HotspotActiveContent: NotchContentProtocol {
     private var appearanceStyle: HotspotAppearanceStyle { settingsViewModel.connectivity.hotspotAppearanceStyle}
     
     var priority: Int { NotchContentRegistry.Network.hotspot.priority }
-    var strokeColor: Color {
-        settingsViewModel.isDefaultActivityStrokeEnabled || settingsViewModel.connectivity.isHotspotDefaultStrokeEnabled ?
-            .white.opacity(0.2) :
-            .green.opacity(0.3)
-    }
+    var strokeColor: Color { .white.opacity(0.2) }
     
     func size(baseWidth: CGFloat, baseHeight: CGFloat) -> CGSize {
         let width = appearanceStyle == .minimal ? 80 : 80

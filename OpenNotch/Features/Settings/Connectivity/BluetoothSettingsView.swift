@@ -9,24 +9,15 @@ struct BluetoothSettingsView: View {
     }
 
     private var isBatteryStrokeLocked: Bool {
-        applicationSettings.isDefaultActivityStrokeEnabled
+        true
     }
 
     private var isBatteryStrokeActive: Bool {
-        settings.isBluetoothBatteryStrokeEnabled && applicationSettings.isDefaultActivityStrokeEnabled == false
+        false
     }
 
     private var bluetoothPreviewStrokeColor: Color {
-        guard applicationSettings.isShowNotchStrokeEnabled else {
-            return .clear
-        }
-
-        guard isBatteryStrokeActive,
-              settings.bluetoothAppearanceStyle.supportsBatteryPresentation else {
-            return .white.opacity(0.2)
-        }
-
-        return bluetoothBatteryColor(for: 82).opacity(0.3)
+        return .clear
     }
     
     @ViewBuilder var cards: some View {

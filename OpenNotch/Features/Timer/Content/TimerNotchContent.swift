@@ -9,11 +9,7 @@ struct TimerNotchContent: NotchContentProtocol {
 
     var priority: Int { NotchContentRegistry.Media.timer.priority }
     var isExpandable: Bool { true }
-    var strokeColor: Color {
-        settingsViewModel.isDefaultActivityStrokeEnabled || settingsViewModel.mediaAndFiles.isTimerDefaultStrokeEnabled ?
-        .white.opacity(0.2) :
-        .orange.opacity(0.3)
-    }
+    var strokeColor: Color { .white.opacity(0.2) }
 
     func size(baseWidth: CGFloat, baseHeight: CGFloat) -> CGSize {
         .init(width: baseWidth + minimalTimerSize, height: baseHeight)

@@ -5,7 +5,7 @@ struct ScreenRecordingSettingsView: View {
     @ObservedObject var appearanceSettings: ApplicationSettingsStore
 
     private var isDefaultStrokeLocked: Bool {
-        appearanceSettings.isDefaultActivityStrokeEnabled
+        true
     }
 
     @ViewBuilder var cards: some View {

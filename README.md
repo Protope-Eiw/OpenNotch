@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="DynamicNotch/Resources/Assets.xcassets/AppIcon.appiconset/logo256.png" alt="OpenNotch logo" width="96" />
+  <img src="OpenNotch/Resources/Assets.xcassets/AppIcon.appiconset/logo256.png" alt="OpenNotch logo" width="96" />
 </p>
 
 <h1 align="center">OpenNotch</h1>

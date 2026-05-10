@@ -11,7 +11,7 @@ struct NotchApp: App {
     @AppStorage("isMenuBarIconVisible") var isMenuBarIconVisible: Bool = true
     
     var body: some Scene {
-        MenuBarExtra("Dynamic Notch", systemImage: "rectangle.topthird.inset.filled", isInserted: $isMenuBarIconVisible) {
+        MenuBarExtra("OpenNotch", systemImage: "rectangle.topthird.inset.filled", isInserted: $isMenuBarIconVisible) {
             MenuBarMenu()
         }
         

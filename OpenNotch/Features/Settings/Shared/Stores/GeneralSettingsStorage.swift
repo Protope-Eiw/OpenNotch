@@ -3,13 +3,9 @@ enum GeneralSettingsStorage {
         static let launchAtLogin = "isLaunchAtLoginEnabled"
         static let dockIcon = "isDockIconVisible"
         static let appearanceMode = "settings.general.appearance.mode"
-        static let notchBackgroundStyle = "settings.notch.backgroundStyle"
         static let notchWidth = "notchWidth"
         static let notchHeight = "notchHeight"
         static let menuBarIcon = "isMenuBarIconVisible"
-        static let notchStrokeEnabled = "isShowNotchStrokeEnabled"
-        static let defaultActivityStrokeEnabled = "settings.general.defaultActivityStroke"
-        static let notchStrokeWidth = "notchStrokeWidth"
         static let displayLocation = "displayLocation"
         static let preferredDisplayUUID = "settings.general.display.preferred.uuid"
         static let preferredDisplayName = "settings.general.display.preferred.name"
@@ -102,13 +98,9 @@ enum GeneralSettingsStorage {
         Keys.launchAtLogin: true,
         Keys.dockIcon: false,
         Keys.appearanceMode: SettingsAppearanceMode.system.rawValue,
-        Keys.notchBackgroundStyle: NotchBackgroundStyle.black.rawValue,
         Keys.notchWidth: 0,
         Keys.notchHeight: 0,
         Keys.menuBarIcon: true,
-        Keys.notchStrokeEnabled: true,
-        Keys.defaultActivityStrokeEnabled: false,
-        Keys.notchStrokeWidth: 1.5,
         Keys.displayLocation: NotchDisplayLocation.main.rawValue,
         Keys.preferredDisplayUUID: "",
         Keys.preferredDisplayName: "",

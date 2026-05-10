@@ -286,7 +286,7 @@ final class DebugSettingsViewModel: ObservableObject {
                     id: Self.sequenceFocusID
                 )
                 try await self.playLivePreview(
-                    ScreenRecordingContent(settingsViewModel: settingsViewModel),
+                    ScreenRecordingContent(),
                     id: Self.sequenceScreenRecordingID
                 )
                 try await self.playTemporaryPreview(
@@ -325,8 +325,7 @@ final class DebugSettingsViewModel: ObservableObject {
                 try await self.playTemporaryPreview(
                     HudNotchContent(
                         kind: .brightness,
-                        level: 72,
-                        applicationSettings: settingsViewModel.application
+                        level: 72
                     ),
                     id: NotchContentRegistry.DebugSequence.hudBrightness,
                     duration: 2
@@ -334,8 +333,7 @@ final class DebugSettingsViewModel: ObservableObject {
                 try await self.playTemporaryPreview(
                     HudNotchContent(
                         kind: .keyboard,
-                        level: 64,
-                        applicationSettings: settingsViewModel.application
+                        level: 64
                     ),
                     id: NotchContentRegistry.DebugSequence.hudKeyboard,
                     duration: 2
@@ -343,8 +341,7 @@ final class DebugSettingsViewModel: ObservableObject {
                 try await self.playTemporaryPreview(
                     HudNotchContent(
                         kind: .volume,
-                        level: 42,
-                        applicationSettings: settingsViewModel.application
+                        level: 42
                     ),
                     id: NotchContentRegistry.DebugSequence.hudVolume,
                     duration: 2
@@ -367,8 +364,7 @@ final class DebugSettingsViewModel: ObservableObject {
         try await playTemporaryPreview(
             BluetoothConnectedNotchContent(
                 bluetoothViewModel: bluetoothViewModel,
-                settings: settingsViewModel.connectivity,
-                applicationSettings: settingsViewModel.application
+                settings: settingsViewModel.connectivity
             ),
             id: NotchContentRegistry.DebugSequence.bluetooth,
             duration: 5
@@ -428,8 +424,7 @@ final class DebugSettingsViewModel: ObservableObject {
         try await playLivePreview(
             NowPlayingNotchContent(
                 nowPlayingViewModel: nowPlayingViewModel,
-                settings: settingsViewModel.mediaAndFiles,
-                applicationSettings: settingsViewModel.application
+                settings: settingsViewModel.mediaAndFiles
             ),
             id: Self.sequenceNowPlayingID
         )

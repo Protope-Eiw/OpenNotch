@@ -10,17 +10,8 @@ struct BluetoothConnectedNotchContent: NotchContentProtocol {
     
     let bluetoothViewModel: BluetoothViewModel
     let settings: ConnectivitySettingsStore
-    let applicationSettings: ApplicationSettingsStore
     
-    var strokeColor: Color {
-        guard settings.bluetoothAppearanceStyle.supportsBatteryPresentation,
-              settings.isBluetoothBatteryStrokeEnabled,
-              applicationSettings.isDefaultActivityStrokeEnabled == false,
-              let batteryLevel = bluetoothViewModel.batteryLevel else {
-            return .white.opacity(0.2)
-        }
-        return batteryStrokeColor(for: batteryLevel).opacity(0.3)
-    }
+    var strokeColor: Color { .white.opacity(0.2) }
     
     func cornerRadius(baseRadius: CGFloat) -> (top: CGFloat, bottom: CGFloat) {
         return (
@@ -46,8 +37,7 @@ struct BluetoothConnectedNotchContent: NotchContentProtocol {
         AnyView(
             BluetoothConnectedNotchView(
                 bluetoothViewModel: bluetoothViewModel,
-                settings: settings,
-                applicationSettings: applicationSettings
+                settings: settings
             )
         )
     }

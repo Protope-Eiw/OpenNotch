@@ -15,11 +15,7 @@ struct DragAndDropCombinedNotchContent: NotchContentProtocol {
 
     var priority: Int { NotchContentRegistry.DragAndDrop.combined.priority }
 
-    var strokeColor: Color {
-        settingsViewModel.isDefaultActivityStrokeEnabled || settingsViewModel.mediaAndFiles.isDragAndDropDefaultStrokeEnabled ?
-        .white.opacity(0.2) :
-        airDropViewModel.targetedDropTarget == .airDrop ? .accentColor.opacity(0.3) : .white.opacity(0.2)
-    }
+    var strokeColor: Color { .white.opacity(0.2) }
 
     func cornerRadius(baseRadius: CGFloat) -> (top: CGFloat, bottom: CGFloat) {
         return (top: 24, bottom: 36)

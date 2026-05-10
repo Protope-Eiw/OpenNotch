@@ -10,7 +10,7 @@ struct LockScreenSettingsView: View {
     @State private var unlockSoundSelectionError: String?
 
     private var lockScreenPreviewStrokeColor: Color {
-        applicationSettings.isShowNotchStrokeEnabled ? .white.opacity(0.2) : .clear
+        Color.clear
     }
 
     private func localized(_ key: String, fallback: String? = nil) -> String {

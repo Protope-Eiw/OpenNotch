@@ -11,6 +11,16 @@ enum L10n {
         )
     }
 
+    static var appLanguageIdentifier: String {
+        let language = OpenNotchLanguage.resolved(
+            UserDefaults.standard.string(forKey: GeneralSettingsStorage.Keys.appLanguage)
+        )
+        switch language {
+        case .system: return Locale.current.identifier
+        default:      return language.rawValue
+        }
+    }
+
     static func string(_ key: String, language: OpenNotchLanguage, fallback: String? = nil) -> String {
         localizedString(
             key,

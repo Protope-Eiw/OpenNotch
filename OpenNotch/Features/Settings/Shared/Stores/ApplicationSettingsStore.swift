@@ -28,12 +28,6 @@ final class ApplicationSettingsStore: SettingsStoreBase, NotchSettingsProviding 
         }
     }
 
-    @Published var notchBackgroundStyle: NotchBackgroundStyle {
-        didSet {
-            persist(notchBackgroundStyle.rawValue, for: GeneralSettingsStorage.Keys.notchBackgroundStyle)
-        }
-    }
-
     @Published var notchWidth: Int {
         didSet {
             guard oldValue != notchWidth else { return }
@@ -53,24 +47,6 @@ final class ApplicationSettingsStore: SettingsStoreBase, NotchSettingsProviding 
     @Published var isMenuBarIconVisible: Bool {
         didSet {
             persist(isMenuBarIconVisible, for: GeneralSettingsStorage.Keys.menuBarIcon)
-        }
-    }
-
-    @Published var isShowNotchStrokeEnabled: Bool {
-        didSet {
-            persist(isShowNotchStrokeEnabled, for: GeneralSettingsStorage.Keys.notchStrokeEnabled)
-        }
-    }
-
-    @Published var isDefaultActivityStrokeEnabled: Bool {
-        didSet {
-            persist(isDefaultActivityStrokeEnabled, for: GeneralSettingsStorage.Keys.defaultActivityStrokeEnabled)
-        }
-    }
-
-    @Published var notchStrokeWidth: Double {
-        didSet {
-            persist(notchStrokeWidth, for: GeneralSettingsStorage.Keys.notchStrokeWidth)
         }
     }
 
@@ -256,15 +232,9 @@ final class ApplicationSettingsStore: SettingsStoreBase, NotchSettingsProviding 
         self.appearanceMode = SettingsAppearanceMode.resolved(
             defaults.string(forKey: GeneralSettingsStorage.Keys.appearanceMode)
         )
-        self.notchBackgroundStyle = NotchBackgroundStyle.resolved(
-            defaults.string(forKey: GeneralSettingsStorage.Keys.notchBackgroundStyle)
-        )
         self.notchWidth = defaults.integer(forKey: GeneralSettingsStorage.Keys.notchWidth)
         self.notchHeight = defaults.integer(forKey: GeneralSettingsStorage.Keys.notchHeight)
         self.isMenuBarIconVisible = defaults.bool(forKey: GeneralSettingsStorage.Keys.menuBarIcon)
-        self.isShowNotchStrokeEnabled = defaults.bool(forKey: GeneralSettingsStorage.Keys.notchStrokeEnabled)
-        self.isDefaultActivityStrokeEnabled = Self.resolvedDefaultActivityStrokeEnabled(defaults: defaults)
-        self.notchStrokeWidth = defaults.double(forKey: GeneralSettingsStorage.Keys.notchStrokeWidth)
         self.displayLocation = NotchDisplayLocation(
             rawValue: defaults.string(forKey: GeneralSettingsStorage.Keys.displayLocation) ?? NotchDisplayLocation.main.rawValue
         ) ?? .main
@@ -376,15 +346,9 @@ final class ApplicationSettingsStore: SettingsStoreBase, NotchSettingsProviding 
         isNotchSwipeDismissEnabled = defaultBool(for: GeneralSettingsStorage.Keys.notchSwipeDismissEnabled)
         isNotchSwipeRestoreEnabled = defaultBool(for: GeneralSettingsStorage.Keys.notchSwipeRestoreEnabled)
         resetNotchContentPriorities()
-        isShowNotchStrokeEnabled = defaultBool(for: GeneralSettingsStorage.Keys.notchStrokeEnabled)
-        isDefaultActivityStrokeEnabled = defaultBool(for: GeneralSettingsStorage.Keys.defaultActivityStrokeEnabled)
         isNotchSizeTemporaryActivityEnabled = defaultBool(for: GeneralSettingsStorage.Keys.notchSizeTemporaryActivityEnabled)
         notchSizeTemporaryActivityDuration = Self.clampTemporaryActivityDuration(
             defaultInt(for: GeneralSettingsStorage.Keys.notchSizeTemporaryActivityDuration)
-        )
-        notchStrokeWidth = defaultDouble(for: GeneralSettingsStorage.Keys.notchStrokeWidth)
-        notchBackgroundStyle = NotchBackgroundStyle.resolved(
-            defaultString(for: GeneralSettingsStorage.Keys.notchBackgroundStyle)
         )
         notchWidth = defaultInt(for: GeneralSettingsStorage.Keys.notchWidth)
         notchHeight = defaultInt(for: GeneralSettingsStorage.Keys.notchHeight)
@@ -414,24 +378,6 @@ final class ApplicationSettingsStore: SettingsStoreBase, NotchSettingsProviding 
 
     func resetNotchContentPriorities() {
         notchContentPriorityOverrides = [:]
-    }
-
-    private static func resolvedDefaultActivityStrokeEnabled(defaults: UserDefaults) -> Bool {
-        if let currentValue = defaults.object(forKey: GeneralSettingsStorage.Keys.defaultActivityStrokeEnabled) as? Bool {
-            return currentValue
-        }
-
-        let legacyKeys = [
-            GeneralSettingsStorage.Keys.downloadsDefaultStrokeEnabled,
-            GeneralSettingsStorage.Keys.airDropDefaultStrokeEnabled,
-            GeneralSettingsStorage.Keys.focusDefaultStrokeEnabled,
-            GeneralSettingsStorage.Keys.hotspotDefaultStrokeEnabled
-        ]
-
-        return legacyKeys.contains { key in
-            guard defaults.object(forKey: key) != nil else { return false }
-            return defaults.bool(forKey: key)
-        }
     }
 
     private static func resolvedBool(defaults: UserDefaults, key: String) -> Bool {

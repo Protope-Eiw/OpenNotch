@@ -14,7 +14,7 @@ struct BatterySettingsView: View {
     }
 
     private var isDefaultStrokeLocked: Bool {
-        appearanceSettings.isDefaultActivityStrokeEnabled
+        true
     }
 
     @ViewBuilder var cards: some View {
@@ -429,15 +429,7 @@ struct BatterySettingsView: View {
     }
 
     private func batteryPreviewStrokeColor(for kind: BatteryNotificationPreviewKind) -> Color {
-        guard appearanceSettings.isShowNotchStrokeEnabled else {
-            return .clear
-        }
-
-        if appearanceSettings.isDefaultActivityStrokeEnabled || isDefaultStrokeEnabled(for: kind) {
-            return .white.opacity(0.2)
-        }
-
-        return kind == .low ? .red.opacity(0.3) : .green.opacity(0.3)
+        return .clear
     }
 
     private func isDefaultStrokeEnabled(for kind: BatteryNotificationPreviewKind) -> Bool {

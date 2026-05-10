@@ -469,7 +469,7 @@ private extension NowPlayingViewModel {
 
     func applyArtworkPresentation(_ artworkData: Data) {
         cancelPendingArtworkPresentation()
-        artworkImage = NSImage(data: artworkData)
+        artworkImage = NSImage(data: artworkData)?.croppedToSquare()
         artworkPalette = NowPlayingArtworkPaletteExtractor.extract(from: artworkData)
     }
 
@@ -674,5 +674,24 @@ private extension WorkspacePlaybackSourceOpener {
     func showRunningApplication(_ application: NSRunningApplication) {
         application.unhide()
         application.activate(options: [.activateAllWindows])
+    }
+}
+
+private extension NSImage {
+    func croppedToSquare() -> NSImage {
+        let originalSize = size
+        guard originalSize.width != originalSize.height,
+              originalSize.width > 0, originalSize.height > 0
+        else { return self }
+
+        let side = round(min(originalSize.width, originalSize.height))
+        let x = round((originalSize.width - side) / 2)
+        let y = round((originalSize.height - side) / 2)
+
+        guard let cgImage = self.cgImage(forProposedRect: nil, context: nil, hints: nil)?
+                .cropping(to: CGRect(x: x, y: y, width: side, height: side))
+        else { return self }
+
+        return NSImage(cgImage: cgImage, size: NSSize(width: side, height: side))
     }
 }

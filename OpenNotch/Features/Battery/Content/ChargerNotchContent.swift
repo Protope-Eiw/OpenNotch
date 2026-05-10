@@ -13,10 +13,7 @@ struct ChargerNotchContent: NotchContentProtocol {
     let powerService: PowerService
     let settingsViewModel: SettingsViewModel
     
-    var strokeColor: Color {
-        settingsViewModel.isDefaultActivityStrokeEnabled ?
-            .white.opacity(0.2) : (powerService.isLowPowerMode ? .yellow.opacity(0.3) : .green.opacity(0.3))
-    }
+    var strokeColor: Color { .white.opacity(0.2) }
     
     func size(baseWidth: CGFloat, baseHeight: CGFloat) -> CGSize {
         return .init(width: baseWidth + 180, height: baseHeight)

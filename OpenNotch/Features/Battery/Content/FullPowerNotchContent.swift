@@ -11,11 +11,7 @@ struct FullPowerNotchContent: NotchContentProtocol {
         settingsViewModel.battery.fullPowerStyle
     }
 
-    var strokeColor: Color {
-        settingsViewModel.isDefaultActivityStrokeEnabled || settingsViewModel.battery.isFullPowerDefaultStrokeEnabled ?
-        .white.opacity(0.2) :
-        (powerService.isLowPowerMode ? .yellow.opacity(0.3) : .green.opacity(0.3))
-    }
+    var strokeColor: Color { .white.opacity(0.2) }
 
     func size(baseWidth: CGFloat, baseHeight: CGFloat) -> CGSize {
         if style == .compact {

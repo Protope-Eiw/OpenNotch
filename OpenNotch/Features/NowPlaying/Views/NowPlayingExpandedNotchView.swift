@@ -11,7 +11,6 @@ struct NowPlayingExpandedNotchView: View {
     @Environment(\.notchScale) var scale
     @ObservedObject var nowPlayingViewModel: NowPlayingViewModel
     @ObservedObject var settings: MediaAndFilesSettingsStore
-    @ObservedObject var applicationSettings: ApplicationSettingsStore
     
     let onOpenPlaybackSource: @MainActor () -> Void
     
@@ -60,9 +59,7 @@ struct NowPlayingExpandedNotchView: View {
         let displayedElapsedTime = snapshot.duration > 0 ?
         TimeInterval(displayedProgress) * snapshot.duration :
         elapsedTime
-        let appearance = settings.resolvedNowPlayingAppearanceOptions(
-            isDefaultActivityStrokeEnabled: applicationSettings.isDefaultActivityStrokeEnabled
-        )
+        let appearance = settings.nowPlayingAppearanceOptions
 
         return VStack {
             Spacer()

@@ -24,9 +24,7 @@ final class NotchHUDEventsHandler {
                         level: level,
                         style: settingsViewModel.hudStyle,
                         indicatorStyle: settingsViewModel.hudIndicatorStyle,
-                        usesColoredLevelTint: settingsViewModel.isHUDColoredLevelEnabled,
-                        usesColoredLevelStroke: settingsViewModel.isHUDColoredLevelStrokeEnabled,
-                        applicationSettings: settingsViewModel.application
+                        usesColoredLevelTint: settingsViewModel.isHUDColoredLevelEnabled
                     ),
                     duration: settingsViewModel.temporaryActivityDuration(for: .brightness)
                 )
@@ -41,9 +39,7 @@ final class NotchHUDEventsHandler {
                         level: level,
                         style: settingsViewModel.hudStyle,
                         indicatorStyle: settingsViewModel.hudIndicatorStyle,
-                        usesColoredLevelTint: settingsViewModel.isHUDColoredLevelEnabled,
-                        usesColoredLevelStroke: settingsViewModel.isHUDColoredLevelStrokeEnabled,
-                        applicationSettings: settingsViewModel.application
+                        usesColoredLevelTint: settingsViewModel.isHUDColoredLevelEnabled
                     ),
                     duration: settingsViewModel.temporaryActivityDuration(for: .keyboard)
                 )
@@ -58,9 +54,7 @@ final class NotchHUDEventsHandler {
                         level: level,
                         style: settingsViewModel.hudStyle,
                         indicatorStyle: settingsViewModel.hudIndicatorStyle,
-                        usesColoredLevelTint: settingsViewModel.isHUDColoredLevelEnabled,
-                        usesColoredLevelStroke: settingsViewModel.isHUDColoredLevelStrokeEnabled,
-                        applicationSettings: settingsViewModel.application
+                        usesColoredLevelTint: settingsViewModel.isHUDColoredLevelEnabled
                     ),
                     duration: settingsViewModel.temporaryActivityDuration(for: .volume)
                 )

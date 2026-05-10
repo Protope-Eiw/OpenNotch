@@ -57,7 +57,7 @@ struct AboutAppSettingsView: View {
                     .frame(width: 60, height: 60)
                 
                 VStack(alignment: .center, spacing: 3) {
-                    Text("Dynamic Notch")
+                    Text("OpenNotch")
                         .font(.system(size: 18, weight: .semibold))
                         .accessibilityIdentifier("settings.about.title")
                     
@@ -103,7 +103,7 @@ struct AboutAppSettingsView: View {
                     
                     Button(action: {
                         let email = "evgeniy.petrukovich@icloud.com"
-                        let subject = "A question about Dynamic Notch"
+                        let subject = "A question about OpenNotch"
                         let body = ""
                         let urlString = "mailto:\(email)?subject=\(subject.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")&body=\(body.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")"
                         if let url = URL(string: urlString) {
@@ -306,9 +306,6 @@ private struct AboutFeatureRow: View {
                 previewHeight: 90,
                 topCornerRadius: topCornerRadius,
                 bottomCornerRadius: bottomCornerRadius,
-                showsStroke: applicationSettings.isShowNotchStrokeEnabled,
-                strokeColor: strokeColor,
-                strokeWidth: 1,
                 lightBackgroundImage: Image("backgroundLight"),
                 darkBackgroundImage: Image("backgroundDark")
             ) {

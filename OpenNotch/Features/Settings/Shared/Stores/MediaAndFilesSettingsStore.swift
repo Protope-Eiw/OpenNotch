@@ -227,17 +227,11 @@ struct NowPlayingAppearanceOptions {
 
 extension MediaAndFilesSettingsStore {
     var nowPlayingAppearanceOptions: NowPlayingAppearanceOptions {
-        resolvedNowPlayingAppearanceOptions(isDefaultActivityStrokeEnabled: false)
-    }
-
-    func resolvedNowPlayingAppearanceOptions(
-        isDefaultActivityStrokeEnabled: Bool
-    ) -> NowPlayingAppearanceOptions {
         .init(
             showsFavoriteButton: isNowPlayingFavoriteButtonVisible,
             showsOutputDeviceButton: isNowPlayingOutputDeviceButtonVisible,
             usesArtworkTint: isNowPlayingArtworkTintEnabled,
-            usesArtworkStrokeTint: isNowPlayingArtworkStrokeEnabled && !isDefaultActivityStrokeEnabled
+            usesArtworkStrokeTint: isNowPlayingArtworkStrokeEnabled
         )
     }
 }

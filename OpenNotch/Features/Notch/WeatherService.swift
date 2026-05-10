@@ -74,15 +74,15 @@ final class WeatherService: NSObject, ObservableObject, CLLocationManagerDelegat
 
     private func info(for code: Int) -> (String, String) {
         switch code {
-        case 0, 1:    return ("sun.max.fill", "晴")
-        case 2:       return ("cloud.sun.fill", "多云")
-        case 3:       return ("cloud.fill", "阴")
-        case 45, 48:  return ("cloud.fog.fill", "雾")
-        case 51...67: return ("cloud.drizzle.fill", "雨")
-        case 71...77: return ("cloud.snow.fill", "雪")
-        case 80...82: return ("cloud.rain.fill", "阵雨")
-        case 85, 86:  return ("cloud.snow.fill", "阵雪")
-        case 95...99: return ("cloud.bolt.rain.fill", "雷雨")
+        case 0, 1:    return ("sun.max.fill", L10n.app("weather.clear", fallback: "Clear"))
+        case 2:       return ("cloud.sun.fill", L10n.app("weather.partlyCloudy", fallback: "Partly Cloudy"))
+        case 3:       return ("cloud.fill", L10n.app("weather.overcast", fallback: "Overcast"))
+        case 45, 48:  return ("cloud.fog.fill", L10n.app("weather.foggy", fallback: "Foggy"))
+        case 51...67: return ("cloud.drizzle.fill", L10n.app("weather.rainy", fallback: "Rainy"))
+        case 71...77: return ("cloud.snow.fill", L10n.app("weather.snowy", fallback: "Snowy"))
+        case 80...82: return ("cloud.rain.fill", L10n.app("weather.showers", fallback: "Showers"))
+        case 85, 86:  return ("cloud.snow.fill", L10n.app("weather.snowShowers", fallback: "Snow Showers"))
+        case 95...99: return ("cloud.bolt.rain.fill", L10n.app("weather.thunderstorm", fallback: "Thunderstorm"))
         default:      return ("cloud", "")
         }
     }

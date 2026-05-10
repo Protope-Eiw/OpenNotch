@@ -9,7 +9,7 @@ struct FocusSettingsView: View {
     }
 
     private var isDefaultStrokeLocked: Bool {
-        appearanceSettings.isDefaultActivityStrokeEnabled
+        true
     }
     
     @ViewBuilder var cards: some View {
@@ -135,15 +135,7 @@ struct FocusSettingsView: View {
     }
     
     private var focusPreviewStrokeColor: Color {
-        guard appearanceSettings.isShowNotchStrokeEnabled else {
-            return .clear
-        }
-
-        if appearanceSettings.isDefaultActivityStrokeEnabled || connectivitySettings.isFocusDefaultStrokeEnabled {
-            return .white.opacity(0.2)
-        }
-
-        return .indigo.opacity(0.3)
+        return .clear
     }
     
     private func localized(_ key: String, fallback: String? = nil) -> String {
