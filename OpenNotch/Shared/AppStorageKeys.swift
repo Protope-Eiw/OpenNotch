@@ -2,8 +2,9 @@ import Foundation
 
 enum AppStorageKeys {
     enum General {
-        static let dashboardLastTab    = "settings.general.dashboardLastTab"
-        static let dashboardDefaultTab = "settings.general.dashboardDefaultTab"
+        static let dashboardLastTab         = "settings.general.dashboardLastTab"
+        static let dashboardDefaultTab      = "settings.general.dashboardDefaultTab"
+        static let dashboardTransitionStyle = "settings.general.dashboardTransitionStyle"
     }
     enum NotchBar {
         static let leftWidgets  = "settings.notchBar.leftWidgets"

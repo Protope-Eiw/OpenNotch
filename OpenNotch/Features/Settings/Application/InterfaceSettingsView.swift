@@ -9,9 +9,10 @@ struct InterfaceSettingsView: View {
     @AppStorage(AppStorageKeys.Overview.showPomodoro)       private var showPomodoro       = true
     @AppStorage(AppStorageKeys.Overview.showWeather)        private var showWeather        = true
     @AppStorage(AppStorageKeys.Overview.hideAppNames)       private var hideAppNames       = false
-    @AppStorage(AppStorageKeys.General.dashboardDefaultTab) private var dashboardDefaultTab = "last"
-    @AppStorage(AppStorageKeys.Music.showSkipButtons)       private var showSkipButtons    = true
-    @AppStorage(AppStorageKeys.Music.showVisualizer)        private var showVisualizer     = true
+    @AppStorage(AppStorageKeys.General.dashboardDefaultTab)      private var dashboardDefaultTab      = "last"
+    @AppStorage(AppStorageKeys.General.dashboardTransitionStyle) private var dashboardTransitionStyle = DashboardTransitionStyle.slide.rawValue
+    @AppStorage(AppStorageKeys.Music.showSkipButtons)            private var showSkipButtons         = true
+    @AppStorage(AppStorageKeys.Music.showVisualizer)             private var showVisualizer          = true
 
     private func localized(_ key: String, fallback: String? = nil) -> String {
         applicationSettings.appLanguage.locale.dn(key, fallback: fallback)
@@ -65,6 +66,20 @@ struct InterfaceSettingsView: View {
                 optionTitle: { defaultTabOptionTitle($0) },
                 accessibilityIdentifier: AppStorageKeys.General.dashboardDefaultTab,
                 selection: $dashboardDefaultTab
+            )
+
+            SettingsDivider()
+
+            SettingsMenuRow(
+                title: localized("settings.interface.transitionStyle", fallback: "Transition Style"),
+                description: localized("settings.interface.transitionStyle.description", fallback: "Slide: original swipe animation. Fade: prevents content overflow."),
+                options: Array(DashboardTransitionStyle.allCases),
+                optionTitle: { localized($0.title) },
+                accessibilityIdentifier: AppStorageKeys.General.dashboardTransitionStyle,
+                selection: Binding(
+                    get: { DashboardTransitionStyle(rawValue: dashboardTransitionStyle) ?? .slide },
+                    set: { dashboardTransitionStyle = $0.rawValue }
+                )
             )
 
             SettingsDivider()

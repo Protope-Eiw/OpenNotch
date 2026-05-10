@@ -9,6 +9,7 @@ struct DashboardPanelView: View {
     var enabledTabs: [DashboardTab]
 
     @State private var macInfo: MacSystemInfo? = nil
+    @AppStorage(AppStorageKeys.General.dashboardTransitionStyle) private var transitionStyle = DashboardTransitionStyle.slide.rawValue
 
     private var selectedIndex: Int {
         enabledTabs.firstIndex(of: selectedTab) ?? 0
@@ -37,7 +38,16 @@ struct DashboardPanelView: View {
             )
     }
 
+    @ViewBuilder
     private var pageContent: some View {
+        if transitionStyle == DashboardTransitionStyle.fade.rawValue {
+            fadeContent
+        } else {
+            slideContent
+        }
+    }
+
+    private var fadeContent: some View {
         GeometryReader { geo in
             ZStack {
                 ForEach(enabledTabs, id: \.self) { tab in
@@ -48,6 +58,19 @@ struct DashboardPanelView: View {
                     }
                 }
             }
+            .animation(.spring(response: 0.35, dampingFraction: 0.85), value: selectedTab)
+        }
+        .mask(Rectangle())
+    }
+
+    private var slideContent: some View {
+        GeometryReader { geo in
+            HStack(spacing: 0) {
+                ForEach(enabledTabs, id: \.self) { tab in
+                    tabPage(for: tab).frame(width: geo.size.width)
+                }
+            }
+            .offset(x: -CGFloat(selectedIndex) * geo.size.width)
             .animation(.spring(response: 0.35, dampingFraction: 0.85), value: selectedTab)
         }
         .mask(Rectangle())
