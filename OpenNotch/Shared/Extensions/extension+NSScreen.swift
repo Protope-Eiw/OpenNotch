@@ -261,6 +261,10 @@ extension NSScreen {
 
     var isBuiltInDisplay: Bool {
         if notchSize != nil { return true }
+        let hasAnyNotchedScreen = Self.screens.contains { $0.notchSize != nil }
+        if hasAnyNotchedScreen {
+            return false
+        }
         guard let displayID else { return false }
         return CGDisplayIsBuiltin(displayID) != 0
     }
