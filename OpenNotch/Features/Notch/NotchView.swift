@@ -866,7 +866,7 @@ private struct DashboardPanelView: View {
         GeometryReader { geo in
             HStack(spacing: 0) {
                 ForEach(enabledTabs, id: \.self) { tab in
-                    tabPage(for: tab).frame(width: geo.size.width)
+                    tabPage(for: tab).frame(width: geo.size.width).clipped()
                 }
             }
             .offset(x: -CGFloat(selectedIndex) * geo.size.width)
