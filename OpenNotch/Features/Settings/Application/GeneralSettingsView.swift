@@ -9,30 +9,12 @@ struct GeneralSettingsView: View {
         self._applicationSettings = ObservedObject(wrappedValue: applicationSettings)
         self._availableDisplays = State(initialValue: NSScreen.availableNotchDisplays())
     }
-    
-    private var unavailableDescriptionKey: LocalizedStringKey? {
-        guard applicationSettings.displayLocation == .specific,
-              let selectedSpecificDisplayUUID,
-              !availableDisplays.contains(where: { $0.displayUUID == selectedSpecificDisplayUUID }) else {
-            return nil
-        }
 
-        if applicationSettings.isDisplayAutoSwitchEnabled {
-            return "settings.general.display.unavailable.autoSwitchEnabled"
-        }
-
-        return "settings.general.display.unavailable.autoSwitchDisabled"
-    }
-    
-    private var selectedSpecificDisplayUUID: String? {
-        applicationSettings.preferredDisplayUUID.isEmpty ? nil : applicationSettings.preferredDisplayUUID
-    }
-    
     private func refreshAvailableDisplays() {
         availableDisplays = NSScreen.availableNotchDisplays()
-        applicationSettings.syncPreferredDisplayMetadata()
+        applicationSettings.syncEnabledDisplayUUIDs()
     }
-    
+
     var body: some View {
         SettingsPageScrollView {
             systemCard
@@ -46,7 +28,7 @@ struct GeneralSettingsView: View {
         }
         .accessibilityIdentifier("settings.general.root")
     }
-    
+
     private var systemCard: some View {
         SettingsCard(title: localized("System")) {
             SettingsToggleRow(
@@ -57,12 +39,12 @@ struct GeneralSettingsView: View {
                 isOn: $applicationSettings.isLaunchAtLoginEnabled,
                 accessibilityIdentifier: "settings.general.launchAtLogin"
             )
-            
+
             Divider()
                 .opacity(0.6)
                 .padding(.leading, 43)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
-            
+
             SettingsToggleRow(
                 title: localized("Show Dock icon"),
                 description: localized("Keep the app visible in the Dock for faster switching and window access."),
@@ -71,12 +53,12 @@ struct GeneralSettingsView: View {
                 isOn: $applicationSettings.isDockIconVisible,
                 accessibilityIdentifier: "settings.general.dockIcon"
             )
-            
+
             Divider()
                 .opacity(0.6)
                 .padding(.leading, 43)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
-            
+
             VStack(alignment: .leading, spacing: 14) {
                 SettingsToggleRow(
                     title: localized("Show menu bar icon"),
@@ -91,7 +73,7 @@ struct GeneralSettingsView: View {
                         Image(systemName: "exclamationmark.triangle.fill")
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundStyle(Color.yellow)
-                        
+
                         Text(localized("You can access the menu by right-clicking on the notch area."))
                             .font(.system(size: 10))
                             .foregroundStyle(Color.secondary)
@@ -100,7 +82,7 @@ struct GeneralSettingsView: View {
             }
         }
     }
-    
+
     private var themeCard: some View {
         SettingsCard(title: localized("Appearance")) {
             CustomPicker(
@@ -126,48 +108,23 @@ struct GeneralSettingsView: View {
                 options: Array(NotchDisplayLocation.allCases),
                 title: { localized($0.title) },
                 headerTitle: localized("Display"),
-                headerDescription: localized("Choose which display OpenNotch should use."),
+                headerDescription: localized("Choose how OpenNotch selects which display to use."),
                 symbolName: { $0.symbolName }
             )
             .accessibilityIdentifier("settings.general.displayLocation")
 
-            Divider()
-                .opacity(0.6)
+            if applicationSettings.displayLocation == .manual {
+                Divider()
+                    .opacity(0.6)
 
-            if applicationSettings.displayLocation == .specific {
-                SpecificDisplayPicker (
+                ManualDisplayPicker(
                     applicationSettings: applicationSettings,
                     availableDisplays: $availableDisplays
                 )
-
-                Divider()
-                    .opacity(0.6)
-
-                SettingsToggleRow(
-                    title: localized("settings.general.display.autoSwitch.title"),
-                    description: localized("settings.general.display.autoSwitch.description"),
-                    systemImage: "arrow.triangle.branch",
-                    color: .teal,
-                    isOn: $applicationSettings.isDisplayAutoSwitchEnabled,
-                    accessibilityIdentifier: "settings.general.displayAutoSwitch"
-                )
-
-                if let unavailableDescriptionKey {
-                    HStack(alignment: .center, spacing: 10) {
-                        Image(systemName: "display.trianglebadge.exclamationmark")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundStyle(Color.orange)
-
-                        Text(unavailableDescriptionKey)
-                            .foregroundStyle(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                }
-
-                Divider()
-                    .opacity(0.6)
             }
+
+            Divider()
+                .opacity(0.6)
 
             SettingsToggleRow(
                 title: localized("Hide live activity in full-screen mode"),
@@ -177,7 +134,6 @@ struct GeneralSettingsView: View {
                 isOn: $applicationSettings.isNotchHiddenInFullscreenEnabled,
                 accessibilityIdentifier: "settings.general.hideNotchInFullscreen"
             )
-
         }
     }
 
@@ -194,7 +150,7 @@ struct GeneralSettingsView: View {
                     title: { localized($0.titleKey) },
                     accessibilityIdentifier: { "settings.language.option.\($0.rawValue)" }
                 ) { language, isSelected in
-                    
+
                     ZStack {
                         if let assetName = language.flagAssetName {
                             Image(assetName)
@@ -202,7 +158,7 @@ struct GeneralSettingsView: View {
                                 .aspectRatio(contentMode: .fit)
                                 .clipShape(RoundedRectangle(cornerRadius: 6))
                                 .frame(width: 54, height: 54)
-                                
+
                         } else {
                             Image(systemName: "globe")
                                 .font(.system(size: 20, weight: .semibold))
@@ -225,100 +181,50 @@ struct GeneralSettingsView: View {
             }
         }
     }
-    
+
     private func localized(_ key: String, fallback: String? = nil) -> String {
         applicationSettings.appLanguage.locale.dn(key, fallback: fallback ?? key)
     }
 }
 
-private struct SpecificDisplayPicker: View {
+private struct ManualDisplayPicker: View {
     @ObservedObject var applicationSettings: ApplicationSettingsStore
     @Binding var availableDisplays: [NotchDisplayOption]
 
-    private var selectedSpecificDisplayUUID: String? {
-        applicationSettings.preferredDisplayUUID.isEmpty ? nil : applicationSettings.preferredDisplayUUID
-    }
-    
-    private var specificDisplayOptions: [NotchDisplayOption] {
-        guard let selectedSpecificDisplayUUID else {
-            return availableDisplays
-        }
-
-        if availableDisplays.contains(where: { $0.displayUUID == selectedSpecificDisplayUUID }) {
-            return availableDisplays
-        }
-
-        return availableDisplays + [
-            NotchDisplayOption.unavailable(
-                displayUUID: selectedSpecificDisplayUUID,
-                name: unavailableDisplayName
-            )
-        ]
-    }
-    
-    private var selectedSpecificDisplay: NotchDisplayOption {
-        specificDisplayOptions.first(where: { $0.displayUUID == selectedSpecificDisplayUUID }) ??
-        availableDisplays.first ??
-        NotchDisplayOption.unavailable(
-            displayUUID: selectedSpecificDisplayUUID ?? "unknown",
-            name: unavailableDisplayName
-        )
-    }
-
-    private var unavailableDisplayName: String {
-        applicationSettings.preferredDisplayName.isEmpty ?
-        localized(
-            "settings.general.display.unavailable.placeholder",
-            fallback: "Unavailable display"
-        ) :
-        applicationSettings.preferredDisplayName
-    }
-    
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .center) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(localized("settings.general.display.specificPicker.title"))
-                    Text(localized("settings.general.display.specificPicker.description"))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-
-                Spacer(minLength: 12)
-
-                Text(verbatim: selectedSpecificDisplay.name)
-                    .font(.system(size: 12))
+            VStack(alignment: .leading, spacing: 2) {
+                Text(localized("settings.general.display.manualPicker.title"))
+                Text(localized("settings.general.display.manualPicker.description"))
+                    .font(.caption)
                     .foregroundStyle(.secondary)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
             }
 
             LazyVGrid(
                 columns: [GridItem(.adaptive(minimum: 116, maximum: 152), spacing: 12)],
                 spacing: 12
             ) {
-                ForEach(specificDisplayOptions) { display in
-                    specificDisplayCard(for: display)
+                ForEach(availableDisplays) { display in
+                    manualDisplayCard(for: display)
                 }
             }
         }
     }
-    
-    private func specificDisplayCard(for display: NotchDisplayOption) -> some View {
-        let isSelected = selectedSpecificDisplayUUID == display.displayUUID
+
+    private func manualDisplayCard(for display: NotchDisplayOption) -> some View {
+        let isSelected = applicationSettings.enabledDisplayUUIDs.contains(display.displayUUID)
 
         return Button {
-            applicationSettings.selectPreferredDisplay(display)
-            refreshAvailableDisplays()
+            applicationSettings.toggleDisplayUUID(display.displayUUID)
         } label: {
             let shape = RoundedRectangle(cornerRadius: 10, style: .continuous)
-            
+
             VStack(spacing: 8) {
                 VStack(spacing: 8) {
                     Image(systemName: display.symbolName)
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundStyle(isSelected ? Color.accentColor : Color.primary)
-                    
+
                     Text(verbatim: display.name)
                         .font(.system(size: 11))
                         .multilineTextAlignment(.center)
@@ -345,22 +251,19 @@ private struct SpecificDisplayPicker: View {
                         )
                 )
                 .contentShape(shape)
-                
+
                 if !display.isAvailable {
                     Text(localized("settings.general.display.badge.unavailable"))
                         .font(.system(size: 10))
                         .foregroundStyle(Color.orange)
-                    
                 } else if display.isBuiltIn {
                     Text(localized("settings.general.display.badge.builtin"))
                         .font(.system(size: 10))
                         .foregroundStyle(isSelected ? Color.accentColor : Color.secondary)
-                    
                 } else if display.isMain {
                     Text(localized("settings.general.display.badge.main"))
                         .font(.system(size: 10))
                         .foregroundStyle(isSelected ? Color.accentColor : Color.secondary)
-                    
                 } else {
                     Text(localized("settings.general.display.badge.external"))
                         .font(.system(size: 10))
@@ -370,14 +273,9 @@ private struct SpecificDisplayPicker: View {
         }
         .buttonStyle(.plain)
         .disabled(!display.isAvailable)
-        .accessibilityIdentifier("settings.general.display.specific.\(display.displayUUID)")
+        .accessibilityIdentifier("settings.general.display.manual.\(display.displayUUID)")
     }
 
-    private func refreshAvailableDisplays() {
-        availableDisplays = NSScreen.availableNotchDisplays()
-        applicationSettings.syncPreferredDisplayMetadata()
-    }
-    
     private func localized(_ key: String, fallback: String? = nil) -> String {
         applicationSettings.appLanguage.locale.dn(key, fallback: fallback)
     }

@@ -915,17 +915,15 @@ final class NotchViewModelIntegrationTests: XCTestCase {
 
     @MainActor
     func testUpdateDimensionsUsesSelectedDisplayMetrics() {
-        let settings = TestNotchSettings(displayLocation: .builtIn)
+        let settings = TestNotchSettings(displayLocation: .auto)
         let viewModel = NotchViewModel(
             settings: settings,
             screenMetricsProvider: { settings in
                 switch settings.displayLocation {
-                case .builtIn:
+                case .auto:
                     return (width: 1512, topInset: 74, notchSize: CGSize(width: 206, height: 37))
-                case .main:
+                case .manual:
                     return (width: 1728, topInset: 0, notchSize: nil)
-                case .specific:
-                    return (width: 1600, topInset: 0, notchSize: nil)
                 }
             }
         )
@@ -934,33 +932,30 @@ final class NotchViewModelIntegrationTests: XCTestCase {
         XCTAssertEqual(viewModel.notchModel.baseWidth, 206, accuracy: 0.001)
         XCTAssertEqual(viewModel.notchModel.baseHeight, 37, accuracy: 0.001)
 
-        settings.displayLocation = .main
+        settings.displayLocation = .manual
         viewModel.updateDimensions()
 
-        let mainScale = max(0.35, CGFloat(1728) / 1440.0)
-        XCTAssertEqual(viewModel.notchModel.baseWidth, 190 * mainScale, accuracy: 0.001)
-        XCTAssertEqual(viewModel.notchModel.baseHeight, 25 * mainScale, accuracy: 0.001)
+        let manualScale = max(0.35, CGFloat(1728) / 1440.0)
+        XCTAssertEqual(viewModel.notchModel.baseWidth, 190 * manualScale, accuracy: 0.001)
+        XCTAssertEqual(viewModel.notchModel.baseHeight, 25 * manualScale, accuracy: 0.001)
     }
 
     @MainActor
-    func testUpdateDimensionsUsesSpecificDisplayMetrics() {
+    func testUpdateDimensionsUsesManualDisplayMetrics() {
         let settings = TestNotchSettings(
-            displayLocation: .specific,
+            displayLocation: .manual,
             screenSelectionPreferences: NotchScreenSelectionPreferences(
-                displayLocation: .specific,
-                preferredDisplayUUID: "EXTERNAL",
-                allowsAutomaticDisplaySwitching: false
+                displayLocation: .manual,
+                enabledDisplayUUIDs: ["EXTERNAL"]
             )
         )
         let viewModel = NotchViewModel(
             settings: settings,
             screenMetricsProvider: { settings in
                 switch settings.screenSelectionPreferences.displayLocation {
-                case .builtIn:
+                case .auto:
                     return (width: 1512, topInset: 74, notchSize: CGSize(width: 206, height: 37))
-                case .main:
-                    return (width: 1728, topInset: 0, notchSize: nil)
-                case .specific:
+                case .manual:
                     return (width: 1920, topInset: 0, notchSize: nil)
                 }
             }

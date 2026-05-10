@@ -9,8 +9,7 @@ final class TestNotchSettings: NotchSettingsProviding {
         didSet {
             screenSelectionPreferences = NotchScreenSelectionPreferences(
                 displayLocation: displayLocation,
-                preferredDisplayUUID: screenSelectionPreferences.preferredDisplayUUID,
-                allowsAutomaticDisplaySwitching: screenSelectionPreferences.allowsAutomaticDisplaySwitching
+                enabledDisplayUUIDs: screenSelectionPreferences.enabledDisplayUUIDs
             )
         }
     }
@@ -43,8 +42,7 @@ final class TestNotchSettings: NotchSettingsProviding {
         self.displayLocation = displayLocation
         self.screenSelectionPreferences = screenSelectionPreferences ?? NotchScreenSelectionPreferences(
             displayLocation: displayLocation,
-            preferredDisplayUUID: nil,
-            allowsAutomaticDisplaySwitching: false
+            enabledDisplayUUIDs: []
         )
         self.notchAnimationPreset = notchAnimationPreset
         self.isNotchTapToExpandEnabled = isNotchTapToExpandEnabled

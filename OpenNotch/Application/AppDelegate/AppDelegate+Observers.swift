@@ -87,15 +87,13 @@ extension AppDelegate {
     }
 
     func observeDisplayLocationChanges() {
-        Publishers.CombineLatest3(
+        Publishers.CombineLatest(
             settingsViewModel.application.$displayLocation.removeDuplicates(),
-            settingsViewModel.application.$preferredDisplayUUID.removeDuplicates(),
-            settingsViewModel.application.$isDisplayAutoSwitchEnabled.removeDuplicates()
+            settingsViewModel.application.$enabledDisplayUUIDs.removeDuplicates()
         )
             .removeDuplicates(by: { lhs, rhs in
                 lhs.0 == rhs.0 &&
-                lhs.1 == rhs.1 &&
-                lhs.2 == rhs.2
+                lhs.1 == rhs.1
             })
             .sink { [weak self] _ in
                 self?.updateWindowFrame()

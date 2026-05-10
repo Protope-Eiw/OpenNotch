@@ -52,6 +52,7 @@ final class NotchViewModel: ObservableObject {
     private let settings: NotchSettingsProviding
     private let engine: NotchEngine
     private let screenMetricsProvider: (any NotchSettingsProviding) -> NotchScreenMetrics?
+    private let screen: NSScreen?
     private var cancellables = Set<AnyCancellable>()
     private var stagedHeightTask: Task<Void, Never>?
     private var expansionTransitionTask: Task<Void, Never>?
@@ -254,9 +255,11 @@ final class NotchViewModel: ObservableObject {
         hideDelay: TimeInterval? = nil,
         queueDelay: TimeInterval? = nil,
         engine: NotchEngine? = nil,
-        screenMetricsProvider: (((any NotchSettingsProviding) -> NotchScreenMetrics?))? = nil
+        screenMetricsProvider: (((any NotchSettingsProviding) -> NotchScreenMetrics?))? = nil,
+        screen: NSScreen? = nil
     ) {
         self.settings = settings
+        self.screen = screen
         self.engine = engine ?? NotchEngine(
             animations: {
                 animations ?? .preset(settings.notchAnimationPreset)
@@ -272,7 +275,14 @@ final class NotchViewModel: ObservableObject {
     }
 
     func updateDimensions() {
-        guard let screenMetrics = screenMetricsProvider(settings) else {
+        let screenMetrics: NotchScreenMetrics?
+        if let screen {
+            screenMetrics = NSScreen.metrics(for: screen)
+        } else {
+            screenMetrics = screenMetricsProvider(settings)
+        }
+
+        guard let screenMetrics else {
             return
         }
         

@@ -35,10 +35,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     var window: OverlayPanelWindow!
+    var notchWindows: [CGDirectDisplayID: OverlayPanelWindow] = [:]
+    var notchViewModels: [CGDirectDisplayID: NotchViewModel] = [:]
     var localClickMonitor: Any?
     let globalClickMonitor = GlobalClickMonitor()
     var cancellables = Set<AnyCancellable>()
     var isPrimaryWindowSuspendedForLock = false
+    var mousePollingTimer: Timer?
+    var lastMouseScreenID: CGDirectDisplayID?
     
     override init() {
         let isRunningUITests = ProcessInfo.processInfo.arguments.contains("-ui-testing")
@@ -65,6 +69,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         if !isRunningUITests {
             createNotchWindow()
+            startMousePolling()
             observeOutsideClickDismissal()
             _ = lockScreenPanelManager
             _ = lockScreenLiveActivityWindowManager
@@ -79,9 +84,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             observeWorkspaceChanges()
 
             DispatchQueue.main.async {
+                let ownWindows = [self.window].compactMap { $0 } + Array(self.notchWindows.values)
+                let keepWindows = Set(ownWindows.map(ObjectIdentifier.init))
                 for w in NSApp.windows {
-                    if w !== self.window {
-                        w.orderOut(nil)
+                    guard let panel = w as? OverlayPanelWindow else { continue }
+                    if !keepWindows.contains(ObjectIdentifier(panel)) {
+                        panel.orderOut(nil)
                     }
                 }
             }
@@ -110,6 +118,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             lockScreenLiveActivityWindowManager.invalidate()
         }
         stopOutsideClickMonitoring()
+        stopMousePolling()
+        destroyNotchWindows()
     }
 
     func applyActivationPolicy(showsDockIcon: Bool) {

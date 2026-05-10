@@ -2,12 +2,11 @@ import XCTest
 @testable import OpenNotch
 
 final class NotchScreenSelectionTests: XCTestCase {
-    func testMainPrefersPrimaryDisplayIdentifier() {
-        let selectedDisplayID = NotchScreenSelection.preferredDisplayID(
+    func testAutoReturnsEmptyArray() {
+        let displayIDs = NotchScreenSelection.preferredDisplayIDs(
             for: NotchScreenSelectionPreferences(
-                displayLocation: .main,
-                preferredDisplayUUID: nil,
-                allowsAutomaticDisplaySwitching: false
+                displayLocation: .auto,
+                enabledDisplayUUIDs: []
             ),
             candidates: [
                 NotchScreenSelectionCandidate(displayID: 11, displayUUID: "BUILTIN", isBuiltIn: true),
@@ -16,106 +15,82 @@ final class NotchScreenSelectionTests: XCTestCase {
             primaryDisplayID: 42
         )
 
-        XCTAssertEqual(selectedDisplayID, 42)
+        XCTAssertTrue(displayIDs.isEmpty)
     }
 
-    func testMainFallsBackToFirstDisplayWhenPrimaryIdentifierIsMissing() {
-        let selectedDisplayID = NotchScreenSelection.preferredDisplayID(
+    func testManualReturnsEnabledDisplayIdentifiers() {
+        let displayIDs = NotchScreenSelection.preferredDisplayIDs(
             for: NotchScreenSelectionPreferences(
-                displayLocation: .main,
-                preferredDisplayUUID: nil,
-                allowsAutomaticDisplaySwitching: false
+                displayLocation: .manual,
+                enabledDisplayUUIDs: ["EXTERNAL"]
             ),
             candidates: [
                 NotchScreenSelectionCandidate(displayID: 11, displayUUID: "BUILTIN", isBuiltIn: true),
                 NotchScreenSelectionCandidate(displayID: 42, displayUUID: "EXTERNAL", isBuiltIn: false)
+            ],
+            primaryDisplayID: 11
+        )
+
+        XCTAssertEqual(displayIDs, [42])
+    }
+
+    func testManualReturnsMultipleEnabledDisplayIdentifiers() {
+        let displayIDs = NotchScreenSelection.preferredDisplayIDs(
+            for: NotchScreenSelectionPreferences(
+                displayLocation: .manual,
+                enabledDisplayUUIDs: ["BUILTIN", "EXTERNAL"]
+            ),
+            candidates: [
+                NotchScreenSelectionCandidate(displayID: 11, displayUUID: "BUILTIN", isBuiltIn: true),
+                NotchScreenSelectionCandidate(displayID: 42, displayUUID: "EXTERNAL", isBuiltIn: false)
+            ],
+            primaryDisplayID: 11
+        )
+
+        XCTAssertEqual(displayIDs.sorted(), [11, 42])
+    }
+
+    func testManualFallsBackToPrimaryWhenNoEnabledUUIDsMatch() {
+        let displayIDs = NotchScreenSelection.preferredDisplayIDs(
+            for: NotchScreenSelectionPreferences(
+                displayLocation: .manual,
+                enabledDisplayUUIDs: ["MISSING"]
+            ),
+            candidates: [
+                NotchScreenSelectionCandidate(displayID: 11, displayUUID: "BUILTIN", isBuiltIn: true),
+                NotchScreenSelectionCandidate(displayID: 42, displayUUID: "EXTERNAL", isBuiltIn: false)
+            ],
+            primaryDisplayID: 42
+        )
+
+        XCTAssertEqual(displayIDs, [42])
+    }
+
+    func testManualFallsBackToFirstWhenPrimaryNotInCandidates() {
+        let displayIDs = NotchScreenSelection.preferredDisplayIDs(
+            for: NotchScreenSelectionPreferences(
+                displayLocation: .manual,
+                enabledDisplayUUIDs: ["MISSING"]
+            ),
+            candidates: [
+                NotchScreenSelectionCandidate(displayID: 11, displayUUID: "BUILTIN", isBuiltIn: true)
             ],
             primaryDisplayID: 99
         )
 
-        XCTAssertEqual(selectedDisplayID, 11)
+        XCTAssertEqual(displayIDs, [11])
     }
 
-    func testBuiltInPrefersBuiltInDisplayIdentifier() {
-        let selectedDisplayID = NotchScreenSelection.preferredDisplayID(
+    func testManualReturnsEmptyWhenNoCandidates() {
+        let displayIDs = NotchScreenSelection.preferredDisplayIDs(
             for: NotchScreenSelectionPreferences(
-                displayLocation: .builtIn,
-                preferredDisplayUUID: nil,
-                allowsAutomaticDisplaySwitching: false
+                displayLocation: .manual,
+                enabledDisplayUUIDs: []
             ),
-            candidates: [
-                NotchScreenSelectionCandidate(displayID: 42, displayUUID: "EXTERNAL", isBuiltIn: false),
-                NotchScreenSelectionCandidate(displayID: 11, displayUUID: "BUILTIN", isBuiltIn: true)
-            ],
-            primaryDisplayID: 42
+            candidates: [],
+            primaryDisplayID: nil
         )
 
-        XCTAssertEqual(selectedDisplayID, 11)
-    }
-
-    func testBuiltInReturnsNilWhenBuiltInDisplayIsUnavailable() {
-        let selectedDisplayID = NotchScreenSelection.preferredDisplayID(
-            for: NotchScreenSelectionPreferences(
-                displayLocation: .builtIn,
-                preferredDisplayUUID: nil,
-                allowsAutomaticDisplaySwitching: false
-            ),
-            candidates: [
-                NotchScreenSelectionCandidate(displayID: 42, displayUUID: "EXTERNAL", isBuiltIn: false)
-            ],
-            primaryDisplayID: 42
-        )
-
-        XCTAssertNil(selectedDisplayID)
-    }
-
-    func testSpecificDisplayPrefersStoredDisplayIdentifier() {
-        let selectedDisplayID = NotchScreenSelection.preferredDisplayID(
-            for: NotchScreenSelectionPreferences(
-                displayLocation: .specific,
-                preferredDisplayUUID: "EXTERNAL",
-                allowsAutomaticDisplaySwitching: false
-            ),
-            candidates: [
-                NotchScreenSelectionCandidate(displayID: 11, displayUUID: "BUILTIN", isBuiltIn: true),
-                NotchScreenSelectionCandidate(displayID: 42, displayUUID: "EXTERNAL", isBuiltIn: false)
-            ],
-            primaryDisplayID: 11
-        )
-
-        XCTAssertEqual(selectedDisplayID, 42)
-    }
-
-    func testSpecificDisplayReturnsNilWhenStoredDisplayIsUnavailableAndAutoSwitchDisabled() {
-        let selectedDisplayID = NotchScreenSelection.preferredDisplayID(
-            for: NotchScreenSelectionPreferences(
-                displayLocation: .specific,
-                preferredDisplayUUID: "MISSING",
-                allowsAutomaticDisplaySwitching: false
-            ),
-            candidates: [
-                NotchScreenSelectionCandidate(displayID: 11, displayUUID: "BUILTIN", isBuiltIn: true)
-            ],
-            primaryDisplayID: 11
-        )
-
-        XCTAssertNil(selectedDisplayID)
-    }
-
-    func testSpecificDisplayFallsBackToPrimaryDisplayWhenStoredDisplayIsUnavailableAndAutoSwitchEnabled() {
-        let selectedDisplayID = NotchScreenSelection.preferredDisplayID(
-            for: NotchScreenSelectionPreferences(
-                displayLocation: .specific,
-                preferredDisplayUUID: "MISSING",
-                allowsAutomaticDisplaySwitching: true
-            ),
-            candidates: [
-                NotchScreenSelectionCandidate(displayID: 11, displayUUID: "BUILTIN", isBuiltIn: true),
-                NotchScreenSelectionCandidate(displayID: 42, displayUUID: "EXTERNAL", isBuiltIn: false)
-            ],
-            primaryDisplayID: 42
-        )
-
-        XCTAssertEqual(selectedDisplayID, 42)
+        XCTAssertTrue(displayIDs.isEmpty)
     }
 }

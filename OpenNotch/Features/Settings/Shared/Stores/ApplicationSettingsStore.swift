@@ -53,31 +53,15 @@ final class ApplicationSettingsStore: SettingsStoreBase, NotchSettingsProviding 
     @Published var displayLocation: NotchDisplayLocation {
         didSet {
             persist(displayLocation.rawValue, for: GeneralSettingsStorage.Keys.displayLocation)
-
-            if displayLocation == .specific {
-                ensureSpecificDisplaySelection(previousLocation: oldValue)
+            if displayLocation == .manual, enabledDisplayUUIDs.isEmpty {
+                syncEnabledDisplayUUIDs()
             }
         }
     }
 
-    @Published var preferredDisplayUUID: String {
+    @Published var enabledDisplayUUIDs: Set<String> {
         didSet {
-            persist(preferredDisplayUUID, for: GeneralSettingsStorage.Keys.preferredDisplayUUID)
-        }
-    }
-
-    @Published var preferredDisplayName: String {
-        didSet {
-            persist(preferredDisplayName, for: GeneralSettingsStorage.Keys.preferredDisplayName)
-        }
-    }
-
-    @Published var isDisplayAutoSwitchEnabled: Bool {
-        didSet {
-            persist(
-                isDisplayAutoSwitchEnabled,
-                for: GeneralSettingsStorage.Keys.displayAutoSwitchEnabled
-            )
+            persist(Array(enabledDisplayUUIDs), for: GeneralSettingsStorage.Keys.enabledDisplayUUIDs)
         }
     }
 
@@ -221,8 +205,7 @@ final class ApplicationSettingsStore: SettingsStoreBase, NotchSettingsProviding 
     var screenSelectionPreferences: NotchScreenSelectionPreferences {
         NotchScreenSelectionPreferences(
             displayLocation: displayLocation,
-            preferredDisplayUUID: preferredDisplayUUID.isEmpty ? nil : preferredDisplayUUID,
-            allowsAutomaticDisplaySwitching: isDisplayAutoSwitchEnabled
+            enabledDisplayUUIDs: enabledDisplayUUIDs
         )
     }
 
@@ -236,17 +219,10 @@ final class ApplicationSettingsStore: SettingsStoreBase, NotchSettingsProviding 
         self.notchHeight = defaults.integer(forKey: GeneralSettingsStorage.Keys.notchHeight)
         self.isMenuBarIconVisible = defaults.bool(forKey: GeneralSettingsStorage.Keys.menuBarIcon)
         self.displayLocation = NotchDisplayLocation(
-            rawValue: defaults.string(forKey: GeneralSettingsStorage.Keys.displayLocation) ?? NotchDisplayLocation.main.rawValue
-        ) ?? .main
-        self.preferredDisplayUUID = defaults.string(
-            forKey: GeneralSettingsStorage.Keys.preferredDisplayUUID
-        ) ?? ""
-        self.preferredDisplayName = defaults.string(
-            forKey: GeneralSettingsStorage.Keys.preferredDisplayName
-        ) ?? ""
-        self.isDisplayAutoSwitchEnabled = Self.resolvedBool(
-            defaults: defaults,
-            key: GeneralSettingsStorage.Keys.displayAutoSwitchEnabled
+            rawValue: defaults.string(forKey: GeneralSettingsStorage.Keys.displayLocation) ?? NotchDisplayLocation.auto.rawValue
+        ) ?? .auto
+        self.enabledDisplayUUIDs = Set(
+            defaults.stringArray(forKey: GeneralSettingsStorage.Keys.enabledDisplayUUIDs) ?? []
         )
         self.appLanguage = OpenNotchLanguage.resolved(
             defaults.string(forKey: GeneralSettingsStorage.Keys.appLanguage)
@@ -299,7 +275,6 @@ final class ApplicationSettingsStore: SettingsStoreBase, NotchSettingsProviding 
             Self.defaultTemporaryActivityDuration(for: GeneralSettingsStorage.Keys.notchSizeTemporaryActivityDuration)
         )
         super.init(defaults: defaults)
-        ensureSpecificDisplaySelection(previousLocation: .main)
         updateLaunchAtLogin()
     }
 
@@ -312,12 +287,8 @@ final class ApplicationSettingsStore: SettingsStoreBase, NotchSettingsProviding 
         isMenuBarIconVisible = defaultBool(for: GeneralSettingsStorage.Keys.menuBarIcon)
         displayLocation = NotchDisplayLocation(
             rawValue: defaultString(for: GeneralSettingsStorage.Keys.displayLocation)
-        ) ?? .main
-        preferredDisplayUUID = defaultString(for: GeneralSettingsStorage.Keys.preferredDisplayUUID)
-        preferredDisplayName = defaultString(for: GeneralSettingsStorage.Keys.preferredDisplayName)
-        isDisplayAutoSwitchEnabled = defaultBool(
-            for: GeneralSettingsStorage.Keys.displayAutoSwitchEnabled
-        )
+        ) ?? .auto
+        enabledDisplayUUIDs = []
         appLanguage = OpenNotchLanguage.resolved(
             defaultString(for: GeneralSettingsStorage.Keys.appLanguage)
         )
@@ -409,44 +380,21 @@ final class ApplicationSettingsStore: SettingsStoreBase, NotchSettingsProviding 
         }
     }
 
-    func selectPreferredDisplay(_ display: NotchDisplayOption) {
-        guard display.isAvailable else { return }
-
-        preferredDisplayUUID = display.displayUUID
-        preferredDisplayName = display.name
-    }
-
-    func syncPreferredDisplayMetadata() {
-        guard !preferredDisplayUUID.isEmpty,
-              let selectedDisplay = NSScreen.availableNotchDisplays().first(where: {
-                  $0.displayUUID == preferredDisplayUUID
-              })
-        else {
-            return
-        }
-
-        if preferredDisplayName != selectedDisplay.name {
-            preferredDisplayName = selectedDisplay.name
+    func toggleDisplayUUID(_ uuid: String) {
+        if enabledDisplayUUIDs.contains(uuid) {
+            guard enabledDisplayUUIDs.count > 1 else { return }
+            enabledDisplayUUIDs.remove(uuid)
+        } else {
+            enabledDisplayUUIDs.insert(uuid)
         }
     }
 
-    private func ensureSpecificDisplaySelection(previousLocation: NotchDisplayLocation) {
-        guard displayLocation == .specific else { return }
-
-        if !preferredDisplayUUID.isEmpty {
-            syncPreferredDisplayMetadata()
-            return
-        }
-
-        let previousPreferences = NotchScreenSelectionPreferences(
-            displayLocation: previousLocation,
-            preferredDisplayUUID: preferredDisplayUUID.isEmpty ? nil : preferredDisplayUUID,
-            allowsAutomaticDisplaySwitching: isDisplayAutoSwitchEnabled
-        )
-
-        if let resolvedDisplay = NSScreen.preferredNotchDisplay(for: previousPreferences) ??
-            NSScreen.availableNotchDisplays().first {
-            selectPreferredDisplay(resolvedDisplay)
+    func syncEnabledDisplayUUIDs() {
+        let available = NSScreen.availableNotchDisplays()
+        let availableUUIDs = Set(available.map(\.displayUUID))
+        enabledDisplayUUIDs = enabledDisplayUUIDs.intersection(availableUUIDs)
+        if enabledDisplayUUIDs.isEmpty, let first = available.first {
+            enabledDisplayUUIDs.insert(first.displayUUID)
         }
     }
 }

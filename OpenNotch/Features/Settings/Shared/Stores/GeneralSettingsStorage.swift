@@ -7,9 +7,7 @@ enum GeneralSettingsStorage {
         static let notchHeight = "notchHeight"
         static let menuBarIcon = "isMenuBarIconVisible"
         static let displayLocation = "displayLocation"
-        static let preferredDisplayUUID = "settings.general.display.preferred.uuid"
-        static let preferredDisplayName = "settings.general.display.preferred.name"
-        static let displayAutoSwitchEnabled = "settings.general.display.autoSwitchEnabled"
+        static let enabledDisplayUUIDs = "settings.general.display.enabledUUIDs"
         static let appLanguage = "settings.general.language.app"
         static let notchAnimationPreset = "settings.general.notchAnimationPreset"
         static let hideNotchInFullscreenEnabled = "settings.general.hideNotchInFullscreen"
@@ -101,10 +99,8 @@ enum GeneralSettingsStorage {
         Keys.notchWidth: 0,
         Keys.notchHeight: 0,
         Keys.menuBarIcon: true,
-        Keys.displayLocation: NotchDisplayLocation.main.rawValue,
-        Keys.preferredDisplayUUID: "",
-        Keys.preferredDisplayName: "",
-        Keys.displayAutoSwitchEnabled: true,
+        Keys.displayLocation: NotchDisplayLocation.auto.rawValue,
+        Keys.enabledDisplayUUIDs: [],
         Keys.appLanguage: OpenNotchLanguage.system.rawValue,
         Keys.notchAnimationPreset: NotchAnimationPreset.balanced.rawValue,
         Keys.hideNotchInFullscreenEnabled: false,

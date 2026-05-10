@@ -9,28 +9,23 @@ import Foundation
 import SwiftUI
 
 enum NotchDisplayLocation: String, CaseIterable {
-    case main
-    case builtIn
-    case specific
+    case auto
+    case manual
 
     var title: String {
         switch self {
-        case .main:
-            return "settings.general.display.main"
-        case .builtIn:
-            return "settings.general.display.builtin"
-        case .specific:
-            return "settings.general.display.specific"
+        case .auto:
+            return "settings.general.display.auto"
+        case .manual:
+            return "settings.general.display.manual"
         }
     }
 
     var symbolName: String {
         switch self {
-        case .main:
-            return "desktopcomputer.and.macbook"
-        case .builtIn:
-            return "macbook.gen2"
-        case .specific:
+        case .auto:
+            return "cursorarrow.motionlines"
+        case .manual:
             return "display.2"
         }
     }
