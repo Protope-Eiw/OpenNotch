@@ -278,6 +278,30 @@ slide 模式下左右切换 tab 时，某些组件会从 dashboard 区域的左/
 - 点击授权按钮后启动**激进刷新策略**（连续 10 秒每 500ms 刷新一次）
 - 修复了设置窗口关闭后 Timer 继续运行的资源浪费问题
 
+### 位置权限弹窗重复弹出
+每次打开 Dashboard 时都会显示系统位置权限弹窗，即使用户已经允许过。
+
+**根因：**
+- `WeatherService.swift` 使用 `requestWhenInUseAuthorization()` 请求位置权限
+- 但 `Info.plist` 中只有旧的 `NSLocationUsageDescription` key（macOS 10.14-）
+- macOS 10.15+ 需要 `NSLocationWhenInUseUsageDescription`
+
+**已修复：**
+- `Info.plist` 添加 `NSLocationWhenInUseUsageDescription` key
+- `Info.plist` 日历权限 key 从 `NSCalendarsUsageDescription` 改为 `NSCalendarsFullAccessUsageDescription`（适配 macOS 14+ 新权限模型）
+
+### 日历权限闪烁
+点击日历权限的"完全访问"后，状态短暂变为"已授权"然后迅速变回原样。
+
+**根因：**
+- `requestCalendarAccess()` 请求成功后只设置了一次 `calendarAuthStatus`
+- 没有调用 `startAggressiveRefresh()` 来持续刷新应对 TCC 数据库延迟
+- 权限判断逻辑不一致：`isGranted` 检查 `.fullAccess || .writeOnly`，但按钮逻辑只检查 `.fullAccess`
+
+**已修复：**
+- `requestCalendarAccess()` 中添加 `startAggressiveRefresh()` 调用
+- 统一权限判断逻辑：`isGranted` 只检查 `.fullAccess`（与 `CalendarStore.isAuthorized()` 保持一致）
+
 ### 设置侧边栏点击判定区域过小
 设置窗口左侧 icon-only 导航栏（64px 宽）需要精确点到图标才能切换，判定区域太小。
 

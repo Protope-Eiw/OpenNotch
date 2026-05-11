@@ -196,7 +196,7 @@ final class SettingsPermissionController: NSObject, ObservableObject, CBCentralM
                 assetImageName: nil,
                 systemImage: "calendar",
                 tintColor: .red,
-                isGranted: calendarAuthStatus == .fullAccess || calendarAuthStatus == .writeOnly,
+                isGranted: calendarAuthStatus == .fullAccess,
                 actionTitleKey: calendarAuthStatus == .fullAccess ? nil : (
                     calendarAuthStatus == .notDetermined ?
                     "settings.permissions.action.grantAccess" :
@@ -327,16 +327,18 @@ final class SettingsPermissionController: NSObject, ObservableObject, CBCentralM
         guard status == .notDetermined else {
             Self.openCalendarPrivacySettings()
             refresh()
+            startAggressiveRefresh()
             return
         }
-        Task {
+        Task { @MainActor in
             do {
                 let granted = try await ekStore.requestFullAccessToEvents()
-                // Trust return value directly — TCC database can lag behind.
                 calendarAuthStatus = granted ? .fullAccess : .denied
+                startAggressiveRefresh()
             } catch {
                 Self.openCalendarPrivacySettings()
                 refresh()
+                startAggressiveRefresh()
             }
         }
     }

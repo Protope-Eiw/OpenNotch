@@ -2,9 +2,11 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>NSCalendarsUsageDescription</key>
+    <key>NSCalendarsFullAccessUsageDescription</key>
     <string>OpenNotch needs calendar access to show your events in the dashboard.</string>
     <key>NSLocationUsageDescription</key>
+    <string>OpenNotch needs your location to show local weather in the overview.</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
     <string>OpenNotch needs your location to show local weather in the overview.</string>
 </dict>
 </plist>
