@@ -183,7 +183,9 @@ private struct FeedbackSheet: View {
                                 .frame(minHeight: 120)
                                 .scrollContentBackground(.hidden)
                                 .onChange(of: message) { _, v in
-                                    if v.count > maxLength { message = String(v.prefix(maxLength)) }
+                                    Task { @MainActor in
+                                        if v.count > maxLength { message = String(v.prefix(maxLength)) }
+                                    }
                                 }
                             if message.isEmpty {
                                 Text(L10n.app("feedback.placeholder", fallback: "Anything to share? Feature suggestions, issues, all welcome…"))

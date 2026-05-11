@@ -53,7 +53,9 @@ struct LockScreenNowPlayingPanelView: View {
                 }
                 .onAppear(perform: configureMediaPanelBackgroundAnimation)
                 .onChange(of: mediaPanelBackgroundStyle) {
-                    configureMediaPanelBackgroundAnimation()
+                    Task { @MainActor in
+                        configureMediaPanelBackgroundAnimation()
+                    }
                 }
                 .ignoresSafeArea()
                 .transition(.opacity)
