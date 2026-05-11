@@ -105,9 +105,7 @@ struct VpnConnectedNotchView: View {
                     .foregroundStyle(Color.orange)
                     .contentTransition(.numericText())
                     .onReceive(timer) { _ in
-                        Task { @MainActor in
-                            updateTimer()
-                        }
+                        updateTimer()
                     }
                     .onAppear {
                         updateTimer()

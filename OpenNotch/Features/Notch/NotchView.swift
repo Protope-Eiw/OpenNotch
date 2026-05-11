@@ -95,54 +95,44 @@ struct NotchView: View {
                     )
                 }
                 .onChange(of: notchViewModel.notchModel.content?.id) {
-                    Task { @MainActor in
-                        notchViewModel.handleStrokeVisibility()
-                    }
+                    notchViewModel.handleStrokeVisibility()
                 }
                 .onChange(of: settingsViewModel.notchWidth) {
-                    Task { @MainActor in
-                        notchViewModel.updateDimensions()
-                    }
+                    notchViewModel.updateDimensions()
                 }
                 .onChange(of: settingsViewModel.notchHeight) {
-                    Task { @MainActor in
-                        notchViewModel.updateDimensions()
-                    }
+                    notchViewModel.updateDimensions()
                 }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .onChange(of: dashboardOpen) { _, isOpen in
-            Task { @MainActor in
-                if isOpen {
-                    applyDashboardTabPolicy()
-                    // Dashboard opening — show side strip immediately (tab indicators live there)
-                    sideWidgetTask?.cancel()
-                    sideWidgetTask = nil
-                    showSideWidgets = true
-                } else {
-                    dashboardLastTab = dashboardTab.rawValue
-                }
+            if isOpen {
+                applyDashboardTabPolicy()
+                // Dashboard opening — show side strip immediately (tab indicators live there)
+                sideWidgetTask?.cancel()
+                sideWidgetTask = nil
+                showSideWidgets = true
+            } else {
+                dashboardLastTab = dashboardTab.rawValue
             }
         }
         .onChange(of: notchExpandedDownward) { _, expanding in
-            Task { @MainActor in
-                sideWidgetTask?.cancel()
-                sideWidgetTask = nil
-                if expanding {
-                    // Notch expanding downward — hide side widgets fast
-                    withAnimation(.easeIn(duration: 0.12).delay(0.04)) {
-                        showSideWidgets = false
-                    }
-                } else {
-                    // Notch just started collapsing — wait for the spring to fully settle,
-                    // then show side widgets.
-                    let delay = sideWidgetRevealDelay
-                    sideWidgetTask = Task { @MainActor in
-                        try? await Task.sleep(for: .seconds(delay))
-                        guard !Task.isCancelled else { return }
-                        withAnimation(.spring(response: 0.42, dampingFraction: 0.85)) {
-                            showSideWidgets = true
-                        }
+            sideWidgetTask?.cancel()
+            sideWidgetTask = nil
+            if expanding {
+                // Notch expanding downward — hide side widgets fast
+                withAnimation(.easeIn(duration: 0.12).delay(0.04)) {
+                    showSideWidgets = false
+                }
+            } else {
+                // Notch just started collapsing — wait for the spring to fully settle,
+                // then show side widgets.
+                let delay = sideWidgetRevealDelay
+                sideWidgetTask = Task { @MainActor in
+                    try? await Task.sleep(for: .seconds(delay))
+                    guard !Task.isCancelled else { return }
+                    withAnimation(.spring(response: 0.42, dampingFraction: 0.85)) {
+                        showSideWidgets = true
                     }
                 }
             }
@@ -433,17 +423,13 @@ private extension NotchView {
                 .animation(.spring(response: 0.45, dampingFraction: 0.85), value: dashboardPanelHeight)
                 .transition(.opacity)
                 .onChange(of: settingsViewModel.application.dashboardDisabledTabs) {
-                    Task { @MainActor in
-                        let enabled = enabledDashboardTabs
-                        if !enabled.isEmpty, !enabled.contains(dashboardTab) {
-                            dashboardTab = enabled[0]
-                        }
+                    let enabled = enabledDashboardTabs
+                    if !enabled.isEmpty, !enabled.contains(dashboardTab) {
+                        dashboardTab = enabled[0]
                     }
                 }
                 .onChange(of: dashboardTab) { _, newTab in
-                    Task { @MainActor in
-                        if newTab != .apps { appSearchText = "" }
-                    }
+                    if newTab != .apps { appSearchText = "" }
                 }
                 .background {
                     if settingsViewModel.application.dashboardOpenMode != .hover {

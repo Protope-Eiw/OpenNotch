@@ -60,11 +60,7 @@ struct CalendarTabView: View {
                 store.load(for: selectedDate)
                 store.loadReminders()
             }
-            .onChange(of: selectedDate) { _, d in
-                Task { @MainActor in
-                    store.load(for: d)
-                }
-            }
+            .onChange(of: selectedDate) { _, d in store.load(for: d) }
             .sheet(isPresented: $showEditSheet) {
                 CalendarEventCreatorView(
                     store: store,
