@@ -1759,7 +1759,37 @@
         }
       }
     },
+    "calendar.untitled": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Untitled"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin título"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Без названия"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无标题"
+          }
+        }
+      }
+    },
     "Carry notch context and media playback into the lock screen transition for a more cohesive experience.": {
+      "extractionState": "stale",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -6191,6 +6221,7 @@
       }
     },
     "Live Activity": {
+      "extractionState": "stale",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -6306,6 +6337,7 @@
       }
     },
     "Lock Screen": {
+      "extractionState": "stale",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -6740,6 +6772,7 @@
       }
     },
     "Make the cutout area more useful.": {
+      "extractionState": "stale",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -7410,6 +7443,7 @@
     },
     "OK": {},
     "On": {
+      "extractionState": "stale",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -7700,6 +7734,7 @@
       }
     },
     "Persistent notch content stays visible for as long as the source event is active, then fades away when it ends.": {
+      "extractionState": "stale",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -8830,6 +8865,35 @@
         }
       }
     },
+    "settings.about.feature.liveActivity.on": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Encendido"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вкл."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开启"
+          }
+        }
+      }
+    },
     "settings.about.feature.liveActivity.title": {
       "extractionState": "stale",
       "localizations": {
@@ -9062,6 +9126,64 @@
         }
       }
     },
+    "settings.about.subtitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Make the cutout area more useful."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Haga que el área de la muesca sea más útil."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сделайте область выреза более полезной."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "让刘海区域更实用。"
+          }
+        }
+      }
+    },
+    "settings.about.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenNotch"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenNotch"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenNotch"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenNotch"
+          }
+        }
+      }
+    },
     "settings.battery.preview.batteryLow": {
       "extractionState": "manual",
       "localizations": {
@@ -9116,6 +9238,35 @@
           "stringUnit": {
             "state": "translated",
             "value": "充满电"
+          }
+        }
+      }
+    },
+    "settings.battery.preview.fullDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your Mac is fully charged."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu Mac está completamente cargada."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ваш Mac полностью заряжен."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你的 Mac 已充满电。"
           }
         }
       }
@@ -9178,6 +9329,35 @@
         }
       }
     },
+    "settings.battery.preview.lowDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn on Low Power Mode or it is recommended to charge it."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Active el modo de bajo consumo o se recomienda cargarlo."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Включите режим низкого энергопотребления или рекомендуется зарядить устройство."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开启低电量模式，或建议充电。"
+          }
+        }
+      }
+    },
     "settings.battery.preview.lowPercent": {
       "extractionState": "manual",
       "localizations": {
@@ -9207,6 +9387,35 @@
         }
       }
     },
+    "settings.bluetooth.preview.connected": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connected"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conectado"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подключено"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已连接"
+          }
+        }
+      }
+    },
     "settings.downloads.speed.zero": {
       "extractionState": "manual",
       "localizations": {
@@ -9232,6 +9441,35 @@
           "stringUnit": {
             "state": "translated",
             "value": "0 KB/秒"
+          }
+        }
+      }
+    },
+    "settings.focus.preview.on": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Encendido"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вкл."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开启"
           }
         }
       }
@@ -10831,6 +11069,93 @@
         }
       }
     },
+    "settings.hotspot.preview.on": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Encendido"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вкл."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开启"
+          }
+        }
+      }
+    },
+    "settings.hud.preview.level": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "72"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "72"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "72"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "72"
+          }
+        }
+      }
+    },
+    "settings.hud.preview.volume": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volume"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volumen"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Громкость"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "音量"
+          }
+        }
+      }
+    },
     "settings.hud.style.compact": {
       "extractionState": "stale",
       "localizations": {
@@ -11266,64 +11591,6 @@
         }
       }
     },
-    "settings.interface.transitionStyle": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Transition Style"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Estilo de transición"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Стиль перехода"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "过渡动画"
-          }
-        }
-      }
-    },
-    "settings.interface.transitionStyle.description": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Slide: original swipe animation. Fade: prevents content overflow."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Slide: animación de deslizamiento original. Fade: evita el desbordamiento de contenido."
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Slide: оригинальная анимация смахивания. Fade: предотвращает переполнение контента."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "滑动：原始滑动手势动画。淡入淡出：防止内容溢出相邻标签页。"
-          }
-        }
-      }
-    },
     "settings.interface.overview.apps": {
       "extractionState": "manual",
       "localizations": {
@@ -11701,6 +11968,64 @@
         }
       }
     },
+    "settings.interface.transitionStyle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transition Style"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estilo de transición"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Стиль перехода"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "过渡动画"
+          }
+        }
+      }
+    },
+    "settings.interface.transitionStyle.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slide: original swipe animation. Fade: prevents content overflow."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slide: animación de deslizamiento original. Fade: evita el desbordamiento de contenido."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slide: оригинальная анимация смахивания. Fade: предотвращает переполнение контента."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "滑动：原始滑动手势动画。淡入淡出：防止内容溢出相邻标签页。"
+          }
+        }
+      }
+    },
     "settings.interface.visibleTabs": {
       "extractionState": "manual",
       "localizations": {
@@ -12049,6 +12374,35 @@
         }
       }
     },
+    "settings.lockscreen.preview.locked": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Locked"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bloqueado"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Заблокировано"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已锁定"
+          }
+        }
+      }
+    },
     "settings.lockscreen.sound.change": {
       "extractionState": "manual",
       "localizations": {
@@ -12103,6 +12457,64 @@
           "stringUnit": {
             "state": "translated",
             "value": "选择"
+          }
+        }
+      }
+    },
+    "settings.network.preview.active": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Active"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activo"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Активно"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "活跃"
+          }
+        }
+      }
+    },
+    "settings.network.preview.connected": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connected"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conectado"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подключено"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已连接"
           }
         }
       }
@@ -15001,6 +15413,7 @@
       }
     },
     "Short-lived overlays appear above live activities so quick system events still feel prominent.": {
+      "extractionState": "stale",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -16769,6 +17182,7 @@
       }
     },
     "Temporary Activity": {
+      "extractionState": "stale",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -18419,408 +18833,205 @@
         }
       }
     },
-    "settings.about.feature.liveActivity.on": {
+    "settings.section.interface.title": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "On"
+            "value": "Interface"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Encendido"
+            "value": "Interfaz"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Вкл."
+            "value": "Интерфейс"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "开启"
+            "value": "界面"
           }
         }
       }
     },
-    "settings.about.subtitle": {
+    "settings.section.interface.subtitle": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Make the cutout area more useful."
+            "value": "Dashboard layout, app grid, and overview customization."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Haga que el área de la muesca sea más útil."
+            "value": "Diseño del panel, cuadrícula de aplicaciones y personalización de vista general."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Сделайте область выреза более полезной."
+            "value": "Макет панели, сетка приложений и настройка обзора."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "让刘海区域更实用。"
+            "value": "仪表盘布局、应用网格和概览自定义。"
           }
         }
       }
     },
-    "settings.about.title": {
+    "settings.interface.tab.overview": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "OpenNotch"
+            "value": "Overview"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "OpenNotch"
+            "value": "Resumen"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "OpenNotch"
+            "value": "Обзор"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "OpenNotch"
+            "value": "概览"
           }
         }
       }
     },
-    "settings.battery.preview.fullDescription": {
+    "settings.interface.tab.music": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Your Mac is fully charged."
+            "value": "Music"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tu Mac está completamente cargada."
+            "value": "Música"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ваш Mac полностью заряжен."
+            "value": "Музыка"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "你的 Mac 已充满电。"
+            "value": "音乐"
           }
         }
       }
     },
-    "settings.battery.preview.lowDescription": {
+    "settings.interface.tab.system": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Turn on Low Power Mode or it is recommended to charge it."
+            "value": "System Status"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Active el modo de bajo consumo o se recomienda cargarlo."
+            "value": "Estado del sistema"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Включите режим низкого энергопотребления или рекомендуется зарядить устройство."
+            "value": "Состояние системы"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "开启低电量模式，或建议充电。"
+            "value": "系统状态"
           }
         }
       }
     },
-    "settings.bluetooth.preview.connected": {
+    "settings.interface.tab.calendar": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Connected"
+            "value": "Calendar"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Conectado"
+            "value": "Calendario"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Подключено"
+            "value": "Календарь"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "已连接"
+            "value": "日历"
           }
         }
       }
     },
-    "settings.focus.preview.on": {
+    "settings.interface.tab.apps": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "On"
+            "value": "App Launcher"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Encendido"
+            "value": "Lanzador de aplicaciones"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Вкл."
+            "value": "Запуск приложений"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "开启"
-          }
-        }
-      }
-    },
-    "settings.hotspot.preview.on": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "On"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Encendido"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Вкл."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "开启"
-          }
-        }
-      }
-    },
-    "settings.hud.preview.level": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "72"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "72"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "72"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "72"
-          }
-        }
-      }
-    },
-    "settings.hud.preview.volume": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Volume"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Volumen"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Громкость"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "音量"
-          }
-        }
-      }
-    },
-    "settings.lockscreen.preview.locked": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Locked"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bloqueado"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Заблокировано"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "已锁定"
-          }
-        }
-      }
-    },
-    "settings.network.preview.active": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Active"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Activo"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Активно"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "活跃"
-          }
-        }
-      }
-    },
-    "settings.network.preview.connected": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Connected"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Conectado"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Подключено"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "已连接"
-          }
-        }
-      }
-    },
-    "calendar.untitled": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Untitled"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sin título"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Без названия"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "无标题"
+            "value": "应用启动器"
           }
         }
       }

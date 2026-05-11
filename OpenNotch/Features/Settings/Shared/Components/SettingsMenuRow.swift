@@ -39,25 +39,29 @@ struct SettingsMenuRow<Option: Hashable>: View {
 
             Spacer(minLength: 12)
 
-            Menu {
-                ForEach(options, id: \.self) { option in
-                    Button {
-                        selection = option
-                    } label: {
-                        HStack {
-                            Text(optionTitle(option))
-                            if option == selection {
-                                Spacer()
-                                Image(systemName: "checkmark")
+            Color.clear
+                .frame(width: 160)
+                .overlay(alignment: .leading) {
+                    Menu {
+                        ForEach(options, id: \.self) { option in
+                            Button {
+                                selection = option
+                            } label: {
+                                HStack {
+                                    Text(optionTitle(option))
+                                    if option == selection {
+                                        Spacer()
+                                        Image(systemName: "checkmark")
+                                    }
+                                }
                             }
                         }
+                    } label: {
+                        Text(optionTitle(selection))
+                            .lineLimit(1)
                     }
+                    .fixedSize(horizontal: true, vertical: false)
                 }
-            } label: {
-                Text(optionTitle(selection))
-                    .lineLimit(1)
-            }
-            .frame(width: 160, alignment: .leading)
         }
         .modifier(SettingsAccessibilityModifier(identifier: accessibilityIdentifier))
     }

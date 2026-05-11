@@ -112,7 +112,7 @@ struct InterfaceSettingsView: View {
                 SettingsDivider(indented: true)
 
                 SettingsToggleRow(
-                    title: localized(tab.title),
+                    title: localized(tab.titleKey, fallback: tab.title),
                     systemImage: tab.icon,
                     color: tab.settingsColor,
                     isOn: tabEnabled,

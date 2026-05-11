@@ -27,6 +27,16 @@ enum DashboardTab: String, CaseIterable {
         }
     }
 
+    var titleKey: String {
+        switch self {
+        case .overview: return "settings.interface.tab.overview"
+        case .music:    return "settings.interface.tab.music"
+        case .system:   return "settings.interface.tab.system"
+        case .calendar: return "settings.interface.tab.calendar"
+        case .apps:     return "settings.interface.tab.apps"
+        }
+    }
+
     var settingsColor: Color {
         switch self {
         case .overview: return .teal

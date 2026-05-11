@@ -39,14 +39,18 @@ struct SettingsSegmentedRow<Option: Hashable>: View {
 
             Spacer(minLength: 12)
 
-            Picker("", selection: $selection) {
-                ForEach(options, id: \.self) { option in
-                    Text(optionTitle(option))
-                        .tag(option)
+            Color.clear
+                .frame(width: 160)
+                .overlay(alignment: .leading) {
+                    Picker("", selection: $selection) {
+                        ForEach(options, id: \.self) { option in
+                            Text(optionTitle(option))
+                                .tag(option)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .fixedSize(horizontal: true, vertical: false)
                 }
-            }
-            .pickerStyle(.segmented)
-            .frame(width: 160)
         }
         .modifier(SettingsAccessibilityModifier(identifier: accessibilityIdentifier))
     }
