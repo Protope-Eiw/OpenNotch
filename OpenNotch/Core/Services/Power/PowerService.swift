@@ -95,7 +95,6 @@ final class PowerService: ObservableObject {
         }
     }
 
-    #if DEBUG
     func applyDebugState(
         onACPower: Bool,
         batteryLevel: Int,
@@ -107,7 +106,6 @@ final class PowerService: ObservableObject {
         self.isCharging = isCharging
         self.isLowPowerMode = isLowPowerMode
     }
-    #endif
 }
 
 extension PowerService: PowerStateProviding {

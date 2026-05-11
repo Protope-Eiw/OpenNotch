@@ -122,7 +122,6 @@ final class TimerViewModel: ObservableObject {
         return formatter
     }()
 
-    #if DEBUG
     private var isShowingDebugPreviewSnapshot: Bool { _isShowingDebugPreviewSnapshot }
     private var _isShowingDebugPreviewSnapshot = false
 
@@ -149,7 +148,6 @@ final class TimerViewModel: ObservableObject {
             fingerprint: "debug.clock.timer"
         )
     }
-    #endif
 }
 
 private extension TimerViewModel {

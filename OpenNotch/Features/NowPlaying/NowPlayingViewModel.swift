@@ -52,9 +52,7 @@ final class NowPlayingViewModel: ObservableObject {
     private var artworkFlipTrackKey: String?
     private var artworkFlipStartedAt: Date?
     private var activeDetailedPresentationSources = Set<String>()
-    #if DEBUG
     private var isShowingDebugPreviewSnapshot = false
-    #endif
 
     var hasActiveSession: Bool {
         snapshot != nil
@@ -260,7 +258,6 @@ final class NowPlayingViewModel: ObservableObject {
         updateDetailPollingState()
     }
 
-    #if DEBUG
     func showDebugPreviewSnapshotIfNeeded() {
         guard snapshot == nil else { return }
         isShowingDebugPreviewSnapshot = true
@@ -316,7 +313,6 @@ final class NowPlayingViewModel: ObservableObject {
         NSGraphicsContext.restoreGraphicsState()
         return rep.representation(using: .png, properties: [:])
     }
-    #endif
 }
 
 private extension NowPlayingViewModel {

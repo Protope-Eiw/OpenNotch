@@ -252,11 +252,9 @@ enum NotchContentRegistry {
             "\(stackID).\(rawValue)"
         }
 
-        #if DEBUG
         static func debugID(forStep rawValue: String) -> String {
             "\(debugStackID).\(rawValue)"
         }
-        #endif
     }
 
     enum DebugSequence {

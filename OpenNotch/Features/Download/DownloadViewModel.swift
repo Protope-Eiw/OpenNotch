@@ -10,9 +10,7 @@ final class DownloadViewModel: ObservableObject {
     private var hasStartedMonitoring = false
     private var ignoresMonitorSnapshots = false
     private var latestObservedDownloads: [DownloadModel] = []
-    #if DEBUG
     private var debugPreviewDownloads: [DownloadModel]?
-    #endif
 
     var hasActiveDownloads: Bool {
         !activeDownloads.isEmpty
@@ -59,7 +57,6 @@ final class DownloadViewModel: ObservableObject {
         commit([])
     }
 
-    #if DEBUG
     func showDebugPreviewDownloadsIfNeeded() {
         let previewDownloads = Self.makeDebugPreviewDownloads()
         debugPreviewDownloads = previewDownloads
@@ -102,7 +99,6 @@ final class DownloadViewModel: ObservableObject {
             )
         ]
     }
-    #endif
 }
 
 private extension DownloadViewModel {
@@ -122,9 +118,7 @@ private extension DownloadViewModel {
 
         latestObservedDownloads = sortedDownloads
 
-        #if DEBUG
         guard debugPreviewDownloads == nil else { return }
-        #endif
 
         commit(sortedDownloads)
     }

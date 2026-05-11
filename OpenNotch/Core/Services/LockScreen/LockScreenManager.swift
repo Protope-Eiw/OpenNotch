@@ -65,7 +65,6 @@ final class LockScreenManager: ObservableObject {
         isLocked || isPreparingLock
     }
 
-    #if DEBUG
     func setDebugLockState(_ locked: Bool) {
         unlockWorkItem?.cancel()
         unlockWorkItem = nil
@@ -73,7 +72,6 @@ final class LockScreenManager: ObservableObject {
         isLocked = locked
         isLockIdle = !locked
     }
-    #endif
 
     private func registerWorkspaceObservers() {
         guard workspaceObservers.isEmpty else { return }
