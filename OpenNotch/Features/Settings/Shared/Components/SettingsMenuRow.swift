@@ -57,7 +57,7 @@ struct SettingsMenuRow<Option: Hashable>: View {
                 Text(optionTitle(selection))
                     .lineLimit(1)
             }
-            .fixedSize(horizontal: true, vertical: false)
+            .frame(width: 160, alignment: .leading)
         }
         .modifier(SettingsAccessibilityModifier(identifier: accessibilityIdentifier))
     }
