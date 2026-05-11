@@ -8,18 +8,22 @@ struct MacSystemInfo {
     var serialNumber: String = "–"
     var macOSVersion: String = {
         let v = ProcessInfo.processInfo.operatingSystemVersion
-        return "macOS \(v.majorVersion).\(v.minorVersion).\(v.patchVersion)"
+        let p = v.patchVersion > 0 ? ".\(v.patchVersion)" : ""
+        return "macOS \(v.majorVersion).\(v.minorVersion)\(p)"
     }()
 
     static func load() async -> MacSystemInfo {
         var info = MacSystemInfo()
-        info.serialNumber = readSerial()
-        info.ramText = readRAM()
+        info.serialNumber = readSerial().trimmingCharacters(in: .whitespacesAndNewlines)
 
         if let hw = await readHardwareProfiler() {
-            if let name = hw["machine_name"] as? String { info.modelName = name }
-            if let chip = hw["cpu_type"] as? String     { info.chipName  = chip }
-            if let mem  = hw["physical_memory"] as? String { info.ramText = mem }
+            if let name = hw["machine_name"] as? String { info.modelName = name.trimmingCharacters(in: .whitespacesAndNewlines) }
+            if let chip = hw["chip_type"] as? String     { info.chipName  = chip.trimmingCharacters(in: .whitespacesAndNewlines) }
+            if let mem  = hw["physical_memory"] as? String { info.ramText = mem.trimmingCharacters(in: .whitespacesAndNewlines) }
+        }
+
+        if info.ramText == "–" {
+            info.ramText = readRAM()
         }
         return info
     }

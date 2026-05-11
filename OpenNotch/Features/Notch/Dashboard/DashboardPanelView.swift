@@ -237,7 +237,7 @@ struct DashboardPanelView: View {
                 .font(.system(size: 10))
                 .foregroundStyle(.white.opacity(0.35))
                 .frame(width: 13)
-            Text(text)
+            Text(text.trimmingCharacters(in: .whitespacesAndNewlines))
                 .font(.system(size: 12, design: .monospaced))
                 .foregroundStyle(.white.opacity(0.75))
                 .lineLimit(1)
