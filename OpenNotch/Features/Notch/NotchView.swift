@@ -216,7 +216,12 @@ private extension NotchView {
                 // Left: speed arrows ↔ tab indicators (same notch-bar level)
                 HStack(spacing: 0) {
                     Color.clear.frame(width: outerPad)
-                    pillLeftWidgetView
+                    PillLeftWidgetView(
+                        systemMonitorViewModel: systemMonitorViewModel,
+                        pomodoroViewModel: pomodoroViewModel,
+                        widgetsRaw: leftWidgetsRaw,
+                        ringSize: ringSize
+                    )
                     .onTapGesture {
                         if !SettingsWindowCoordinator.exists {
                             openWindow(id: WindowsScene.settings)
@@ -315,7 +320,11 @@ private extension NotchView {
                     Color.clear.frame(width: notchClearance)
                     Spacer(minLength: 0)
                     ZStack(alignment: .trailing) {
-                        pillRightWidgetView
+                        PillRightWidgetView(
+                            systemMonitorViewModel: systemMonitorViewModel,
+                            widgetsRaw: rightWidgetsRaw,
+                            ringSize: ringSize
+                        )
                         .contextMenu { contextMenuItem }
                         .opacity(dashboardOpen ? 0 : 1)
                         .scaleEffect(dashboardOpen ? 0.72 : 1, anchor: .trailing)
@@ -478,77 +487,7 @@ private extension NotchView {
 
 
 
-    @ViewBuilder
-    private var pillLeftWidgetView: some View {
-        let widgets = leftWidgetsRaw.split(separator: ",").compactMap { NotchBarWidget(rawValue: String($0)) }
-        if pomodoroViewModel.state != .idle {
-            HStack(spacing: 4) {
-                Image(systemName: pomodoroViewModel.phase == .work ? "flame.fill" : "cup.and.heat.waves.fill")
-                    .font(.system(size: 8))
-                    .foregroundStyle(pomodoroViewModel.phase == .work ? .orange : .mint)
-                Text(pomodoroViewModel.timeString)
-                    .font(.system(size: 10, weight: .semibold, design: .monospaced))
-                    .foregroundStyle(pomodoroViewModel.phase == .work ? Color.orange : Color.mint)
-            }
-        } else if widgets.isEmpty {
-            Color.clear.frame(width: 65, height: 1)
-        } else {
-            HStack(spacing: 6) {
-                ForEach(Array(widgets.prefix(2)), id: \.self) { pillRingView(for: $0) }
-            }
-        }
-    }
 
-    @ViewBuilder
-    private var pillRightWidgetView: some View {
-        let widgets = rightWidgetsRaw.split(separator: ",").compactMap { NotchBarWidget(rawValue: String($0)) }
-        if widgets.isEmpty {
-            Color.clear.frame(width: CGFloat(ringSize * 2 + 8), height: 1)
-        } else {
-            HStack(spacing: 8) {
-                ForEach(Array(widgets.prefix(2)), id: \.self) { pillRingView(for: $0) }
-            }
-        }
-    }
-
-    @ViewBuilder
-    private func pillRingView(for widget: NotchBarWidget) -> some View {
-        switch widget {
-        case .networkSpeed:
-            VStack(alignment: .leading, spacing: 1) {
-                HStack(spacing: 3) {
-                    Image(systemName: "arrowtriangle.up.fill")
-                        .font(.system(size: 6))
-                        .foregroundStyle(.blue)
-                    Text(systemMonitorViewModel.formattedSpeed(systemMonitorViewModel.uploadSpeed))
-                        .foregroundStyle(.blue)
-                }
-                HStack(spacing: 3) {
-                    Image(systemName: "arrowtriangle.down.fill")
-                        .font(.system(size: 6))
-                        .foregroundStyle(.green)
-                    Text(systemMonitorViewModel.formattedSpeed(systemMonitorViewModel.downloadSpeed))
-                        .foregroundStyle(.green)
-                }
-            }
-            .font(.system(size: 10, weight: .medium, design: .monospaced))
-        case .cpu:
-            ProgressRing(progress: systemMonitorViewModel.cpuUsage,
-                         color: Color.pillColor(systemMonitorViewModel.cpuUsage, warn: 50, danger: 80),
-                         label: "CPU")
-                .frame(width: ringSize, height: ringSize)
-        case .memory:
-            ProgressRing(progress: systemMonitorViewModel.memoryUsage,
-                         color: Color.pillColor(systemMonitorViewModel.memoryUsage, warn: 70, danger: 85),
-                         label: "MEM")
-                .frame(width: ringSize, height: ringSize)
-        case .disk:
-            ProgressRing(progress: systemMonitorViewModel.diskUsage,
-                         color: Color.pillColor(systemMonitorViewModel.diskUsage, warn: 80, danger: 90),
-                         label: "DSK")
-                .frame(width: ringSize, height: ringSize)
-        }
-    }
 
     private func applyDashboardTabPolicy() {
         let available = enabledDashboardTabs
@@ -702,87 +641,7 @@ private extension NotchView {
     }
 }
 
-private struct NotchEventHandlersView: View {
-    let notchEventCoordinator: NotchEventCoordinator
-    let powerViewModel: PowerViewModel
-    let bluetoothViewModel: BluetoothViewModel
-    let networkViewModel: NetworkViewModel
-    let downloadViewModel: DownloadViewModel
-    let focusViewModel: FocusViewModel
-    let airDropViewModel: AirDropNotchViewModel
-    let settingsViewModel: SettingsViewModel
-    let nowPlayingViewModel: NowPlayingViewModel
-    let timerViewModel: TimerViewModel
-    let screenRecordingViewModel: ScreenRecordingViewModel
-    let lockScreenManager: LockScreenManager
-    
-     var body: some View {
-         Color.clear
-             .onReceive(powerViewModel.event) { event in
-                 notchEventCoordinator.handlePowerEvent(event)
-             }
-             .onReceive(bluetoothViewModel.$event.compactMap { $0 }) { event in
-                notchEventCoordinator.handleBluetoothEvent(event)
-            }
-            .onReceive(networkViewModel.$networkEvent.compactMap { $0 }) { event in
-                notchEventCoordinator.handleNetworkEvent(event)
-            }
-            .onReceive(downloadViewModel.$event.compactMap { $0 }) { event in
-                notchEventCoordinator.handleDownloadEvent(event)
-            }
-            .onReceive(focusViewModel.$focusEvent.compactMap { $0 }) { event in
-                notchEventCoordinator.handleFocusEvent(event)
-            }
-            .onReceive(airDropViewModel.$event.compactMap { $0 }) { event in
-                notchEventCoordinator.handleAirDropEvent(event)
-            }
-            .onReceive(settingsViewModel.notchSizeEvent) { event in
-                notchEventCoordinator.handleNotchWidthEvent(event)
-            }
-            .onReceive(nowPlayingViewModel.$event.compactMap { $0 }) { event in
-                notchEventCoordinator.handleNowPlayingEvent(event)
-            }
-            .onReceive(timerViewModel.$event.compactMap { $0 }) { event in
-                notchEventCoordinator.handleTimerEvent(event)
-            }
-            .onReceive(screenRecordingViewModel.$event.compactMap { $0 }) { event in
-                notchEventCoordinator.handleScreenRecordingEvent(event)
-            }
-            .onReceive(lockScreenManager.$event.compactMap { $0 }) { event in
-                notchEventCoordinator.handleLockScreenEvent(event)
-            }
-    }
-}
 
-struct ProgressRing: View {
-    let progress: Double
-    let color: Color
-    let label: String
-    var valueText: String? = nil
-    var showInternalText: Bool = true
 
-    var body: some View {
-        ZStack {
-            Circle()
-                .stroke(Color.white.opacity(0.15), lineWidth: 2.5)
-            Circle()
-                .trim(from: 0, to: min(progress / 100, 1))
-                .stroke(color, style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
-                .rotationEffect(.degrees(-90))
-                .animation(.easeInOut(duration: 0.4), value: progress)
-            if showInternalText {
-                VStack(spacing: 1) {
-                    Text(valueText ?? "\(Int(progress))")
-                        .font(.system(size: 9, weight: .semibold, design: .monospaced))
-                        .foregroundStyle(.white)
-                    if !label.isEmpty {
-                        Text(label)
-                            .font(.system(size: 6, weight: .medium))
-                            .foregroundStyle(.white.opacity(0.55))
-                    }
-                }
-            }
-        }
-    }
-}
+
 
