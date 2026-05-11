@@ -11292,6 +11292,64 @@
         }
       }
     },
+    "settings.interface.transitionStyle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transition Style"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estilo de transición"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Стиль перехода"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "过渡动画"
+          }
+        }
+      }
+    },
+    "settings.interface.transitionStyle.description" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Slide: original swipe animation. Fade: prevents content overflow."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Slide: animación de deslizamiento original. Fade: evita el desbordamiento de contenido."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Slide: оригинальная анимация смахивания. Fade: предотвращает переполнение контента."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "滑动：原始滑动手势动画。淡入淡出：防止内容溢出相邻标签页。"
+          }
+        }
+      }
+    },
     "settings.interface.overview.apps" : {
       "extractionState" : "manual",
       "localizations" : {

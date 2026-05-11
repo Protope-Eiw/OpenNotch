@@ -46,7 +46,7 @@ struct SettingsSegmentedRow<Option: Hashable>: View {
                 }
             }
             .pickerStyle(.segmented)
-            .frame(maxWidth: 200)
+            .frame(width: 160)
         }
         .modifier(SettingsAccessibilityModifier(identifier: accessibilityIdentifier))
     }
