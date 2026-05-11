@@ -3948,9 +3948,6 @@
     "CPU %lld%%" : {
 
     },
-    "CPU, memory, disk, network, and battery stats." : {
-
-    },
     "Debug Ensemble" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -6961,9 +6958,6 @@
         }
       }
     },
-    "Music player with playback controls and progress bar." : {
-
-    },
     "Network activity" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -7433,6 +7427,9 @@
           }
         }
       }
+    },
+    "OK" : {
+
     },
     "On" : {
       "localizations" : {
@@ -8275,12 +8272,6 @@
           }
         }
       }
-    },
-    "Quick launcher for pinned apps." : {
-
-    },
-    "Quick overview with pinned apps, time, and system info." : {
-
     },
     "Quit" : {
       "extractionState" : "stale",
@@ -9561,35 +9552,6 @@
         }
       }
     },
-    "settings.general.display.autoSwitch.description" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Use the main display while the selected display is unavailable, then move Dynamic Notch back when it returns."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Usa la pantalla principal mientras la pantalla seleccionada no esté disponible y devuelve Dynamic Notch cuando vuelva."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Использовать основной дисплей, пока выбранный дисплей недоступен, и возвращать Dynamic Notch обратно, когда он появится."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "当所选显示屏不可用时使用主显示屏，并在其恢复后将 Dynamic Notch 移回去。"
-          }
-        }
-      }
-    },
     "settings.general.display.auto" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -9615,6 +9577,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "跟随鼠标光标"
+          }
+        }
+      }
+    },
+    "settings.general.display.autoSwitch.description" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use the main display while the selected display is unavailable, then move Dynamic Notch back when it returns."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usa la pantalla principal mientras la pantalla seleccionada no esté disponible y devuelve Dynamic Notch cuando vuelva."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Использовать основной дисплей, пока выбранный дисплей недоступен, и возвращать Dynamic Notch обратно, когда он появится."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "当所选显示屏不可用时使用主显示屏，并在其恢复后将 Dynamic Notch 移回去。"
           }
         }
       }
@@ -17003,9 +16994,6 @@
           }
         }
       }
-    },
-    "Today's calendar events from your calendars." : {
-
     },
     "Toggle persistent previews to inspect their live activity UI." : {
       "extractionState" : "stale",

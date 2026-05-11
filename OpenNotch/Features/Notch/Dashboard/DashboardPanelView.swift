@@ -72,9 +72,10 @@ struct DashboardPanelView: View {
                         .offset(x: slideOffset(for: tab, width: geo.size.width))
                 }
             }
+            .compositingGroup()
+            .clipShape(Rectangle())
             .animation(.spring(response: 0.35, dampingFraction: 0.85), value: selectedTab)
         }
-        .mask(Rectangle())
     }
 
     private var slideTabs: [DashboardTab] {

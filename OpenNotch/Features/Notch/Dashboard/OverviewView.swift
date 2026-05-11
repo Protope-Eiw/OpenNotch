@@ -280,6 +280,7 @@ struct OverviewView: View {
         }
         .frame(width: 116, height: 116)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .clipped()
     }
 }
 

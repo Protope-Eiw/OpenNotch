@@ -26,7 +26,7 @@ struct SettingsSegmentedRow<Option: Hashable>: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        HStack(alignment: .center, spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                 if let description {
@@ -37,6 +37,8 @@ struct SettingsSegmentedRow<Option: Hashable>: View {
                 }
             }
 
+            Spacer(minLength: 12)
+
             Picker("", selection: $selection) {
                 ForEach(options, id: \.self) { option in
                     Text(optionTitle(option))
@@ -44,6 +46,7 @@ struct SettingsSegmentedRow<Option: Hashable>: View {
                 }
             }
             .pickerStyle(.segmented)
+            .frame(maxWidth: 200)
         }
         .modifier(SettingsAccessibilityModifier(identifier: accessibilityIdentifier))
     }

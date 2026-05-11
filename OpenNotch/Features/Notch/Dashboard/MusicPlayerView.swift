@@ -119,13 +119,14 @@ struct MusicPlayerView: View {
             if let img = artwork {
                 Image(nsImage: img)
                     .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .clipped()
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .aspectRatio(1, contentMode: .fit)
+                    .frame(maxHeight: .infinity)
                     .scaleEffect(x: 1.4, y: 1.5)
                     .rotationEffect(.degrees(92))
-                    .blur(radius: 22)
-                    .opacity(snapshot.isPlaying ? 0.55 : 0)
-                    .animation(.easeInOut(duration: 0.45), value: snapshot.isPlaying)
+                    .blur(radius: 30)
+                    .opacity(snapshot.isPlaying ? 0.5 : 0)
             }
 
             Group {
@@ -147,16 +148,17 @@ struct MusicPlayerView: View {
             .frame(maxHeight: .infinity)
             .clipShape(RoundedRectangle(cornerRadius: 12))
             .scaleEffect(snapshot.isPlaying ? 1.0 : 0.87)
-            .animation(.spring(response: 0.4, dampingFraction: 0.75), value: snapshot.isPlaying)
 
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.black.opacity(snapshot.isPlaying ? 0 : 0.5))
+            Rectangle()
+                .fill(Color.black)
                 .aspectRatio(1, contentMode: .fit)
                 .frame(maxHeight: .infinity)
-                .animation(.easeInOut(duration: 0.3), value: snapshot.isPlaying)
+                .blur(radius: 50)
+                .opacity(snapshot.isPlaying ? 0 : 0.6)
         }
         .aspectRatio(1, contentMode: .fit)
         .frame(maxHeight: .infinity)
+        .animation(.easeInOut(duration: 0.45), value: snapshot.isPlaying)
     }
 
     private func progressBar(progress: Double) -> some View {

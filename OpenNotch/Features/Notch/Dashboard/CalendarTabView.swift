@@ -9,6 +9,9 @@ struct CalendarTabView: View {
         let c = Calendar.current
         return c.date(from: c.dateComponents([.year, .month], from: Date())) ?? Date()
     }()
+    @State private var showEditSheet = false
+    @State private var editingEvent: EKEvent? = nil
+    @State private var showDeleteConfirm = false
 
     var body: some View {
         switch store.authStatus {
@@ -28,8 +31,13 @@ struct CalendarTabView: View {
             )
         default:
             HStack(spacing: 0) {
-                MiniCalendarView(selectedDate: $selectedDate, displayedMonth: $displayedMonth)
-                    .frame(width: 162)
+                MiniCalendarView(
+                    selectedDate: $selectedDate,
+                    displayedMonth: $displayedMonth,
+                    eventDates: store.eventDates,
+                    reminderDates: store.reminderDates
+                )
+                .frame(width: 162)
                 Rectangle()
                     .fill(Color.white.opacity(0.07))
                     .frame(width: 1)
@@ -37,11 +45,37 @@ struct CalendarTabView: View {
                 CalendarEventPane(
                     date: selectedDate,
                     events: store.events,
-                    version: store.version
+                    reminders: store.reminders,
+                    version: store.version,
+                    onEditEvent: { editingEvent = $0; showEditSheet = true },
+                    onDeleteEvent: { editingEvent = $0; showDeleteConfirm = true }
                 )
             }
-            .onAppear { store.load(for: selectedDate) }
+            .onAppear {
+                store.load(for: selectedDate)
+                store.loadReminders()
+            }
             .onChange(of: selectedDate) { _, d in store.load(for: d) }
+            .sheet(isPresented: $showEditSheet) {
+                CalendarEventCreatorView(
+                    store: store,
+                    defaultDate: selectedDate,
+                    editingEvent: editingEvent,
+                    onDismiss: { showEditSheet = false; editingEvent = nil }
+                )
+                .frame(width: 340, height: 420)
+            }
+            .alert(L10n.app("calendar.deleteConfirm", fallback: "Delete this event?"), isPresented: $showDeleteConfirm) {
+                Button(L10n.app("calendar.delete", fallback: "Delete"), role: .destructive) {
+                    if let event = editingEvent {
+                        store.removeEvent(event)
+                    }
+                    editingEvent = nil
+                }
+                Button(L10n.app("calendar.cancel", fallback: "Cancel"), role: .cancel) {
+                    editingEvent = nil
+                }
+            }
         }
     }
 
@@ -73,6 +107,8 @@ struct CalendarTabView: View {
 struct MiniCalendarView: View {
     @Binding var selectedDate: Date
     @Binding var displayedMonth: Date
+    var eventDates: Set<String> = []
+    var reminderDates: Set<String> = []
 
     private let cal = Calendar.current
 
@@ -80,6 +116,11 @@ struct MiniCalendarView: View {
         var s = cal.veryShortWeekdaySymbols
         s.append(s.removeFirst())
         return s
+    }
+
+    private func dateKey(_ date: Date) -> String {
+        let c = Calendar.current
+        return "\(c.component(.year, from: date))-\(c.component(.month, from: date))-\(c.component(.day, from: date))"
     }
 
     var body: some View {
@@ -136,7 +177,9 @@ struct MiniCalendarView: View {
                         MiniDateCell(
                             day: cal.component(.day, from: date),
                             isToday: cal.isDateInToday(date),
-                            isSelected: cal.isDate(date, inSameDayAs: selectedDate)
+                            isSelected: cal.isDate(date, inSameDayAs: selectedDate),
+                            hasEvent: eventDates.contains(dateKey(date)),
+                            hasReminder: reminderDates.contains(dateKey(date))
                         ) {
                             selectedDate = date
                         }
@@ -189,20 +232,36 @@ struct MiniDateCell: View {
     let day: Int
     let isToday: Bool
     let isSelected: Bool
+    var hasEvent: Bool = false
+    var hasReminder: Bool = false
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            Text("\(day)")
-                .font(.system(size: 10.5, weight: isToday ? .semibold : .regular))
-                .foregroundStyle(isToday || isSelected ? .white : .white.opacity(0.5))
-                .frame(maxWidth: .infinity)
-                .frame(height: 19)
-                .background(
-                    isToday     ? Color.accentColor :
-                    isSelected  ? Color.white.opacity(0.18) : Color.clear
-                )
-                .clipShape(RoundedRectangle(cornerRadius: 4))
+            ZStack(alignment: .bottom) {
+                Text("\(day)")
+                    .font(.system(size: 10.5, weight: isToday ? .semibold : .regular))
+                    .foregroundStyle(isToday || isSelected ? .white : .white.opacity(0.5))
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 19)
+                    .background(
+                        isToday     ? Color.accentColor :
+                        isSelected  ? Color.white.opacity(0.18) : Color.clear
+                    )
+                    .clipShape(RoundedRectangle(cornerRadius: 4))
+
+                if hasEvent {
+                    Circle()
+                        .fill(Color.white.opacity(0.6))
+                        .frame(width: 3, height: 3)
+                        .offset(y: -1.5)
+                } else if hasReminder {
+                    Circle()
+                        .fill(Color.orange.opacity(0.7))
+                        .frame(width: 3, height: 3)
+                        .offset(y: -1.5)
+                }
+            }
         }
         .buttonStyle(.plain)
     }
@@ -213,7 +272,10 @@ struct MiniDateCell: View {
 struct CalendarEventPane: View {
     let date: Date
     let events: [EKEvent]
+    let reminders: [EKReminder]
     let version: Int
+    var onEditEvent: ((EKEvent) -> Void)? = nil
+    var onDeleteEvent: ((EKEvent) -> Void)? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -224,12 +286,11 @@ struct CalendarEventPane: View {
                     .padding(.leading, 12)
                     .padding(.top, 8)
                     .padding(.bottom, 5)
-                Spacer()
             }
 
             Divider().opacity(0.08)
 
-            if events.isEmpty {
+            if events.isEmpty && reminders.isEmpty {
                 VStack(spacing: 5) {
                     Image(systemName: "calendar.badge.checkmark")
                         .font(.system(size: 16))
@@ -243,10 +304,38 @@ struct CalendarEventPane: View {
                 ScrollViewReader { proxy in
                     ScrollView(.vertical, showsIndicators: false) {
                         VStack(spacing: 0) {
-                            ForEach(events, id: \.eventIdentifier) { event in
-                                CalendarEventRow(event: event).id(event.eventIdentifier)
-                                if event.eventIdentifier != events.last?.eventIdentifier {
-                                    Divider().opacity(0.08).padding(.leading, 11)
+                            if !reminders.isEmpty {
+                                VStack(spacing: 0) {
+                                    HStack {
+                                        Text(L10n.app("calendar.reminders", fallback: "Reminders"))
+                                            .font(.system(size: 8.5, weight: .semibold))
+                                            .foregroundStyle(.orange.opacity(0.6))
+                                            .padding(.leading, 4)
+                                            .padding(.top, 4)
+                                            .padding(.bottom, 2)
+                                        Spacer()
+                                    }
+                                    ForEach(reminders, id: \.self) { reminder in
+                                        CalendarReminderRow(reminder: reminder)
+                                        if reminder != reminders.last {
+                                            Divider().opacity(0.08).padding(.leading, 11)
+                                        }
+                                    }
+                                }
+                            }
+                            if !events.isEmpty {
+                                if !reminders.isEmpty {
+                                    Divider().opacity(0.12).padding(.vertical, 2)
+                                }
+                                ForEach(events, id: \.eventIdentifier) { event in
+                                    CalendarEventRow(
+                                        event: event,
+                                        onEdit: { onEditEvent?(event) },
+                                        onDelete: { onDeleteEvent?(event) }
+                                    ).id(event.eventIdentifier)
+                                    if event.eventIdentifier != events.last?.eventIdentifier {
+                                        Divider().opacity(0.08).padding(.leading, 11)
+                                    }
                                 }
                             }
                         }
@@ -288,8 +377,57 @@ struct CalendarEventPane: View {
 
 struct CalendarEventRow: View {
     let event: EKEvent
+    var onEdit: (() -> Void)? = nil
+    var onDelete: (() -> Void)? = nil
 
     var body: some View {
+        Group {
+            if event.isAllDay {
+                allDayBanner
+            } else {
+                timedEventRow
+            }
+        }
+        .onTapGesture(count: 2) { onEdit?() }
+        .contextMenu {
+            Button(L10n.app("calendar.edit", fallback: "Edit"), action: { onEdit?() })
+            Divider()
+            Button(L10n.app("calendar.delete", fallback: "Delete"), role: .destructive, action: { onDelete?() })
+        }
+    }
+
+    private var allDayBanner: some View {
+        HStack(spacing: 6) {
+            RoundedRectangle(cornerRadius: 1.5)
+                .fill(Color(cgColor: event.calendar.cgColor))
+                .frame(width: 3)
+
+            Circle()
+                .fill(Color(cgColor: event.calendar.cgColor))
+                .frame(width: 5, height: 5)
+
+            Text(event.title ?? "Untitled")
+                .font(.system(size: 10.5, weight: .semibold))
+                .foregroundStyle(Color(cgColor: event.calendar.cgColor).opacity(0.9))
+                .lineLimit(1)
+
+            Spacer(minLength: 0)
+
+            Text(L10n.app("calendar.allDay", fallback: "All Day"))
+                .font(.system(size: 8, weight: .medium))
+                .foregroundStyle(Color(cgColor: event.calendar.cgColor).opacity(0.55))
+                .padding(.horizontal, 5)
+                .padding(.vertical, 2)
+                .background(Color(cgColor: event.calendar.cgColor).opacity(0.12))
+                .clipShape(Capsule())
+        }
+        .padding(.vertical, 4)
+        .padding(.horizontal, 6)
+        .background(Color(cgColor: event.calendar.cgColor).opacity(0.04))
+        .clipShape(RoundedRectangle(cornerRadius: 6))
+    }
+
+    private var timedEventRow: some View {
         HStack(alignment: .top, spacing: 8) {
             RoundedRectangle(cornerRadius: 1.5)
                 .fill(Color(cgColor: event.calendar.cgColor))
@@ -312,18 +450,12 @@ struct CalendarEventRow: View {
             Spacer(minLength: 0)
 
             VStack(alignment: .trailing, spacing: 2) {
-                if event.isAllDay {
-                    Text(L10n.app("calendar.allDay", fallback: "All Day"))
-                        .font(.system(size: 9, weight: .medium))
-                        .foregroundStyle(.white.opacity(0.45))
-                } else {
-                    Text(fmt(event.startDate))
-                        .font(.system(size: 9, weight: .medium))
-                        .foregroundStyle(.white.opacity(0.65))
-                    Text(fmt(event.endDate))
-                        .font(.system(size: 9))
-                        .foregroundStyle(.white.opacity(0.3))
-                }
+                Text(fmt(event.startDate))
+                    .font(.system(size: 9, weight: .medium))
+                    .foregroundStyle(.white.opacity(0.65))
+                Text(fmt(event.endDate))
+                    .font(.system(size: 9))
+                    .foregroundStyle(.white.opacity(0.3))
             }
         }
         .padding(.vertical, 5)
@@ -344,13 +476,67 @@ struct CalendarEventRow: View {
     }
 }
 
+// MARK: - Calendar Reminder Row
+
+struct CalendarReminderRow: View {
+    let reminder: EKReminder
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: reminder.isCompleted ? "checkmark.circle.fill" : "circle")
+                .font(.system(size: 10))
+                .foregroundStyle(reminder.isCompleted ? .green.opacity(0.7) : .orange.opacity(0.5))
+
+            Text(reminder.title ?? "Untitled")
+                .font(.system(size: 10.5, weight: .regular))
+                .foregroundStyle(reminder.isCompleted ? .white.opacity(0.35) : .white)
+                .strikethrough(reminder.isCompleted)
+                .lineLimit(1)
+
+            Spacer(minLength: 0)
+
+            if let dueDate = reminder.dueDateComponents?.date {
+                Text(fmtReminder(dueDate))
+                    .font(.system(size: 8.5))
+                    .foregroundStyle(.white.opacity(0.3))
+            }
+        }
+        .padding(.vertical, 4)
+        .padding(.horizontal, 6)
+    }
+
+    private func fmtReminder(_ date: Date) -> String {
+        let f = DateFormatter()
+        f.timeStyle = .short
+        f.dateStyle = .none
+        return f.string(from: date)
+    }
+}
+
 // MARK: - CalendarStore
 
 @MainActor
 final class CalendarStore: ObservableObject {
     @Published var events: [EKEvent] = []
+    @Published var reminders: [EKReminder] = []
     @Published var version: Int = 0
     @Published var authStatus: EKAuthorizationStatus = EKEventStore.authorizationStatus(for: .event)
+    @Published var reminderAuthStatus: EKAuthorizationStatus = EKEventStore.authorizationStatus(for: .reminder)
+
+    var eventDates: Set<String> {
+        Set(events.map { dateKey($0.startDate) })
+    }
+
+    var reminderDates: Set<String> {
+        Set(reminders.compactMap { r in
+            guard let d = r.dueDateComponents?.date else { return nil }
+            return dateKey(d)
+        })
+    }
+
+    var calendars: [EKCalendar] {
+        ekStore.calendars(for: .event)
+    }
 
     private let ekStore = EKEventStore.app
     private var activeObserver: NSObjectProtocol?
@@ -363,8 +549,13 @@ final class CalendarStore: ObservableObject {
             queue: .main
         ) { [weak self] _ in
             guard let self else { return }
-            Task { @MainActor in self.refreshStatus() }
+            Task { @MainActor in self.refresh() }
         }
+    }
+
+    private func dateKey(_ date: Date) -> String {
+        let c = Calendar.current
+        return "\(c.component(.year, from: date))-\(c.component(.month, from: date))-\(c.component(.day, from: date))"
     }
 
     func load(for date: Date) {
@@ -375,6 +566,13 @@ final class CalendarStore: ObservableObject {
         fetch(for: date)
     }
 
+    func loadReminders() {
+        let status = EKEventStore.authorizationStatus(for: .reminder)
+        reminderAuthStatus = status
+        guard status == .fullAccess else { return }
+        fetchReminders()
+    }
+
     func requestAccess() {
         Task {
             do {
@@ -382,6 +580,7 @@ final class CalendarStore: ObservableObject {
                 if granted {
                     authStatus = .fullAccess
                     fetch(for: lastLoadedDate ?? Date())
+                    loadReminders()
                 } else {
                     authStatus = .denied
                 }
@@ -397,12 +596,37 @@ final class CalendarStore: ObservableObject {
         )
     }
 
-    private func refreshStatus() {
+    @discardableResult
+    func saveEvent(_ event: EKEvent) -> Bool {
+        do {
+            try ekStore.save(event, span: .thisEvent, commit: true)
+            if let date = lastLoadedDate { fetch(for: date) }
+            return true
+        } catch {
+            return false
+        }
+    }
+
+    @discardableResult
+    func removeEvent(_ event: EKEvent) -> Bool {
+        do {
+            try ekStore.remove(event, span: .thisEvent, commit: true)
+            if let date = lastLoadedDate { fetch(for: date) }
+            return true
+        } catch {
+            return false
+        }
+    }
+
+    private func refresh() {
         let status = EKEventStore.authorizationStatus(for: .event)
         authStatus = status
         if isAuthorized(status), let date = lastLoadedDate {
             fetch(for: date)
         }
+        let reminderStatus = EKEventStore.authorizationStatus(for: .reminder)
+        reminderAuthStatus = reminderStatus
+        if reminderStatus == .fullAccess { fetchReminders() }
     }
 
     private func isAuthorized(_ status: EKAuthorizationStatus) -> Bool {
@@ -416,5 +640,27 @@ final class CalendarStore: ObservableObject {
         let pred  = ekStore.predicateForEvents(withStart: start, end: end, calendars: nil)
         events  = ekStore.events(matching: pred).sorted { $0.startDate < $1.startDate }
         version += 1
+    }
+
+    private func fetchReminders() {
+        let predicate = ekStore.predicateForIncompleteReminders(
+            withDueDateStarting: nil,
+            ending: nil,
+            calendars: nil
+        )
+        ekStore.fetchReminders(matching: predicate) { [weak self] fetched in
+            guard let self, let fetched else { return }
+            let now = Date()
+            let upcoming = fetched.filter { r in
+                guard let d = r.dueDateComponents?.date else { return false }
+                return d > now.addingTimeInterval(-86400) && d < now.addingTimeInterval(86400 * 14)
+            }
+            Task { @MainActor in
+                self.reminders = upcoming.sorted { a, b in
+                    (a.dueDateComponents?.date ?? .distantFuture) < (b.dueDateComponents?.date ?? .distantFuture)
+                }
+                self.version += 1
+            }
+        }
     }
 }
