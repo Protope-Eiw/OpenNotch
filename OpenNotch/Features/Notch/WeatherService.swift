@@ -6,10 +6,12 @@ final class WeatherService: NSObject, ObservableObject, CLLocationManagerDelegat
     @Published var temperature: Double? = nil
     @Published var symbolName: String = "cloud"
     @Published var conditionText: String = ""
+    @Published var fetchFailed: Bool = false
 
     private let locationManager = CLLocationManager()
     private var lastFetch: Date = .distantPast
     private let cacheTTL: TimeInterval = 1800 // 30 min
+    private var fetchTimeoutTask: Task<Void, Never>?
 
     override init() {
         super.init()
@@ -18,16 +20,27 @@ final class WeatherService: NSObject, ObservableObject, CLLocationManagerDelegat
     }
 
     func requestAndFetch() {
+        fetchFailed = false
         let status = locationManager.authorizationStatus
         switch status {
         case .notDetermined:
             locationManager.requestWhenInUseAuthorization()
         case .denied, .restricted:
-            break
+            fetchFailed = true
         default:
             if Date().timeIntervalSince(lastFetch) > cacheTTL {
+                startFetchTimeout()
                 locationManager.requestLocation()
             }
+        }
+    }
+
+    private func startFetchTimeout() {
+        fetchTimeoutTask?.cancel()
+        fetchTimeoutTask = Task { @MainActor in
+            try? await Task.sleep(for: .seconds(10))
+            guard !Task.isCancelled else { return }
+            fetchFailed = true
         }
     }
 
@@ -35,41 +48,56 @@ final class WeatherService: NSObject, ObservableObject, CLLocationManagerDelegat
 
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         let status = manager.authorizationStatus
-        guard status != .notDetermined, status != .denied, status != .restricted else { return }
-        manager.requestLocation()
+        guard status != .notDetermined else { return }
+        if status == .denied || status == .restricted {
+            fetchFailed = true
+        } else {
+            fetchFailed = false
+            manager.requestLocation()
+        }
     }
 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let loc = locations.first else { return }
         lastFetch = Date()
+        fetchTimeoutTask?.cancel()
         Task { await fetch(lat: loc.coordinate.latitude, lon: loc.coordinate.longitude) }
     }
 
-    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {}
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        fetchFailed = true
+    }
 
     // MARK: Fetch
 
     @MainActor
     private func fetch(lat: Double, lon: Double) async {
         let urlStr = "https://api.open-meteo.com/v1/forecast?latitude=\(lat)&longitude=\(lon)&current=temperature_2m,weather_code"
-        guard let url = URL(string: urlStr),
-              let (data, _) = try? await URLSession.shared.data(from: url) else { return }
+        guard let url = URL(string: urlStr) else { fetchFailed = true; return }
 
-        struct Response: Codable {
-            struct Current: Codable {
-                let temperature2m: Double
-                let weatherCode: Int
-                enum CodingKeys: String, CodingKey {
-                    case temperature2m = "temperature_2m"
-                    case weatherCode = "weather_code"
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            struct Response: Codable {
+                struct Current: Codable {
+                    let temperature2m: Double
+                    let weatherCode: Int
+                    enum CodingKeys: String, CodingKey {
+                        case temperature2m = "temperature_2m"
+                        case weatherCode = "weather_code"
+                    }
                 }
+                let current: Current
             }
-            let current: Current
+            guard let resp = try? JSONDecoder().decode(Response.self, from: data) else {
+                fetchFailed = true
+                return
+            }
+            fetchFailed = false
+            temperature = resp.current.temperature2m
+            (symbolName, conditionText) = info(for: resp.current.weatherCode)
+        } catch {
+            fetchFailed = true
         }
-
-        guard let resp = try? JSONDecoder().decode(Response.self, from: data) else { return }
-        temperature = resp.current.temperature2m
-        (symbolName, conditionText) = info(for: resp.current.weatherCode)
     }
 
     private func info(for code: Int) -> (String, String) {

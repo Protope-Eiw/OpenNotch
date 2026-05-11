@@ -66,11 +66,8 @@ struct OnboardingNotchView: View {
         case .second:
             HStack {
                 Button(action: {
-                    guard let url = URL(string: "x-apple.systempreferences:com.apple.preference.security") else {
-                        return
-                    }
-                    openURL(url)
-                    
+                    UserDefaults.standard.set("permissions", forKey: "settings.root.selection")
+                    SettingsWindowCoordinator.activate()
                 }) {
                     Text(verbatim: "Open Settings")
                         .fontWeight(.medium)

@@ -149,6 +149,12 @@ struct OverviewView: View {
                             .font(.system(size: 10, weight: .medium))
                     }
                     .foregroundStyle(Color.orange.opacity(0.8))
+                } else if weatherService.fetchFailed {
+                    HStack(spacing: 3) {
+                        Image(systemName: "location.slash").font(.system(size: 9))
+                        Text(L10n.app("weather.unavailable", fallback: "Weather unavailable")).font(.system(size: 9))
+                    }
+                    .foregroundStyle(.white.opacity(0.2))
                 } else {
                     HStack(spacing: 3) {
                         Image(systemName: "location.slash").font(.system(size: 9))
@@ -219,11 +225,6 @@ struct OverviewView: View {
                 Text(pomodoroViewModel.timeString)
                     .font(.system(size: 20, weight: .bold, design: .monospaced))
                     .foregroundStyle(.white)
-
-                Text(isIdle ? "\(workMinutes)\(L10n.app("pomodoro.minutes.suffix", fallback: "m"))"
-                     : pomodoroViewModel.phase == .work ? L10n.app("pomodoro.focusing", fallback: "Focusing") : L10n.app("pomodoro.resting", fallback: "Resting"))
-                    .font(.system(size: 9))
-                    .foregroundStyle(isIdle ? .white.opacity(0.3) : accentColor.opacity(0.8))
 
                 HStack(spacing: 10) {
                     Button { pomodoroViewModel.toggleRunning() } label: {

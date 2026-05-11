@@ -74,13 +74,25 @@ final class SettingsPermissionController: NSObject, ObservableObject, CBCentralM
         notificationCenter.publisher(for: NSApplication.didBecomeActiveNotification)
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
+                Task { @MainActor in
+                    try? await Task.sleep(for: .milliseconds(300))
+                    self?.refresh()
+                }
+            }
+            .store(in: &cancellables)
+
+        notificationCenter.publisher(for: NSWindow.didBecomeKeyNotification)
+            .receive(on: RunLoop.main)
+            .sink { [weak self] notif in
+                guard let window = notif.object as? NSWindow,
+                      window.identifier == SettingsWindowCoordinator.identifier else { return }
                 self?.refresh()
             }
             .store(in: &cancellables)
     }
 
     func startPolling() {
-        guard !isPollingActive else { return }
+        stopPolling()
         isPollingActive = true
 
         Timer.publish(every: 2, on: .main, in: .common)
@@ -184,7 +196,7 @@ final class SettingsPermissionController: NSObject, ObservableObject, CBCentralM
                 assetImageName: nil,
                 systemImage: "calendar",
                 tintColor: .red,
-                isGranted: calendarAuthStatus == .fullAccess,
+                isGranted: calendarAuthStatus == .fullAccess || calendarAuthStatus == .writeOnly,
                 actionTitleKey: calendarAuthStatus == .fullAccess ? nil : (
                     calendarAuthStatus == .notDetermined ?
                     "settings.permissions.action.grantAccess" :
