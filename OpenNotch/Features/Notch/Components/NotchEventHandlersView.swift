@@ -18,13 +18,19 @@ struct NotchEventHandlersView: View {
      var body: some View {
          Color.clear
              .onReceive(powerViewModel.event) { event in
-                 notchEventCoordinator.handlePowerEvent(event)
+                 Task { @MainActor in
+                     notchEventCoordinator.handlePowerEvent(event)
+                 }
              }
              .onReceive(bluetoothViewModel.$event.compactMap { $0 }) { event in
-                notchEventCoordinator.handleBluetoothEvent(event)
-            }
+                 Task { @MainActor in
+                     notchEventCoordinator.handleBluetoothEvent(event)
+                 }
+             }
               .onReceive(networkViewModel.$networkEvent.compactMap { $0 }) { event in
-                 notchEventCoordinator.handleNetworkEvent(event)
+                 Task { @MainActor in
+                     notchEventCoordinator.handleNetworkEvent(event)
+                 }
              }
               .onReceive(downloadViewModel.$event.compactMap { $0 }) { event in
                  Task { @MainActor in
@@ -32,25 +38,39 @@ struct NotchEventHandlersView: View {
                  }
              }
               .onReceive(focusViewModel.$focusEvent.compactMap { $0 }) { event in
-                 notchEventCoordinator.handleFocusEvent(event)
+                 Task { @MainActor in
+                     notchEventCoordinator.handleFocusEvent(event)
+                 }
              }
               .onReceive(airDropViewModel.$event.compactMap { $0 }) { event in
-                 notchEventCoordinator.handleAirDropEvent(event)
+                 Task { @MainActor in
+                     notchEventCoordinator.handleAirDropEvent(event)
+                 }
              }
              .onReceive(settingsViewModel.notchSizeEvent) { event in
-                notchEventCoordinator.handleNotchWidthEvent(event)
-            }
+                 Task { @MainActor in
+                     notchEventCoordinator.handleNotchWidthEvent(event)
+                 }
+             }
              .onReceive(nowPlayingViewModel.$event.compactMap { $0 }) { event in
-                notchEventCoordinator.handleNowPlayingEvent(event)
-            }
+                 Task { @MainActor in
+                     notchEventCoordinator.handleNowPlayingEvent(event)
+                 }
+             }
              .onReceive(timerViewModel.$event.compactMap { $0 }) { event in
-                notchEventCoordinator.handleTimerEvent(event)
-            }
+                 Task { @MainActor in
+                     notchEventCoordinator.handleTimerEvent(event)
+                 }
+             }
              .onReceive(screenRecordingViewModel.$event.compactMap { $0 }) { event in
-                notchEventCoordinator.handleScreenRecordingEvent(event)
-            }
+                 Task { @MainActor in
+                     notchEventCoordinator.handleScreenRecordingEvent(event)
+                 }
+             }
              .onReceive(lockScreenManager.$event.compactMap { $0 }) { event in
-                notchEventCoordinator.handleLockScreenEvent(event)
-            }
+                 Task { @MainActor in
+                     notchEventCoordinator.handleLockScreenEvent(event)
+                 }
+             }
      }
 }

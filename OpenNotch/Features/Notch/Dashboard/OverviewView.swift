@@ -39,9 +39,15 @@ struct OverviewView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .onReceive(clock) { now = $0 }
+        .onReceive(clock) { date in
+            Task { @MainActor in
+                now = date
+            }
+        }
         .onReceive(NotificationCenter.default.publisher(for: .pinnedAppsDidChange)) { _ in
-            pinnedAppsStore.load()
+            Task { @MainActor in
+                pinnedAppsStore.load()
+            }
         }
         .onAppear {
             if showWeather { weatherService.requestAndFetch() }

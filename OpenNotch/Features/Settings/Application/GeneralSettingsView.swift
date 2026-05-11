@@ -24,7 +24,9 @@ struct GeneralSettingsView: View {
         }
         .onAppear(perform: refreshAvailableDisplays)
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didChangeScreenParametersNotification)) { _ in
-            refreshAvailableDisplays()
+            Task { @MainActor in
+                refreshAvailableDisplays()
+            }
         }
         .accessibilityIdentifier("settings.general.root")
     }

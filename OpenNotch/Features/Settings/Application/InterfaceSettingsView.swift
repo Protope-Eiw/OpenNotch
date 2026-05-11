@@ -331,7 +331,9 @@ private struct PinnedAppsSettingsRow: View {
         }
         .padding(.vertical, 8)
         .onReceive(NotificationCenter.default.publisher(for: .pinnedAppsDidChange)) { _ in
-            store.load()
+            Task { @MainActor in
+                store.load()
+            }
         }
         .sheet(isPresented: $showingPicker) {
             appPickerContent
