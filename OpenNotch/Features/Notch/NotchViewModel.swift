@@ -455,7 +455,6 @@ final class NotchViewModel: ObservableObject {
         
         engine.$notchModel
             .dropFirst()
-            .receive(on: DispatchQueue.main)
             .sink { [weak self] in
                 guard let self else { return }
                 if isDisplayTransitioning {
