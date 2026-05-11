@@ -329,6 +329,7 @@ final class DebugSettingsViewModel: ObservableObject {
 
     private func updateDownloadPreview() {
         if isDownloadPreviewEnabled {
+            settingsViewModel.mediaAndFiles.isDownloadsLiveActivityEnabled = true
             downloadViewModel.showDebugPreviewDownloadsIfNeeded()
             notchEventCoordinator.handleDownloadEvent(.started)
         } else {
