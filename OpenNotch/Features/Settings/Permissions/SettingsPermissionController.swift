@@ -46,6 +46,9 @@ final class SettingsPermissionController: NSObject, ObservableObject, CBCentralM
     private let ekStore = EKEventStore.app
     private var cancellables = Set<AnyCancellable>()
 
+    private var isPollingActive: Bool = false
+    private var aggressiveRefreshTask: Task<Void, Never>?
+
     private static let privacySettingsURL = URL(
         string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"
     )
@@ -68,23 +71,42 @@ final class SettingsPermissionController: NSObject, ObservableObject, CBCentralM
 
         super.init()
 
-        // Refresh when app regains focus
         notificationCenter.publisher(for: NSApplication.didBecomeActiveNotification)
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
                 self?.refresh()
             }
             .store(in: &cancellables)
+    }
 
-        // Poll every 2s while settings window is open — TCC state can lag behind
-        // NSApplication.didBecomeActiveNotification and the app may never lose focus
-        // if the user keeps both windows visible side by side.
+    func startPolling() {
+        guard !isPollingActive else { return }
+        isPollingActive = true
+
         Timer.publish(every: 2, on: .main, in: .common)
             .autoconnect()
             .sink { [weak self] _ in
-                self?.refresh()
+                guard let self, self.isPollingActive else { return }
+                self.refresh()
             }
             .store(in: &cancellables)
+    }
+
+    func stopPolling() {
+        isPollingActive = false
+        aggressiveRefreshTask?.cancel()
+        aggressiveRefreshTask = nil
+    }
+
+    private func startAggressiveRefresh() {
+        aggressiveRefreshTask?.cancel()
+        aggressiveRefreshTask = Task { @MainActor in
+            for _ in 0..<20 {
+                try? await Task.sleep(for: .milliseconds(500))
+                guard !Task.isCancelled else { return }
+                refresh()
+            }
+        }
     }
 
     func refresh() {
@@ -225,6 +247,7 @@ final class SettingsPermissionController: NSObject, ObservableObject, CBCentralM
             try? await Task.sleep(for: .milliseconds(500))
             refresh()
         }
+        startAggressiveRefresh()
     }
 
     private var bluetoothActionTitleKey: String? {

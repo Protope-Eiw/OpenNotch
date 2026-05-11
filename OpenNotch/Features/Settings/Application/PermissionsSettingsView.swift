@@ -14,6 +14,10 @@ struct PermissionsSettingsView: View {
         }
         .onAppear {
             permissionController.refresh()
+            permissionController.startPolling()
+        }
+        .onDisappear {
+            permissionController.stopPolling()
         }
     }
 

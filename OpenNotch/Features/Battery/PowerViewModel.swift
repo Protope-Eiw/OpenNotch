@@ -3,7 +3,8 @@ import Combine
 
 @MainActor
 final class PowerViewModel: ObservableObject {
-    @Published var event: PowerEvent?
+    var event: some Publisher<PowerEvent, Never> { eventSubject }
+    private let eventSubject = PassthroughSubject<PowerEvent, Never>()
 
     private let powerStateProvider: any PowerStateProviding
     private let batterySettings: BatterySettingsStore
@@ -12,6 +13,9 @@ final class PowerViewModel: ObservableObject {
     private var lowPowerThreshold: Int
     private var fullPowerThreshold: Int
     private var cancellables = Set<AnyCancellable>()
+
+    private var lastSentEvent: PowerEvent?
+    private var eventDebounceTask: Task<Void, Never>?
 
     init(
         powerService: any PowerStateProviding,
@@ -58,19 +62,34 @@ final class PowerViewModel: ObservableObject {
     }
 
     private func handlePowerStateChange(onACPower: Bool, batteryLevel: Int) {
+        var eventToSend: PowerEvent?
+
         if !previousOnACPower && onACPower {
-            event = .charger
+            eventToSend = .charger
         }
 
         if previousBatteryLevel > lowPowerThreshold && batteryLevel <= lowPowerThreshold {
-            event = .lowPower
+            eventToSend = .lowPower
         }
 
         if previousBatteryLevel < fullPowerThreshold && batteryLevel >= fullPowerThreshold {
-            event = .fullPower
+            eventToSend = .fullPower
         }
 
         previousOnACPower = onACPower
         previousBatteryLevel = batteryLevel
+
+        guard let eventToSend else { return }
+
+        eventDebounceTask?.cancel()
+        eventDebounceTask = Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(100))
+            guard !Task.isCancelled else { return }
+
+            if lastSentEvent != eventToSend {
+                eventSubject.send(eventToSend)
+                lastSentEvent = eventToSend
+            }
+        }
     }
 }

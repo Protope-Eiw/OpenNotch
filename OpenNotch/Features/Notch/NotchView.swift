@@ -716,12 +716,12 @@ private struct NotchEventHandlersView: View {
     let screenRecordingViewModel: ScreenRecordingViewModel
     let lockScreenManager: LockScreenManager
     
-    var body: some View {
-        Color.clear
-            .onReceive(powerViewModel.$event.compactMap { $0 }) { event in
-                notchEventCoordinator.handlePowerEvent(event)
-            }
-            .onReceive(bluetoothViewModel.$event.compactMap { $0 }) { event in
+     var body: some View {
+         Color.clear
+             .onReceive(powerViewModel.event) { event in
+                 notchEventCoordinator.handlePowerEvent(event)
+             }
+             .onReceive(bluetoothViewModel.$event.compactMap { $0 }) { event in
                 notchEventCoordinator.handleBluetoothEvent(event)
             }
             .onReceive(networkViewModel.$networkEvent.compactMap { $0 }) { event in
