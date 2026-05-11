@@ -38,18 +38,23 @@ struct CalendarTabView: View {
                     reminderDates: store.reminderDates
                 )
                 .frame(width: 162)
+                .padding(.leading, 12)
+
                 Rectangle()
                     .fill(Color.white.opacity(0.07))
                     .frame(width: 1)
                     .padding(.vertical, 10)
-                CalendarEventPane(
-                    date: selectedDate,
-                    events: store.events,
-                    reminders: store.reminders,
-                    version: store.version,
-                    onEditEvent: { editingEvent = $0; showEditSheet = true },
-                    onDeleteEvent: { editingEvent = $0; showDeleteConfirm = true }
-                )
+                    .padding(.leading, 12)
+
+                VStack(spacing: 6) {
+                    Image(systemName: "wrench.and.screwdriver.fill")
+                        .font(.system(size: 18))
+                        .foregroundStyle(.white.opacity(0.2))
+                    Text(L10n.app("calendar.comingSoon", fallback: "Under development, stay tuned"))
+                        .font(.system(size: 11))
+                        .foregroundStyle(.white.opacity(0.3))
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             .onAppear {
                 store.load(for: selectedDate)
