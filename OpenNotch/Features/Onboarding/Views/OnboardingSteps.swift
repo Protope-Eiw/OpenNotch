@@ -23,7 +23,6 @@ enum OnboardingSteps: String, Equatable, CaseIterable {
         return allCases.contains(where: { $0.liveActivityID == id })
     }
     
-    #if DEBUG
     static let debugStackID = NotchContentRegistry.Onboarding.debugStackID
     
     var debugLiveActivityID: String {
@@ -34,7 +33,6 @@ enum OnboardingSteps: String, Equatable, CaseIterable {
         guard let id else { return false }
         return allCases.contains(where: { $0.debugLiveActivityID == id })
     }
-    #endif
     
     var offsetXTransition: CGFloat {
         switch self {
