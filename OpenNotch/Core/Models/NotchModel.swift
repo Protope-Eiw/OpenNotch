@@ -73,7 +73,7 @@ struct NotchModel: Equatable {
             return liveActivityContent.cornerRadius(baseRadius: baseRadius)
         }
 
-        return (top: baseRadius - 4, bottom: baseRadius)
+        return (top: max(0, baseRadius - 4), bottom: baseRadius)
     }
     
     var strokeColor: Color { content?.strokeColor ?? .clear }

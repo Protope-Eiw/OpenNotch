@@ -34,7 +34,7 @@ extension NotchContentProtocol {
     var windowLink: (@MainActor () -> Void)? { nil }
     
     func cornerRadius(baseRadius: CGFloat) -> (top: CGFloat, bottom: CGFloat) {
-        return (top: baseRadius - 4, bottom: baseRadius)
+        return (top: max(0, baseRadius - 4), bottom: baseRadius)
     }
 
     func expandedSize(baseWidth: CGFloat, baseHeight: CGFloat) -> CGSize {

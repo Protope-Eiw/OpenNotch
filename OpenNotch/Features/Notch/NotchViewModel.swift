@@ -455,6 +455,7 @@ final class NotchViewModel: ObservableObject {
         
         engine.$notchModel
             .dropFirst()
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] in
                 guard let self else { return }
                 if isDisplayTransitioning {
@@ -469,12 +470,14 @@ final class NotchViewModel: ObservableObject {
             .store(in: &cancellables)
         
         engine.$showNotch
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] in
                 self?.showNotch = $0
             }
             .store(in: &cancellables)
         
         engine.$cachedStrokeColor
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] in
                 self?.cachedStrokeColor = $0
             }

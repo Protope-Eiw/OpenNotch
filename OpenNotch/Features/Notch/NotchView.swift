@@ -155,7 +155,7 @@ private extension NotchView {
     var baseHeight: CGFloat { notchViewModel.notchModel.baseHeight > 0 ? notchViewModel.notchModel.baseHeight : 37  }
 
     // Sizing — update leftIntrinsicWidth or rightIntrinsicWidth to add more content
-    var ringSize:       CGFloat { baseHeight - 6 }
+    var ringSize:       CGFloat { max(0, baseHeight - 6) }
     var outerPad:       CGFloat { 10 }
     var notchClearance: CGFloat { ceil(notchViewModel.interactiveCornerRadius.top) + 3 }
     var leftIntrinsicWidth:  CGFloat { outerPad + 65 }   // two-line speed text ~65pt wide
