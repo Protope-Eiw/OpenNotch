@@ -14,7 +14,6 @@ final class PowerViewModel: ObservableObject {
     private var fullPowerThreshold: Int
     private var cancellables = Set<AnyCancellable>()
 
-    private var lastSentEvent: PowerEvent?
     private var eventDebounceTask: Task<Void, Never>?
 
     init(
@@ -85,11 +84,7 @@ final class PowerViewModel: ObservableObject {
         eventDebounceTask = Task { @MainActor in
             try? await Task.sleep(for: .milliseconds(100))
             guard !Task.isCancelled else { return }
-
-            if lastSentEvent != eventToSend {
-                eventSubject.send(eventToSend)
-                lastSentEvent = eventToSend
-            }
+            eventSubject.send(eventToSend)
         }
     }
 }

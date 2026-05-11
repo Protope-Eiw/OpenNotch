@@ -82,17 +82,20 @@ final class HUDSettingsStore: SettingsStoreBase {
     }
 
     override init(defaults: UserDefaults) {
-        self.isBrightnessHUDEnabled = defaults.bool(forKey: GeneralSettingsStorage.Keys.brightnessHUDEnabled)
+        self.isBrightnessHUDEnabled = defaults.object(forKey: GeneralSettingsStorage.Keys.brightnessHUDEnabled) as? Bool ??
+        (GeneralSettingsStorage.defaultValues[GeneralSettingsStorage.Keys.brightnessHUDEnabled] as? Bool ?? true)
         self.brightnessHUDDuration = Self.clampTemporaryActivityDuration(
             defaults.object(forKey: GeneralSettingsStorage.Keys.brightnessHUDDuration) as? Int ??
             Self.defaultTemporaryActivityDuration(for: GeneralSettingsStorage.Keys.brightnessHUDDuration)
         )
-        self.isKeyboardHUDEnabled = defaults.bool(forKey: GeneralSettingsStorage.Keys.keyboardHUDEnabled)
+        self.isKeyboardHUDEnabled = defaults.object(forKey: GeneralSettingsStorage.Keys.keyboardHUDEnabled) as? Bool ??
+        (GeneralSettingsStorage.defaultValues[GeneralSettingsStorage.Keys.keyboardHUDEnabled] as? Bool ?? true)
         self.keyboardHUDDuration = Self.clampTemporaryActivityDuration(
             defaults.object(forKey: GeneralSettingsStorage.Keys.keyboardHUDDuration) as? Int ??
             Self.defaultTemporaryActivityDuration(for: GeneralSettingsStorage.Keys.keyboardHUDDuration)
         )
-        self.isVolumeHUDEnabled = defaults.bool(forKey: GeneralSettingsStorage.Keys.volumeHUDEnabled)
+        self.isVolumeHUDEnabled = defaults.object(forKey: GeneralSettingsStorage.Keys.volumeHUDEnabled) as? Bool ??
+        (GeneralSettingsStorage.defaultValues[GeneralSettingsStorage.Keys.volumeHUDEnabled] as? Bool ?? true)
         self.volumeHUDDuration = Self.clampTemporaryActivityDuration(
             defaults.object(forKey: GeneralSettingsStorage.Keys.volumeHUDDuration) as? Int ??
             Self.defaultTemporaryActivityDuration(for: GeneralSettingsStorage.Keys.volumeHUDDuration)
@@ -103,8 +106,10 @@ final class HUDSettingsStore: SettingsStoreBase {
         self.indicatorStyle = HudIndicatorStyle(
             rawValue: defaults.string(forKey: GeneralSettingsStorage.Keys.hudIndicatorStyle) ?? HudIndicatorStyle.bar.rawValue
         ) ?? .bar
-        self.isColoredLevelEnabled = defaults.bool(forKey: GeneralSettingsStorage.Keys.hudColoredLevelEnabled)
-        self.isColoredLevelStrokeEnabled = defaults.bool(forKey: GeneralSettingsStorage.Keys.hudColoredStrokeEnabled)
+        self.isColoredLevelEnabled = defaults.object(forKey: GeneralSettingsStorage.Keys.hudColoredLevelEnabled) as? Bool ??
+        (GeneralSettingsStorage.defaultValues[GeneralSettingsStorage.Keys.hudColoredLevelEnabled] as? Bool ?? true)
+        self.isColoredLevelStrokeEnabled = defaults.object(forKey: GeneralSettingsStorage.Keys.hudColoredStrokeEnabled) as? Bool ??
+        (GeneralSettingsStorage.defaultValues[GeneralSettingsStorage.Keys.hudColoredStrokeEnabled] as? Bool ?? false)
         super.init(defaults: defaults)
     }
 

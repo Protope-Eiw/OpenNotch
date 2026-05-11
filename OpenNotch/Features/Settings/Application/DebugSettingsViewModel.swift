@@ -106,54 +106,148 @@ final class DebugSettingsViewModel: ObservableObject {
 
     func triggerBluetoothPreview() {
         applyBluetoothPreviewState()
-        notchEventCoordinator.handleBluetoothEvent(.connected)
+        notchViewModel.send(
+            .showTemporaryNotification(
+                BluetoothConnectedNotchContent(
+                    bluetoothViewModel: bluetoothViewModel,
+                    settings: settingsViewModel.connectivity
+                ),
+                duration: 5
+            )
+        )
     }
 
     func triggerWifiPreview() {
         networkViewModel.wifiConnected = true
         networkViewModel.wifiName = "Debug Wi-Fi"
-        notchEventCoordinator.handleNetworkEvent(.wifiConnected)
+        notchViewModel.send(
+            .showTemporaryNotification(
+                WifiConnectedNotchContent(
+                    networkViewModel: networkViewModel
+                ),
+                duration: 3
+            )
+        )
     }
 
     func triggerNoInternetConnectionPreview() {
-        notchEventCoordinator.handleNetworkEvent(.noInternetConnection)
+        notchViewModel.send(
+            .showTemporaryNotification(
+                NoInternetConnectionContent(
+                    onDismiss: { [weak self] in
+                        self?.notchViewModel.hideTemporaryNotification()
+                    }
+                ),
+                duration: .infinity
+            )
+        )
     }
 
     func triggerVPNPreview() {
         applyVPNPreviewState()
-        notchEventCoordinator.handleNetworkEvent(.vpnConnected)
+        notchViewModel.send(
+            .showTemporaryNotification(
+                VpnConnectedNotchContent(
+                    networkViewModel: networkViewModel,
+                    settings: settingsViewModel.connectivity
+                ),
+                duration: 5
+            )
+        )
     }
 
     func triggerChargingPreview() {
         applyChargingPreviewState()
-        notchEventCoordinator.handlePowerEvent(.charger)
+        notchViewModel.send(
+            .showTemporaryNotification(
+                ChargerNotchContent(
+                    powerService: powerService,
+                    settingsViewModel: settingsViewModel
+                ),
+                duration: 4
+            )
+        )
     }
 
     func triggerLowPowerPreview() {
         applyLowPowerPreviewState()
-        notchEventCoordinator.handlePowerEvent(.lowPower)
+        notchViewModel.send(
+            .showTemporaryNotification(
+                LowPowerNotchContent(
+                    powerService: powerService,
+                    settingsViewModel: settingsViewModel
+                ),
+                duration: 4
+            )
+        )
     }
 
     func triggerFullBatteryPreview() {
         applyFullBatteryPreviewState()
-        notchEventCoordinator.handlePowerEvent(.fullPower)
+        notchViewModel.send(
+            .showTemporaryNotification(
+                FullPowerNotchContent(
+                    powerService: powerService,
+                    settingsViewModel: settingsViewModel
+                ),
+                duration: 4
+            )
+        )
     }
 
     func triggerFocusOffPreview() {
         isFocusLivePreviewEnabled = false
-        notchEventCoordinator.handleFocusEvent(.FocusOff)
+        notchViewModel.send(
+            .showTemporaryNotification(
+                FocusOffNotchContent(settingsViewModel: settingsViewModel),
+                duration: 3
+            )
+        )
     }
 
     func triggerBrightnessHUDPreview() {
-        notchEventCoordinator.handleHudEvent(.display(72))
+        notchViewModel.send(
+            .showTemporaryNotification(
+                HudNotchContent(
+                    kind: .brightness,
+                    level: 72,
+                    style: settingsViewModel.hudStyle,
+                    indicatorStyle: settingsViewModel.hudIndicatorStyle,
+                    usesColoredLevelTint: settingsViewModel.isHUDColoredLevelEnabled
+                ),
+                duration: settingsViewModel.temporaryActivityDuration(for: .brightness)
+            )
+        )
     }
 
     func triggerKeyboardHUDPreview() {
-        notchEventCoordinator.handleHudEvent(.keyboard(64))
+        notchViewModel.send(
+            .showTemporaryNotification(
+                HudNotchContent(
+                    kind: .keyboard,
+                    level: 64,
+                    style: settingsViewModel.hudStyle,
+                    indicatorStyle: settingsViewModel.hudIndicatorStyle,
+                    usesColoredLevelTint: settingsViewModel.isHUDColoredLevelEnabled
+                ),
+                duration: settingsViewModel.temporaryActivityDuration(for: .keyboard)
+            )
+        )
     }
 
     func triggerVolumeHUDPreview() {
-        notchEventCoordinator.handleHudEvent(.volume(42))
+        notchViewModel.send(
+            .showTemporaryNotification(
+                HudNotchContent(
+                    kind: .volume,
+                    level: 42,
+                    style: settingsViewModel.hudStyle,
+                    indicatorStyle: settingsViewModel.hudIndicatorStyle,
+                    usesColoredLevelTint: settingsViewModel.isHUDColoredLevelEnabled
+                ),
+                duration: settingsViewModel.temporaryActivityDuration(for: .volume)
+            )
+        )
     }
 
     func triggerNotchWidthPreview() {
