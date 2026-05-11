@@ -268,7 +268,7 @@ slide 模式下左右切换 tab 时，某些组件会从 dashboard 区域的左/
 4. 移除 Layer 1 独立 clipShape，移除 Layer 3 的 RoundedRectangle
 
 ### Dashboard 打开速度差异
-点击 notch 区域打开 dashboard 非常丝滑快捷，而点击两侧 widget 区域打开则明显变慢。需要排查 gesture 响应链路中的延迟原因。
+✅ 已修复：根因为点击两侧 widget 时触发的 `contextMenu` 和 `.onTapGesture` 响应链路相比 notch 区域多了一层。当前已优化。
 
 ### 权限页面状态实时更新
 设置 → 权限 页面中，各权限的状态（Accessibility、Bluetooth、Screen Recording、Calendar）不是实时刷新的。当前依靠 `NSApplication.didBecomeActiveNotification` 和 2 秒轮询，但用户从系统设置授权后切回来时可能存在 TCC 延迟，且 2 秒轮询间隔内 UI 不会更新。需要更可靠的刷新机制。
