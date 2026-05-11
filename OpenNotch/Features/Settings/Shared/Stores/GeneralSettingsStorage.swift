@@ -134,7 +134,7 @@ enum GeneralSettingsStorage {
         Keys.nowPlayingArtworkStrokeEnabled: false,
         Keys.nowPlayingPauseHideTimerEnabled: true,
         Keys.nowPlayingPauseHideDelay: 5,
-        Keys.downloadsLiveActivityEnabled: true,
+        Keys.downloadsLiveActivityEnabled: false,
         Keys.downloadsDefaultStrokeEnabled: false,
         Keys.downloadsAppearanceStyle: DownloadAppearanceStyle.minimal.rawValue,
         Keys.downloadsProgressIndicatorStyle: DownloadProgressIndicatorStyle.percent.rawValue,

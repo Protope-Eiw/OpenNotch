@@ -23,18 +23,20 @@ struct NotchEventHandlersView: View {
              .onReceive(bluetoothViewModel.$event.compactMap { $0 }) { event in
                 notchEventCoordinator.handleBluetoothEvent(event)
             }
-             .onReceive(networkViewModel.$networkEvent.compactMap { $0 }) { event in
-                notchEventCoordinator.handleNetworkEvent(event)
-            }
-             .onReceive(downloadViewModel.$event.compactMap { $0 }) { event in
-                notchEventCoordinator.handleDownloadEvent(event)
-            }
-             .onReceive(focusViewModel.$focusEvent.compactMap { $0 }) { event in
-                notchEventCoordinator.handleFocusEvent(event)
-            }
-             .onReceive(airDropViewModel.$event.compactMap { $0 }) { event in
-                notchEventCoordinator.handleAirDropEvent(event)
-            }
+              .onReceive(networkViewModel.$networkEvent.compactMap { $0 }) { event in
+                 notchEventCoordinator.handleNetworkEvent(event)
+             }
+              .onReceive(downloadViewModel.$event.compactMap { $0 }) { event in
+                 Task { @MainActor in
+                     notchEventCoordinator.handleDownloadEvent(event)
+                 }
+             }
+              .onReceive(focusViewModel.$focusEvent.compactMap { $0 }) { event in
+                 notchEventCoordinator.handleFocusEvent(event)
+             }
+              .onReceive(airDropViewModel.$event.compactMap { $0 }) { event in
+                 notchEventCoordinator.handleAirDropEvent(event)
+             }
              .onReceive(settingsViewModel.notchSizeEvent) { event in
                 notchEventCoordinator.handleNotchWidthEvent(event)
             }
