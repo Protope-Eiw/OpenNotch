@@ -30,14 +30,8 @@ final class NotchEventCoordinator: ObservableObject {
     private var isOnboardingActive: Bool {
         OnboardingSteps.contains(id: notchViewModel.notchModel.liveActivityContent?.id) ||
         OnboardingSteps.contains(id: notchViewModel.notchModel.temporaryNotificationContent?.id) ||
-        {
-            #if DEBUG
-            OnboardingSteps.containsDebug(id: notchViewModel.notchModel.liveActivityContent?.id) ||
-            OnboardingSteps.containsDebug(id: notchViewModel.notchModel.temporaryNotificationContent?.id)
-            #else
-            false
-            #endif
-        }()
+        OnboardingSteps.containsDebug(id: notchViewModel.notchModel.liveActivityContent?.id) ||
+        OnboardingSteps.containsDebug(id: notchViewModel.notchModel.temporaryNotificationContent?.id)
     }
 
     private var isLockScreenTransitionActive: Bool {
@@ -147,11 +141,9 @@ final class NotchEventCoordinator: ObservableObject {
             notchViewModel.send(.hideLiveActivity(id: step.liveActivityID))
         }
         
-        #if DEBUG
         OnboardingSteps.allCases.forEach { step in
             notchViewModel.send(.hideLiveActivity(id: step.debugLiveActivityID))
         }
-        #endif
 
         if markAsSeen &&
             nowPlayingViewModel.hasActiveSession &&
@@ -175,7 +167,6 @@ final class NotchEventCoordinator: ObservableObject {
         )
     }
     
-    #if DEBUG
     func showDebugOnboardingPreview(step: OnboardingSteps = .first) {
         notchViewModel.send(
             .showLiveActivity(
@@ -186,7 +177,6 @@ final class NotchEventCoordinator: ObservableObject {
             )
         )
     }
-    #endif
     
     func handleNotchWidthEvent(_ event: NotchSizeEvent) {
         guard !isOnboardingActive else { return }
@@ -337,11 +327,18 @@ final class NotchEventCoordinator: ObservableObject {
     }
 
     private func observeSettingsChanges() {
+        observeConnectivitySettings()
+        observeMediaSettings()
+        observeScreenRecordingSettings()
+        observeLockScreenSettings()
+        observeNotchModelChanges()
+    }
+
+    private func observeConnectivitySettings() {
         settingsViewModel.connectivity.$isFocusLiveActivityEnabled
             .removeDuplicates()
             .sink { [weak self] isEnabled in
                 guard let self else { return }
-
                 if isEnabled == false {
                     self.notchViewModel.send(.hideLiveActivity(id: NotchContentRegistry.Focus.active.id))
                 }
@@ -352,7 +349,6 @@ final class NotchEventCoordinator: ObservableObject {
             .removeDuplicates()
             .sink { [weak self] isEnabled in
                 guard let self else { return }
-
                 if isEnabled {
                     if self.networkViewModel.hotspotActive {
                         self.connectivityHandler.handleNetwork(.hotspotActive)
@@ -369,16 +365,16 @@ final class NotchEventCoordinator: ObservableObject {
                 guard let self else { return }
                 guard self.settingsViewModel.connectivity.isHotspotLiveActivityEnabled else { return }
                 guard self.networkViewModel.hotspotActive else { return }
-
                 self.connectivityHandler.handleNetwork(.hotspotActive)
             }
             .store(in: &cancellables)
+    }
 
+    private func observeMediaSettings() {
         settingsViewModel.mediaAndFiles.$isNowPlayingLiveActivityEnabled
             .removeDuplicates()
             .sink { [weak self] isEnabled in
                 guard let self else { return }
-
                 if isEnabled {
                     if self.nowPlayingViewModel.hasActiveSession {
                         self.mediaHandler.handleNowPlaying(.started)
@@ -398,7 +394,6 @@ final class NotchEventCoordinator: ObservableObject {
             guard let self else { return }
             guard self.settingsViewModel.isLiveActivityEnabled(.nowPlaying) else { return }
             guard self.nowPlayingViewModel.hasActiveSession else { return }
-
             self.mediaHandler.syncNowPlayingPlaybackState()
         }
         .store(in: &cancellables)
@@ -407,7 +402,6 @@ final class NotchEventCoordinator: ObservableObject {
             .removeDuplicates()
             .sink { [weak self] isEnabled in
                 guard let self else { return }
-
                 if isEnabled {
                     if self.downloadViewModel.hasActiveDownloads {
                         self.mediaHandler.handleDownload(.started)
@@ -422,7 +416,6 @@ final class NotchEventCoordinator: ObservableObject {
             .removeDuplicates()
             .sink { [weak self] isEnabled in
                 guard let self else { return }
-
                 if isEnabled {
                     self.mediaHandler.refreshDragAndDropPresentation()
                     self.syncFileTrayLiveActivity()
@@ -447,13 +440,10 @@ final class NotchEventCoordinator: ObservableObject {
             .removeDuplicates()
             .sink { [weak self] isEnabled in
                 guard let self else { return }
-
                 if isEnabled {
                     self.syncFileTrayLiveActivity()
                 } else {
-                    self.notchViewModel.send(
-                        .hideLiveActivity(id: NotchContentRegistry.DragAndDrop.trayActive.id)
-                    )
+                    self.notchViewModel.send(.hideLiveActivity(id: NotchContentRegistry.DragAndDrop.trayActive.id))
                 }
             }
             .store(in: &cancellables)
@@ -469,7 +459,6 @@ final class NotchEventCoordinator: ObservableObject {
             .removeDuplicates()
             .sink { [weak self] isEnabled in
                 guard let self else { return }
-
                 if isEnabled {
                     if self.timerViewModel.snapshot != nil {
                         self.timerHandler.handleTimer(.started)
@@ -479,33 +468,25 @@ final class NotchEventCoordinator: ObservableObject {
                 }
             }
             .store(in: &cancellables)
+    }
 
+    private func observeScreenRecordingSettings() {
         settingsViewModel.screenRecording.$isScreenRecordingLiveActivityEnabled
             .removeDuplicates()
             .sink { [weak self] isEnabled in
                 guard let self else { return }
-
                 if isEnabled == false {
-                    self.notchViewModel.send(
-                        .hideLiveActivity(id: NotchContentRegistry.ScreenRecording.active.id)
-                    )
+                    self.notchViewModel.send(.hideLiveActivity(id: NotchContentRegistry.ScreenRecording.active.id))
                 }
             }
             .store(in: &cancellables)
+    }
 
-        notchViewModel.$notchModel
-            .map(\.isLiveActivityExpanded)
-            .removeDuplicates()
-            .sink { [weak self] isExpanded in
-                self?.mediaHandler.handleExpansionChange(isExpanded: isExpanded)
-            }
-            .store(in: &cancellables)
-
+    private func observeLockScreenSettings() {
         settingsViewModel.lockScreen.$isLockScreenLiveActivityEnabled
             .removeDuplicates()
             .sink { [weak self] isEnabled in
                 guard let self else { return }
-
                 if isEnabled {
                     if self.lockScreenManager.isLocked {
                         self.handleLockScreenEvent(.started)
@@ -520,10 +501,7 @@ final class NotchEventCoordinator: ObservableObject {
             .removeDuplicates()
             .sink { [weak self] style in
                 guard let self else { return }
-                guard self.notchViewModel.notchModel.liveActivityContent?.id == NotchContentRegistry.LockScreen.activity.id else {
-                    return
-                }
-
+                guard self.notchViewModel.notchModel.liveActivityContent?.id == NotchContentRegistry.LockScreen.activity.id else { return }
                 self.notchViewModel.send(
                     .showLiveActivity(
                         LockScreenNotchContent(
@@ -532,6 +510,16 @@ final class NotchEventCoordinator: ObservableObject {
                         )
                     )
                 )
+            }
+            .store(in: &cancellables)
+    }
+
+    private func observeNotchModelChanges() {
+        notchViewModel.$notchModel
+            .map(\.isLiveActivityExpanded)
+            .removeDuplicates()
+            .sink { [weak self] isExpanded in
+                self?.mediaHandler.handleExpansionChange(isExpanded: isExpanded)
             }
             .store(in: &cancellables)
     }

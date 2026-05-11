@@ -5,7 +5,6 @@
 //  Created by Евгений Петрукович on 3/21/26.
 //
 
-#if DEBUG
 import SwiftUI
 import Combine
 
@@ -719,4 +718,3 @@ final class DebugSettingsViewModel: ObservableObject {
         )
     }
 }
-#endif

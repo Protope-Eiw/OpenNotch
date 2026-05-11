@@ -1,4 +1,3 @@
-#if DEBUG
 import SwiftUI
 import Combine
 
@@ -459,4 +458,3 @@ struct DebugOnboardingPreviewNotchContent: NotchContentProtocol {
         )
     }
 }
-#endif

@@ -21,11 +21,9 @@ extension SettingsRootViewModel {
         case connectivity
         case system
         case permissions
-        case lockScreen
-        case donation
-        #if DEBUG
-        case debug
-        #endif
+         case lockScreen
+         case donation
+         case debug
 
         var id: String { rawValue }
 
@@ -213,7 +211,6 @@ private enum SettingsSectionCatalog {
                 resetGroup: nil
             )
 
-        #if DEBUG
         case .debug:
             return .init(
                 titleKey: "settings.section.debug.title",
@@ -226,7 +223,6 @@ private enum SettingsSectionCatalog {
                 tint: .red,
                 resetGroup: nil
             )
-        #endif
         }
     }
 }

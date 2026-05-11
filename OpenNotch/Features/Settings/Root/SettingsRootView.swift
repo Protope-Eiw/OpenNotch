@@ -261,10 +261,8 @@ struct SettingsRootView: View {
         case .donation:
             DonationView()
 
-        #if DEBUG
         case .debug:
             DebugSettingsView(viewModel: viewModel.debugViewModel)
-        #endif
         }
     }
 }

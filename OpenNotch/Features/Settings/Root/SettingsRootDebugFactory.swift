@@ -1,4 +1,3 @@
-#if DEBUG
 import Foundation
 
 private struct SettingsRootDebugDependencies {
@@ -115,4 +114,3 @@ extension SettingsRootViewModel {
         )
     }
 }
-#endif

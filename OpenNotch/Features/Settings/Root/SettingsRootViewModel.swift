@@ -2,9 +2,7 @@ import Foundation
 
 @MainActor
 final class SettingsRootViewModel {
-    #if DEBUG
     let debugViewModel: DebugSettingsViewModel
-    #endif
 
     private let settingsViewModel: SettingsViewModel
     private let defaults: UserDefaults
@@ -26,7 +24,6 @@ final class SettingsRootViewModel {
         self.settingsViewModel = settingsViewModel
         self.defaults = defaults
 
-        #if DEBUG
         self.debugViewModel = Self.makeDebugViewModel(
             settingsViewModel: settingsViewModel,
             notchViewModel: notchViewModel,
@@ -39,7 +36,6 @@ final class SettingsRootViewModel {
             timerViewModel: timerViewModel,
             lockScreenManager: lockScreenManager
         )
-        #endif
     }
 
     var sections: [Section] {

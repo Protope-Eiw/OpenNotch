@@ -10,7 +10,7 @@ struct OverviewView: View {
     @AppStorage(AppStorageKeys.Overview.showSystemInfo)   private var showSystemInfo = true
     @AppStorage(AppStorageKeys.Overview.showPomodoro)     private var showPomodoro   = true
     @AppStorage(AppStorageKeys.Overview.hideAppNames)     private var hideAppNames   = false
-    @AppStorage(AppStorageKeys.Overview.showWeather)      private var showWeather    = true
+    @AppStorage(AppStorageKeys.Overview.showWeather)      private var showWeather    = false
     @AppStorage(AppStorageKeys.Overview.pomodoroDuration) private var workMinutes    = 25
 
     @StateObject private var pinnedAppsStore = PinnedAppsStore()
@@ -151,13 +151,13 @@ struct OverviewView: View {
                     .foregroundStyle(Color.orange.opacity(0.8))
                 } else if weatherService.fetchFailed {
                     HStack(spacing: 3) {
-                        Image(systemName: "location.slash").font(.system(size: 9))
+                        Image(systemName: "wifi.slash").font(.system(size: 9))
                         Text(L10n.app("weather.unavailable", fallback: "Weather unavailable")).font(.system(size: 9))
                     }
                     .foregroundStyle(.white.opacity(0.2))
                 } else {
                     HStack(spacing: 3) {
-                        Image(systemName: "location.slash").font(.system(size: 9))
+                        Image(systemName: "cloud").font(.system(size: 9))
                         Text(L10n.app("weather.fetching", fallback: "Fetching weather\u{2026}")).font(.system(size: 9))
                     }
                     .foregroundStyle(.white.opacity(0.2))

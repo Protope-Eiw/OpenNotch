@@ -116,27 +116,7 @@ extension AppDelegate {
             level: OverlayWindowLevel.interactiveNotch
         )
 
-        let hostingView = NotchHostingView(
-            rootView: NotchView(
-                notchViewModel: notchViewModel,
-                notchEventCoordinator: notchEventCoordinator,
-                powerViewModel: powerViewModel,
-                bluetoothViewModel: bluetoothViewModel,
-                networkViewModel: networkViewModel,
-                downloadViewModel: downloadViewModel,
-                focusViewModel: focusViewModel,
-                airDropViewModel: airDropViewModel,
-                airDropController: airDropController,
-                settingsViewModel: settingsViewModel,
-                nowPlayingViewModel: nowPlayingViewModel,
-                timerViewModel: timerViewModel,
-                screenRecordingViewModel: screenRecordingViewModel,
-                lockScreenManager: lockScreenManager,
-                systemMonitorViewModel: container.systemMonitorViewModel
-            )
-        )
-
-        window.contentView = hostingView
+        window.contentView = makeNotchHostingView(viewModel: notchViewModel)
         window.collectionBehavior = OverlayPanelFactory.collectionBehavior(
             includesFullscreenAuxiliary: true
         )
@@ -205,27 +185,7 @@ extension AppDelegate {
                 )
             }
 
-            let hostingView = NotchHostingView(
-                rootView: NotchView(
-                    notchViewModel: viewModel,
-                    notchEventCoordinator: notchEventCoordinator,
-                    powerViewModel: powerViewModel,
-                    bluetoothViewModel: bluetoothViewModel,
-                    networkViewModel: networkViewModel,
-                    downloadViewModel: downloadViewModel,
-                    focusViewModel: focusViewModel,
-                    airDropViewModel: airDropViewModel,
-                    airDropController: airDropController,
-                    settingsViewModel: settingsViewModel,
-                    nowPlayingViewModel: nowPlayingViewModel,
-                    timerViewModel: timerViewModel,
-                    screenRecordingViewModel: screenRecordingViewModel,
-                    lockScreenManager: lockScreenManager,
-                    systemMonitorViewModel: container.systemMonitorViewModel
-                )
-            )
-
-            window.contentView = hostingView
+            window.contentView = makeNotchHostingView(viewModel: viewModel)
             window.collectionBehavior = OverlayPanelFactory.collectionBehavior(
                 includesFullscreenAuxiliary: true
             )
@@ -281,27 +241,7 @@ extension AppDelegate {
                     screen: screen
                 )
 
-                let hostingView = NotchHostingView(
-                    rootView: NotchView(
-                        notchViewModel: viewModel,
-                        notchEventCoordinator: notchEventCoordinator,
-                        powerViewModel: powerViewModel,
-                        bluetoothViewModel: bluetoothViewModel,
-                        networkViewModel: networkViewModel,
-                        downloadViewModel: downloadViewModel,
-                        focusViewModel: focusViewModel,
-                        airDropViewModel: airDropViewModel,
-                        airDropController: airDropController,
-                        settingsViewModel: settingsViewModel,
-                        nowPlayingViewModel: nowPlayingViewModel,
-                        timerViewModel: timerViewModel,
-                        screenRecordingViewModel: screenRecordingViewModel,
-                        lockScreenManager: lockScreenManager,
-                        systemMonitorViewModel: container.systemMonitorViewModel
-                    )
-                )
-
-                window.contentView = hostingView
+                window.contentView = makeNotchHostingView(viewModel: viewModel)
                 window.collectionBehavior = OverlayPanelFactory.collectionBehavior(
                     includesFullscreenAuxiliary: true
                 )
@@ -365,5 +305,27 @@ extension AppDelegate {
 
     private func clearNowPlayingPrimaryWindowPresentationState() {
         nowPlayingViewModel.clearPresentationActivityState()
+    }
+
+    private func makeNotchHostingView(viewModel: NotchViewModel) -> NotchHostingView {
+        NotchHostingView(
+            rootView: NotchView(
+                notchViewModel: viewModel,
+                notchEventCoordinator: notchEventCoordinator,
+                powerViewModel: powerViewModel,
+                bluetoothViewModel: bluetoothViewModel,
+                networkViewModel: networkViewModel,
+                downloadViewModel: downloadViewModel,
+                focusViewModel: focusViewModel,
+                airDropViewModel: airDropViewModel,
+                airDropController: airDropController,
+                settingsViewModel: settingsViewModel,
+                nowPlayingViewModel: nowPlayingViewModel,
+                timerViewModel: timerViewModel,
+                screenRecordingViewModel: screenRecordingViewModel,
+                lockScreenManager: lockScreenManager,
+                systemMonitorViewModel: container.systemMonitorViewModel
+            )
+        )
     }
 }

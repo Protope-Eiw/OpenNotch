@@ -1,84 +1,45 @@
 import Combine
-import CoreLocation
 import Foundation
 
-final class WeatherService: NSObject, ObservableObject, CLLocationManagerDelegate {
+final class WeatherService: ObservableObject {
     @Published var temperature: Double? = nil
     @Published var symbolName: String = "cloud"
     @Published var conditionText: String = ""
     @Published var fetchFailed: Bool = false
 
-    private let locationManager = CLLocationManager()
     private var lastFetch: Date = .distantPast
-    private let cacheTTL: TimeInterval = 1800 // 30 min
-    private var fetchTimeoutTask: Task<Void, Never>?
+    private let cacheTTL: TimeInterval = 1800
+    private var refreshTimer: Timer?
 
-    override init() {
-        super.init()
-        locationManager.delegate = self
-        locationManager.desiredAccuracy = kCLLocationAccuracyKilometer
+    init() {
+        temperature = UserDefaults.standard.object(forKey: AppStorageKeys.Overview.weatherTemperature) as? Double
+        symbolName = UserDefaults.standard.string(forKey: AppStorageKeys.Overview.weatherSymbolName) ?? "cloud"
+        conditionText = UserDefaults.standard.string(forKey: AppStorageKeys.Overview.weatherConditionText) ?? ""
+        lastFetch = UserDefaults.standard.object(forKey: AppStorageKeys.Overview.weatherLastFetch) as? Date ?? .distantPast
     }
 
     func requestAndFetch() {
+        guard Date().timeIntervalSince(lastFetch) >= cacheTTL else { return }
+
         fetchFailed = false
-        let status = locationManager.authorizationStatus
-        switch status {
-        case .notDetermined:
-            locationManager.requestWhenInUseAuthorization()
-        case .denied, .restricted:
-            fetchFailed = true
-        default:
-            if Date().timeIntervalSince(lastFetch) > cacheTTL {
-                startFetchTimeout()
-                locationManager.requestLocation()
-            }
-        }
+
+        Task { await fetch() }
     }
-
-    private func startFetchTimeout() {
-        fetchTimeoutTask?.cancel()
-        fetchTimeoutTask = Task { @MainActor in
-            try? await Task.sleep(for: .seconds(10))
-            guard !Task.isCancelled else { return }
-            fetchFailed = true
-        }
-    }
-
-    // MARK: CLLocationManagerDelegate
-
-    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        let status = manager.authorizationStatus
-        guard status != .notDetermined else { return }
-        if status == .denied || status == .restricted {
-            fetchFailed = true
-        } else {
-            fetchFailed = false
-            manager.requestLocation()
-        }
-    }
-
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard let loc = locations.first else { return }
-        lastFetch = Date()
-        fetchTimeoutTask?.cancel()
-        Task { await fetch(lat: loc.coordinate.latitude, lon: loc.coordinate.longitude) }
-    }
-
-    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        fetchFailed = true
-    }
-
-    // MARK: Fetch
 
     @MainActor
-    private func fetch(lat: Double, lon: Double) async {
-        let urlStr = "https://api.open-meteo.com/v1/forecast?latitude=\(lat)&longitude=\(lon)&current=temperature_2m,weather_code"
+    private func fetch() async {
+        guard let location = await resolveLocation() else {
+            fetchFailed = true
+            return
+        }
+
+        let urlStr = "https://api.open-meteo.com/v1/forecast?latitude=\(location.lat)&longitude=\(location.lon)&current=temperature_2m,weather_code"
         guard let url = URL(string: urlStr) else { fetchFailed = true; return }
 
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
-            struct Response: Codable {
-                struct Current: Codable {
+            struct Response: Decodable {
+                struct Current: Decodable {
                     let temperature2m: Double
                     let weatherCode: Int
                     enum CodingKeys: String, CodingKey {
@@ -88,15 +49,50 @@ final class WeatherService: NSObject, ObservableObject, CLLocationManagerDelegat
                 }
                 let current: Current
             }
+
             guard let resp = try? JSONDecoder().decode(Response.self, from: data) else {
                 fetchFailed = true
                 return
             }
+
+            lastFetch = Date()
             fetchFailed = false
             temperature = resp.current.temperature2m
             (symbolName, conditionText) = info(for: resp.current.weatherCode)
+            persist()
+            scheduleNextRefresh()
         } catch {
             fetchFailed = true
+        }
+    }
+
+    private func resolveLocation() async -> (lat: Double, lon: Double)? {
+        guard let url = URL(string: "http://ip-api.com/json/") else { return nil }
+
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            struct IPLocation: Decodable {
+                let lat: Double
+                let lon: Double
+            }
+            let location = try JSONDecoder().decode(IPLocation.self, from: data)
+            return (location.lat, location.lon)
+        } catch {
+            return nil
+        }
+    }
+
+    private func persist() {
+        UserDefaults.standard.set(temperature, forKey: AppStorageKeys.Overview.weatherTemperature)
+        UserDefaults.standard.set(symbolName, forKey: AppStorageKeys.Overview.weatherSymbolName)
+        UserDefaults.standard.set(conditionText, forKey: AppStorageKeys.Overview.weatherConditionText)
+        UserDefaults.standard.set(lastFetch, forKey: AppStorageKeys.Overview.weatherLastFetch)
+    }
+
+    private func scheduleNextRefresh() {
+        refreshTimer?.invalidate()
+        refreshTimer = Timer.scheduledTimer(withTimeInterval: cacheTTL, repeats: false) { [weak self] _ in
+            self?.requestAndFetch()
         }
     }
 
