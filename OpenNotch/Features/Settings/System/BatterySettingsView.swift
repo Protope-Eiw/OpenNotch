@@ -346,12 +346,12 @@ struct BatterySettingsView: View {
     @ViewBuilder
     private func batteryStandardDescription(for kind: BatteryNotificationPreviewKind) -> some View {
         if kind == .low {
-            Text(verbatim: "Turn on Low Power Mode or it\nis recommended to charge it.")
+            Text(localized("settings.battery.preview.lowDescription", fallback: "Turn on Low Power Mode or it is recommended to charge it."))
                 .font(.system(size: 8.5, weight: .medium))
                 .foregroundStyle(.white.opacity(0.45))
                 .lineLimit(2)
         } else {
-            Text(verbatim: "Your Mac is fully charged.")
+            Text(localized("settings.battery.preview.fullDescription", fallback: "Your Mac is fully charged."))
                 .font(.system(size: 9, weight: .medium))
                 .foregroundStyle(.white.opacity(0.45))
                 .lineLimit(1)

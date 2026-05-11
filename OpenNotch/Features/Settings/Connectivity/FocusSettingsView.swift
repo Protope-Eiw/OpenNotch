@@ -122,7 +122,7 @@ struct FocusSettingsView: View {
                     
                     Spacer()
                     
-                    Text(verbatim: "On")
+                    Text(localized("settings.focus.preview.on", fallback: "On"))
                         .foregroundStyle(.indigo.opacity(0.8))
                 }
             }

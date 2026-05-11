@@ -14,6 +14,10 @@ struct AboutAppSettingsView: View {
 
     let onRequestInternetAccess: () -> Bool
 
+    private func localized(_ key: String, fallback: String? = nil) -> String {
+        applicationSettings.appLanguage.locale.dn(key, fallback: fallback ?? key)
+    }
+
     private let heroCardHeight: CGFloat = 300
     
     private var appVersionText: String {
@@ -57,11 +61,11 @@ struct AboutAppSettingsView: View {
                     .frame(width: 60, height: 60)
                 
                 VStack(alignment: .center, spacing: 3) {
-                    Text("OpenNotch")
+                    Text(localized("settings.about.title", fallback: "OpenNotch"))
                         .font(.system(size: 18, weight: .semibold))
                         .accessibilityIdentifier("settings.about.title")
-                    
-                    Text("Make the cutout area more useful.")
+
+                    Text(localized("settings.about.subtitle", fallback: "Make the cutout area more useful."))
                         .font(.system(size: 10))
                         .foregroundStyle(.secondary)
                     
@@ -128,8 +132,8 @@ struct AboutAppSettingsView: View {
     private var highlightsCard: some View {
         VStack(spacing: 18) {
             AboutFeatureRow(
-                title: "Live Activity",
-                description: "Persistent notch content stays visible for as long as the source event is active, then fades away when it ends.",
+                title: localized("settings.about.feature.liveActivity.title", fallback: "Live Activity"),
+                description: localized("settings.about.feature.liveActivity.description", fallback: "Persistent notch content stays visible for as long as the source event is active, then fades away when it ends."),
                 notchWidth: 166,
                 notchHeight: 26,
                 topCornerRadius: 5,
@@ -137,11 +141,11 @@ struct AboutAppSettingsView: View {
                 strokeColor: .indigo.opacity(0.3),
                 applicationSettings: applicationSettings
             ) {
-                AboutLiveActivityPreviewNotchView()
+                AboutLiveActivityPreviewNotchView(statusText: localized("settings.about.feature.liveActivity.on", fallback: "On"))
             }
             AboutFeatureRow(
-                title: "Temporary Activity",
-                description: "Short-lived overlays appear above live activities so quick system events still feel prominent.",
+                title: localized("settings.about.feature.temporaryActivity.title", fallback: "Temporary Activity"),
+                description: localized("settings.about.feature.temporaryActivity.description", fallback: "Short-lived overlays appear above live activities so quick system events still feel prominent."),
                 notchWidth: 166,
                 notchHeight: 26,
                 topCornerRadius: 5,
@@ -152,8 +156,8 @@ struct AboutAppSettingsView: View {
                 AboutTemporaryActivityPreviewNotchView()
             }
             AboutFeatureRow(
-                title: "Lock Screen",
-                description: "Carry notch context and media playback into the lock screen transition for a more cohesive experience.",
+                title: localized("settings.about.feature.lockScreen.title", fallback: "Lock Screen"),
+                description: localized("settings.about.feature.lockScreen.description", fallback: "Carry notch context and media playback into the lock screen transition for a more cohesive experience."),
                 notchWidth: 166,
                 notchHeight: 26,
                 topCornerRadius: 5,
@@ -264,20 +268,20 @@ private struct AboutHeroBackground: View {
 }
 
 private struct AboutFeatureRow: View {
-    let title: LocalizedStringKey
-    let description: LocalizedStringKey
+    let title: String
+    let description: String
     let notchWidth: CGFloat
     let notchHeight: CGFloat
     let topCornerRadius: CGFloat
     let bottomCornerRadius: CGFloat
     let strokeColor: Color
     let content: () -> AnyView
-    
+
     @ObservedObject var applicationSettings: ApplicationSettingsStore
-    
+
     init(
-        title: LocalizedStringKey,
-        description: LocalizedStringKey,
+        title: String,
+        description: String,
         notchWidth: CGFloat,
         notchHeight: CGFloat,
         topCornerRadius: CGFloat,
@@ -329,15 +333,17 @@ private struct AboutFeatureRow: View {
 }
 
 private struct AboutLiveActivityPreviewNotchView: View {
+    let statusText: String
+
     var body: some View {
         AboutMiniPreviewContainer {
             HStack(spacing: 0) {
                 Image(systemName: "moon.fill")
                     .font(.system(size: 11, weight: .bold))
-                
+
                 Spacer(minLength: 8)
-                
-                Text("On")
+
+                Text(verbatim: statusText)
                     .font(.system(size: 11))
             }
             .foregroundStyle(.indigo)

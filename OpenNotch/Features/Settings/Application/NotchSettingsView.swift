@@ -69,13 +69,13 @@ struct NotchSettingsView: View {
                             HStack(spacing: 3) {
                                 Image(systemName: "arrowtriangle.up.fill").font(.system(size: 5))
                                     .foregroundStyle(.blue)
-                                Text(localized("1.2 MB")).font(.system(size: 8, design: .monospaced))
+                                Text(verbatim: "1.2 MB").font(.system(size: 8, design: .monospaced))
                                     .foregroundStyle(.blue)
                             }
                             HStack(spacing: 3) {
                                 Image(systemName: "arrowtriangle.down.fill").font(.system(size: 5))
                                     .foregroundStyle(.green)
-                                Text(localized("3.8 MB")).font(.system(size: 8, design: .monospaced))
+                                Text(verbatim: "3.8 MB").font(.system(size: 8, design: .monospaced))
                                     .foregroundStyle(.green)
                             }
                         }

@@ -155,7 +155,7 @@ struct BluetoothSettingsView: View {
                             .foregroundStyle(.white.opacity(0.8))
                         
                         VStack(alignment: .leading, spacing: 0) {
-                            Text(verbatim: "Connected")
+                            Text(localized("settings.bluetooth.preview.connected", fallback: "Connected"))
                                 .lineLimit(1)
                                 .font(.system(size: 10))
                                 .foregroundStyle(.white.opacity(0.4))

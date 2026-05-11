@@ -167,7 +167,7 @@ struct LockScreenSettingsView: View {
                 Spacer()
                 
                 if style == .enlarged {
-                    Text(verbatim: "Locked")
+                    Text(localized("settings.lockscreen.preview.locked", fallback: "Locked"))
                 }
             }
             .foregroundStyle(.white.opacity(0.8))

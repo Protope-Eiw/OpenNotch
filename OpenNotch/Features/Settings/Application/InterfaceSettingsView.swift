@@ -135,7 +135,7 @@ struct InterfaceSettingsView: View {
         VStack(spacing: 0) {
             Divider().opacity(0.4).padding(.leading, 43)
             SubToggleRow(
-                title: localized("settings.interface.music.skipButtons", fallback: "Skip Buttons"),
+                title: localized("settings.interface.music.skipButtons", fallback: "15s Adjustment"),
                 isOn: $showSkipButtons,
                 accessibilityIdentifier: AppStorageKeys.Music.showSkipButtons
             )

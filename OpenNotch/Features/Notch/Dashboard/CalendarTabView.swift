@@ -201,6 +201,7 @@ struct MiniCalendarView: View {
     private var monthYearString: String {
         let f = DateFormatter()
         f.dateFormat = "MMM yyyy"
+        f.locale = Locale(identifier: L10n.appLanguageIdentifier)
         return f.string(from: displayedMonth)
     }
 
@@ -411,7 +412,7 @@ struct CalendarEventRow: View {
                 .fill(Color(cgColor: event.calendar.cgColor))
                 .frame(width: 5, height: 5)
 
-            Text(event.title ?? "Untitled")
+            Text(event.title ?? L10n.app("calendar.untitled", fallback: "Untitled"))
                 .font(.system(size: 10.5, weight: .semibold))
                 .foregroundStyle(Color(cgColor: event.calendar.cgColor).opacity(0.9))
                 .lineLimit(1)
@@ -492,7 +493,7 @@ struct CalendarReminderRow: View {
                 .font(.system(size: 10))
                 .foregroundStyle(reminder.isCompleted ? .green.opacity(0.7) : .orange.opacity(0.5))
 
-            Text(reminder.title ?? "Untitled")
+            Text(reminder.title ?? L10n.app("calendar.untitled", fallback: "Untitled"))
                 .font(.system(size: 10.5, weight: .regular))
                 .foregroundStyle(reminder.isCompleted ? .white.opacity(0.35) : .white)
                 .strikethrough(reminder.isCompleted)

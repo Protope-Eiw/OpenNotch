@@ -184,7 +184,7 @@ struct HUDSettingsView: View {
                     .frame(height: 30)
                 
                 HStack(spacing: 8) {
-                    Text(verbatim: "Volume")
+                    Text(localized("settings.hud.preview.volume", fallback: "Volume"))
                         .lineLimit(1)
                     
                     Spacer()
@@ -233,7 +233,7 @@ struct HUDSettingsView: View {
                     
                     Spacer()
                     
-                    Text(verbatim: "72")
+                    Text(localized("settings.hud.preview.level", fallback: "72"))
                 }
                 .foregroundStyle(.white.opacity(0.8))
                 .padding(.horizontal, 8)

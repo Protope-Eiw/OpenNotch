@@ -215,7 +215,7 @@ struct NetworkSettingsView: View {
                     
                     Spacer()
                     
-                    Text(verbatim: "Active")
+                    Text(localized("settings.network.preview.active", fallback: "Active"))
                         .foregroundStyle(.white.opacity(0.8))
                         .lineLimit(1)
                 }
@@ -240,7 +240,7 @@ struct NetworkSettingsView: View {
                             .foregroundStyle(.white.opacity(0.8))
                         
                         VStack(alignment: .leading, spacing: 0) {
-                            Text(verbatim: "Connected")
+                            Text(localized("settings.network.preview.connected", fallback: "Connected"))
                                 .lineLimit(1)
                                 .font(.system(size: 10))
                                 .foregroundStyle(.white.opacity(0.4))
@@ -307,7 +307,7 @@ struct NetworkSettingsView: View {
                     
                     Spacer()
                     
-                    Text(verbatim: "On")
+                    Text(localized("settings.hotspot.preview.on", fallback: "On"))
                         .foregroundStyle(.green.opacity(0.8))
                 }
                 .padding(.leading, 7)
