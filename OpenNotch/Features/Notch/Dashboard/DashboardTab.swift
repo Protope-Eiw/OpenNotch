@@ -27,16 +27,6 @@ enum DashboardTab: String, CaseIterable {
         }
     }
 
-    var settingsDescription: LocalizedStringKey {
-        switch self {
-        case .overview: return "Quick overview with pinned apps, time, and system info."
-        case .music:    return "Music player with playback controls and progress bar."
-        case .system:   return "CPU, memory, disk, network, and battery stats."
-        case .calendar: return "Today's calendar events from your calendars."
-        case .apps:     return "Quick launcher for pinned apps."
-        }
-    }
-
     var settingsColor: Color {
         switch self {
         case .overview: return .teal

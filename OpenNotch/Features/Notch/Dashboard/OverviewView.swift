@@ -167,7 +167,7 @@ struct OverviewView: View {
             HStack(spacing: 14) {
                 statBlock("\(Int(systemMonitorViewModel.cpuUsage))%",  "CPU",
                           Color.thresholdColor(systemMonitorViewModel.cpuUsage,  warn: 50, danger: 80))
-                statBlock("\(Int(systemMonitorViewModel.memoryUsage))%", "RAM",
+                statBlock("\(Int(systemMonitorViewModel.memoryUsage))%", "MEM",
                           Color.thresholdColor(systemMonitorViewModel.memoryUsage, warn: 70, danger: 85))
                 statBlock("\(Int(systemMonitorViewModel.diskUsage))%",  "DISK",
                           Color.thresholdColor(systemMonitorViewModel.diskUsage,  warn: 80, danger: 90))

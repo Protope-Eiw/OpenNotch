@@ -170,8 +170,8 @@ struct MiniCalendarView: View {
     private struct Cell { let index: Int; let date: Date? }
 
     private var gridCells: [Cell] {
-        let start = cal.date(from: cal.dateComponents([.year, .month], from: displayedMonth))!
-        let daysInMonth = cal.range(of: .day, in: .month, for: start)!.count
+        guard let start = cal.date(from: cal.dateComponents([.year, .month], from: displayedMonth)) else { return [] }
+        let daysInMonth = cal.range(of: .day, in: .month, for: start)?.count ?? 30
         let firstWeekday = cal.component(.weekday, from: start)
         let leading = (firstWeekday + 5) % 7
 
