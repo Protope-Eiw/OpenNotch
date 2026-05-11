@@ -396,6 +396,23 @@ Overview 界面最右侧会渲染当前播放的封面（`NowPlayingArtworkBackg
 
 ---
 
+### 蓝牙临时活动默认值
+`BluetoothSettingsStore` 中 `isBluetoothTemporaryActivityEnabled` 默认值为 `false`，应改为 `true`（该选项位于 设置 → Connectivity → 蓝牙活动 → 蓝牙临时活动）。
+
+### 设置界面排版：所有 notch 功能集中到一个栏目
+当前设置页面中点击 Notch 和系统状态等功能分散在不同栏目，应将所有 notch 相关功能（通知开关、优先级、动画等）归并到统一的栏目下。
+
+### 播放器保持显示时的 widget 策略
+播放器可以打开保持显示，但此时 notch 区域功能和左右两侧 widget 是否应该显示？需要决策并实现对应的显示/隐藏逻辑。
+
+### System Status dashboard 排版
+当前 `.system` tab 命名为 "System Status"，其 dashboard 界面（`DashboardPanelView.swift:146` `systemView`）使用 2×2 gauge grid + 右侧 Mac 信息列。布局偏紧凑，可以考虑美化：统一卡片间距、对齐方式、颜色主题等。
+
+### 捐赠栏目与全局限定化
+捐赠栏目写死了中文文本 '喜欢就请我喝杯咖啡，完全随意☕️'，但已直接替换为英文。很多其他位置也是写死中/英文的，需要整体梳理，确保所有用户可见字符串都通过 `locale.dn(_:fallback:)` 走 i18n 流程。
+
+---
+
 ## Planned features (suggested by user)
 
 ### System Status dashboard tab

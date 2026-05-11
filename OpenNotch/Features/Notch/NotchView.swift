@@ -37,7 +37,8 @@ struct NotchView: View {
     @AppStorage(AppStorageKeys.NotchBar.leftWidgets)  private var leftWidgetsRaw  = NotchBarWidget.networkSpeed.rawValue
     @AppStorage(AppStorageKeys.NotchBar.rightWidgets) private var rightWidgetsRaw = "cpu,memory"
     @AppStorage(AppStorageKeys.NotchBar.hideWidgets)  private var hideWidgets     = false
-    @AppStorage(AppStorageKeys.General.dashboardLastTab)    private var dashboardLastTab    = DashboardTab.system.rawValue
+    @AppStorage(AppStorageKeys.General.dashboardLastTab)          private var dashboardLastTab          = DashboardTab.system.rawValue
+    @AppStorage(AppStorageKeys.General.dashboardTransitionStyle)  private var dashboardTransitionStyle  = DashboardTransitionStyle.slide.rawValue
     @AppStorage(AppStorageKeys.General.dashboardDefaultTab) private var dashboardDefaultTab = "last"
     // Separate show/hide state so widgets only reappear after the notch finishes collapsing
     @State private var showSideWidgets = true
@@ -248,7 +249,10 @@ private extension NotchView {
                                 }()
                                 Button {
                                     if draggingTab == nil {
-                                        withAnimation(.spring(response: 0.28, dampingFraction: 0.8)) {
+                                        let anim: Animation = dashboardTransitionStyle == DashboardTransitionStyle.fade.rawValue
+                                            ? .easeInOut(duration: 0.2)
+                                            : .spring(response: 0.28, dampingFraction: 0.8)
+                                        withAnimation(anim) {
                                             dashboardTab = tab
                                         }
                                     }

@@ -11,6 +11,12 @@ struct DashboardPanelView: View {
     @State private var macInfo: MacSystemInfo? = nil
     @AppStorage(AppStorageKeys.General.dashboardTransitionStyle) private var transitionStyle = DashboardTransitionStyle.slide.rawValue
 
+    private var transitionAnimation: Animation {
+        transitionStyle == DashboardTransitionStyle.fade.rawValue
+            ? .easeInOut(duration: 0.2)
+            : .spring(response: 0.35, dampingFraction: 0.85)
+    }
+
     private var selectedIndex: Int {
         enabledTabs.firstIndex(of: selectedTab) ?? 0
     }
@@ -23,14 +29,14 @@ struct DashboardPanelView: View {
                     onSwipeLeft: {
                         let idx = selectedIndex
                         guard idx + 1 < enabledTabs.count else { return }
-                        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                        withAnimation(transitionAnimation) {
                             selectedTab = enabledTabs[idx + 1]
                         }
                     },
                     onSwipeRight: {
                         let idx = selectedIndex
                         guard idx > 0 else { return }
-                        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                        withAnimation(transitionAnimation) {
                             selectedTab = enabledTabs[idx - 1]
                         }
                     }
@@ -58,7 +64,7 @@ struct DashboardPanelView: View {
                     }
                 }
             }
-            .animation(.spring(response: 0.35, dampingFraction: 0.85), value: selectedTab)
+            .animation(.easeInOut(duration: 0.2), value: selectedTab)
         }
         .mask(Rectangle())
     }
