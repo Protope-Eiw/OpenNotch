@@ -65,15 +65,31 @@ struct DashboardPanelView: View {
 
     private var slideContent: some View {
         GeometryReader { geo in
-            HStack(spacing: 0) {
-                ForEach(enabledTabs, id: \.self) { tab in
-                    tabPage(for: tab).frame(width: geo.size.width)
+            ZStack {
+                ForEach(slideTabs, id: \.self) { tab in
+                    tabPage(for: tab)
+                        .frame(width: geo.size.width)
+                        .offset(x: slideOffset(for: tab, width: geo.size.width))
                 }
             }
-            .offset(x: -CGFloat(selectedIndex) * geo.size.width)
             .animation(.spring(response: 0.35, dampingFraction: 0.85), value: selectedTab)
         }
         .mask(Rectangle())
+    }
+
+    private var slideTabs: [DashboardTab] {
+        let idx = selectedIndex
+        var tabs: [DashboardTab] = []
+        if idx > 0 { tabs.append(enabledTabs[idx - 1]) }
+        tabs.append(enabledTabs[idx])
+        if idx + 1 < enabledTabs.count { tabs.append(enabledTabs[idx + 1]) }
+        return tabs
+    }
+
+    private func slideOffset(for tab: DashboardTab, width: CGFloat) -> CGFloat {
+        guard let tabIdx = enabledTabs.firstIndex(of: tab),
+              let selIdx = enabledTabs.firstIndex(of: selectedTab) else { return 0 }
+        return CGFloat(tabIdx - selIdx) * width
     }
 
     @ViewBuilder
