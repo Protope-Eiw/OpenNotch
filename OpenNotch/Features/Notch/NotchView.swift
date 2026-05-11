@@ -95,7 +95,9 @@ struct NotchView: View {
                     )
                 }
                 .onChange(of: notchViewModel.notchModel.content?.id) {
-                    notchViewModel.handleStrokeVisibility()
+                    Task { @MainActor in
+                        notchViewModel.handleStrokeVisibility()
+                    }
                 }
                 .onChange(of: settingsViewModel.notchWidth) {
                     Task { @MainActor in
