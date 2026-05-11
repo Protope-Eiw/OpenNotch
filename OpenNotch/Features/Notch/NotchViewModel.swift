@@ -312,6 +312,7 @@ final class NotchViewModel: ObservableObject {
         updateDimensions()
         stagedHeightTask?.cancel()
         isClosingHeightStaged = false
+        notchModel = engine.notchModel
         stagedNotchHeight = interactiveNotchSize.height
     }
 
