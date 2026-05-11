@@ -7,7 +7,7 @@ struct InterfaceSettingsView: View {
     @AppStorage(AppStorageKeys.Overview.showTimeDate)       private var showTimeDate       = true
     @AppStorage(AppStorageKeys.Overview.showSystemInfo)     private var showSystemInfo     = true
     @AppStorage(AppStorageKeys.Overview.showPomodoro)       private var showPomodoro       = true
-    @AppStorage(AppStorageKeys.Overview.showWeather)        private var showWeather        = true
+    @AppStorage(AppStorageKeys.Overview.showWeather)        private var showWeather        = false
     @AppStorage(AppStorageKeys.Overview.hideAppNames)       private var hideAppNames       = false
     @AppStorage(AppStorageKeys.General.dashboardDefaultTab)      private var dashboardDefaultTab      = "last"
     @AppStorage(AppStorageKeys.General.dashboardTransitionStyle) private var dashboardTransitionStyle = DashboardTransitionStyle.slide.rawValue
