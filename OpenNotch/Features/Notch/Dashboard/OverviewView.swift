@@ -220,7 +220,7 @@ struct OverviewView: View {
                     .font(.system(size: 20, weight: .bold, design: .monospaced))
                     .foregroundStyle(.white)
 
-                Text(isIdle ? "\(workMinutes)m"
+                Text(isIdle ? "\(workMinutes)\(L10n.app("pomodoro.minutes.suffix", fallback: "m"))"
                      : pomodoroViewModel.phase == .work ? L10n.app("pomodoro.focusing", fallback: "Focusing") : L10n.app("pomodoro.resting", fallback: "Resting"))
                     .font(.system(size: 9))
                     .foregroundStyle(isIdle ? .white.opacity(0.3) : accentColor.opacity(0.8))
@@ -239,7 +239,7 @@ struct OverviewView: View {
                     VStack(spacing: 0) {
                         Button {
                             if isIdle {
-                                if workMinutes < 120 { workMinutes += 1; pomodoroViewModel.updateWorkMinutes(workMinutes) }
+                                if workMinutes < 120 { workMinutes += 1 }
                             } else {
                                 pomodoroViewModel.adjustTime(minutes: 1)
                             }
@@ -253,7 +253,7 @@ struct OverviewView: View {
 
                         Button {
                             if isIdle {
-                                if workMinutes > 1 { workMinutes -= 1; pomodoroViewModel.updateWorkMinutes(workMinutes) }
+                                if workMinutes > 1 { workMinutes -= 1 }
                             } else {
                                 pomodoroViewModel.adjustTime(minutes: -1)
                             }

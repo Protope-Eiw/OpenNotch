@@ -11,30 +11,26 @@ final class PomodoroViewModel: ObservableObject {
     @Published private(set) var timeRemaining: Int = 25 * 60
 
     private var countdownTask: Task<Void, Never>?
-    private var _workMinutes: Int = 25
+
+    private var workMinutes: Int {
+        max(UserDefaults.standard.integer(forKey: AppStorageKeys.Overview.pomodoroDuration), 1)
+    }
 
     var timeString: String { String(format: "%02d:%02d", timeRemaining / 60, timeRemaining % 60) }
-    var phaseTotalSeconds: Int { phase == .work ? _workMinutes * 60 : 5 * 60 }
+    var phaseTotalSeconds: Int { phase == .work ? workMinutes * 60 : 5 * 60 }
 
     init() {
-        let stored = UserDefaults.standard.integer(forKey: AppStorageKeys.Overview.pomodoroDuration)
-        _workMinutes = stored > 0 ? stored : 25
-        timeRemaining = _workMinutes * 60
+        timeRemaining = workMinutes * 60
     }
 
     deinit {
         countdownTask?.cancel()
     }
 
-    func updateWorkMinutes(_ minutes: Int) {
-        _workMinutes = minutes
-        if state == .idle { timeRemaining = _workMinutes * 60 }
-    }
-
     func toggleRunning() {
         switch state {
         case .idle:
-            timeRemaining = _workMinutes * 60
+            timeRemaining = workMinutes * 60
             state = .running
             startCountdown()
         case .running:
@@ -55,7 +51,7 @@ final class PomodoroViewModel: ObservableObject {
         countdownTask = nil
         state = .idle
         phase = .work
-        timeRemaining = _workMinutes * 60
+        timeRemaining = workMinutes * 60
     }
 
     private func startCountdown() {
@@ -74,7 +70,7 @@ final class PomodoroViewModel: ObservableObject {
             } else {
                 phase = .work
                 state = .idle
-                timeRemaining = _workMinutes * 60
+                timeRemaining = workMinutes * 60
             }
         }
     }
