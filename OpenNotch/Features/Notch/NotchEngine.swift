@@ -68,11 +68,9 @@ final class NotchEngine: ObservableObject {
     }
 
     func updateBaseGeometry(width: CGFloat, height: CGFloat, scale: CGFloat) {
-        var updated = notchModel
-        updated.baseWidth = width
-        updated.baseHeight = height
-        updated.scale = scale
-        notchModel = updated
+        notchModel.baseWidth = width
+        notchModel.baseHeight = height
+        notchModel.scale = scale
     }
 
     func send(_ notchState: NotchState) {
