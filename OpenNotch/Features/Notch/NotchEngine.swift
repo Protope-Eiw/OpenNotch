@@ -286,14 +286,15 @@ final class NotchEngine: ObservableObject {
         let state = eventQueue.removeFirst()
 
         Task {
+            defer {
+                isProcessingQueue = false
+                processQueue()
+            }
             await executeState(state)
 
             if !eventQueue.isEmpty {
                 try? await Task.sleep(nanoseconds: UInt64(queueDelay * 1_000_000_000))
             }
-
-            isProcessingQueue = false
-            processQueue()
         }
     }
 

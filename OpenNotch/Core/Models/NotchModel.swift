@@ -79,7 +79,11 @@ struct NotchModel: Equatable {
     var strokeColor: Color { content?.strokeColor ?? .clear }
     
     static func == (lhs: NotchModel, rhs: NotchModel) -> Bool {
-        lhs.content?.id == rhs.content?.id &&
-        lhs.isLiveActivityExpanded == rhs.isLiveActivityExpanded
+        lhs.liveActivityContent?.id == rhs.liveActivityContent?.id &&
+        lhs.temporaryNotificationContent?.id == rhs.temporaryNotificationContent?.id &&
+        lhs.isLiveActivityExpanded == rhs.isLiveActivityExpanded &&
+        lhs.baseWidth == rhs.baseWidth &&
+        lhs.baseHeight == rhs.baseHeight &&
+        lhs.scale == rhs.scale
     }
 }

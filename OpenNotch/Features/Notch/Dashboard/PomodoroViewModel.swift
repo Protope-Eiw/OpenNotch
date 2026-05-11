@@ -22,6 +22,10 @@ final class PomodoroViewModel: ObservableObject {
         timeRemaining = _workMinutes * 60
     }
 
+    deinit {
+        countdownTask?.cancel()
+    }
+
     func updateWorkMinutes(_ minutes: Int) {
         _workMinutes = minutes
         if state == .idle { timeRemaining = _workMinutes * 60 }
