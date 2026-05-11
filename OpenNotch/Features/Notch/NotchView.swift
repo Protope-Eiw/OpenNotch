@@ -249,10 +249,17 @@ private extension NotchView {
                                 }()
                                 Button {
                                     if draggingTab == nil {
-                                        let anim: Animation = dashboardTransitionStyle == DashboardTransitionStyle.fade.rawValue
-                                            ? .easeInOut(duration: 0.2)
-                                            : .spring(response: 0.28, dampingFraction: 0.8)
-                                        withAnimation(anim) {
+                                        let currentIdx = enabledDashboardTabs.firstIndex(of: dashboardTab) ?? 0
+                                        let targetIdx = enabledDashboardTabs.firstIndex(of: tab) ?? 0
+                                        let isAdjacent = abs(currentIdx - targetIdx) <= 1
+                                        if isAdjacent {
+                                            let anim: Animation = dashboardTransitionStyle == DashboardTransitionStyle.fade.rawValue
+                                                ? .easeInOut(duration: 0.2)
+                                                : .spring(response: 0.28, dampingFraction: 0.8)
+                                            withAnimation(anim) {
+                                                dashboardTab = tab
+                                            }
+                                        } else {
                                             dashboardTab = tab
                                         }
                                     }

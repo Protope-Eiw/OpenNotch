@@ -158,7 +158,6 @@ struct MusicPlayerView: View {
         }
         .aspectRatio(1, contentMode: .fit)
         .frame(maxHeight: .infinity)
-        .clipped()
         .animation(.easeInOut(duration: 0.45), value: snapshot.isPlaying)
     }
 
