@@ -455,20 +455,16 @@ final class NotchViewModel: ObservableObject {
         
         engine.$notchModel
             .dropFirst()
-            .sink { [weak self] model in
+            .sink { [weak self] in
                 guard let self else { return }
-                let transitioning = isDisplayTransitioning
-                RunLoop.main.perform { [weak self] in
-                    guard let self else { return }
-                    if transitioning {
-                        stagedHeightTask?.cancel()
-                        isClosingHeightStaged = false
-                        stagedNotchHeight = model.size.height
-                    } else {
-                        scheduleStagedHeightUpdate(to: model.size.height)
-                    }
-                    notchModel = model
+                if isDisplayTransitioning {
+                    stagedHeightTask?.cancel()
+                    isClosingHeightStaged = false
+                    stagedNotchHeight = $0.size.height
+                } else {
+                    scheduleStagedHeightUpdate(to: $0.size.height)
                 }
+                notchModel = $0
             }
             .store(in: &cancellables)
         

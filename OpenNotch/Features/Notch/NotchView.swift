@@ -98,10 +98,14 @@ struct NotchView: View {
                     notchViewModel.handleStrokeVisibility()
                 }
                 .onChange(of: settingsViewModel.notchWidth) {
-                    notchViewModel.updateDimensions()
+                    Task { @MainActor in
+                        notchViewModel.updateDimensions()
+                    }
                 }
                 .onChange(of: settingsViewModel.notchHeight) {
-                    notchViewModel.updateDimensions()
+                    Task { @MainActor in
+                        notchViewModel.updateDimensions()
+                    }
                 }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
