@@ -240,30 +240,34 @@ struct OverviewView: View {
                         Button {
                             if isIdle {
                                 if workMinutes < 120 { workMinutes += 1 }
+                                pomodoroViewModel.syncWorkMinutes()
                             } else {
                                 pomodoroViewModel.adjustTime(minutes: 1)
                             }
                         } label: {
                             Image(systemName: "chevron.up")
                                 .font(.system(size: 7, weight: .semibold))
-                                .frame(width: 18, height: 11)
+                                .frame(width: 22, height: 14)
+                                .contentShape(Rectangle())
                         }
-                        .buttonStyle(.plain).foregroundStyle(.white.opacity(0.5))
-                        .contentShape(Rectangle())
+                        .buttonStyle(.plain)
+                        .foregroundStyle(.white.opacity(0.5))
 
                         Button {
                             if isIdle {
                                 if workMinutes > 1 { workMinutes -= 1 }
+                                pomodoroViewModel.syncWorkMinutes()
                             } else {
                                 pomodoroViewModel.adjustTime(minutes: -1)
                             }
                         } label: {
                             Image(systemName: "chevron.down")
                                 .font(.system(size: 7, weight: .semibold))
-                                .frame(width: 18, height: 11)
+                                .frame(width: 22, height: 14)
+                                .contentShape(Rectangle())
                         }
-                        .buttonStyle(.plain).foregroundStyle(.white.opacity(0.5))
-                        .contentShape(Rectangle())
+                        .buttonStyle(.plain)
+                        .foregroundStyle(.white.opacity(0.5))
                     }
 
                     Button { pomodoroViewModel.reset() } label: {

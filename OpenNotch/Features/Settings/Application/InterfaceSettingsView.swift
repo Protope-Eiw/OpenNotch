@@ -232,22 +232,7 @@ struct InterfaceSettingsView: View {
             )
             .padding(.leading, 16)
 
-            if showPomodoro {
-                Divider().opacity(0.3).padding(.leading, 72)
-                HStack {
-                    Text(localized("settings.interface.overview.workDuration", fallback: "Work Duration"))
-                        .font(.system(size: 13, weight: .medium))
-                    Spacer()
-                    Text(applicationSettings.appLanguage.locale.dnFormat("settings.interface.overview.workDurationValue", fallback: "%lld min", Int64(applicationSettings.overviewPomodoroDuration)))
-                        .font(.system(size: 13))
-                        .foregroundStyle(.secondary)
-                    Stepper("", value: $applicationSettings.overviewPomodoroDuration, in: 1...120)
-                        .labelsHidden()
-                }
-                .padding(.leading, 32)
-                .padding(.trailing, 4)
-                .padding(.vertical, 6)
-            }
+
         }
         .background(Color.primary.opacity(0.03))
         .clipShape(RoundedRectangle(cornerRadius: 8))

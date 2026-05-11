@@ -46,6 +46,10 @@ final class PomodoroViewModel: ObservableObject {
         timeRemaining = max(0, timeRemaining + minutes * 60)
     }
 
+    func syncWorkMinutes() {
+        timeRemaining = workMinutes * 60
+    }
+
     func reset() {
         countdownTask?.cancel()
         countdownTask = nil
