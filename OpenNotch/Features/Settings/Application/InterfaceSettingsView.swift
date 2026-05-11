@@ -49,7 +49,7 @@ struct InterfaceSettingsView: View {
 
     private var dashboardCard: some View {
         SettingsCard(title: localized("settings.interface.dashboardCard", fallback: "Dashboard")) {
-            SettingsMenuRow(
+            SettingsSegmentedRow(
                 title: localized("settings.interface.openMode", fallback: "Open Mode"),
                 options: Array(DashboardOpenMode.allCases),
                 optionTitle: { localized($0.title) },
@@ -70,7 +70,7 @@ struct InterfaceSettingsView: View {
 
             SettingsDivider()
 
-            SettingsMenuRow(
+            SettingsSegmentedRow(
                 title: localized("settings.interface.transitionStyle", fallback: "Transition Style"),
                 description: localized("settings.interface.transitionStyle.description", fallback: "Slide: original swipe animation. Fade: prevents content overflow."),
                 options: Array(DashboardTransitionStyle.allCases),
