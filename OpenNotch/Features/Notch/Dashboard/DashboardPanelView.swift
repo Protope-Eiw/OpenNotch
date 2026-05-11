@@ -149,9 +149,9 @@ struct DashboardPanelView: View {
     // MARK: System tab
 
     private var systemView: some View {
-        HStack(alignment: .top, spacing: 8) {
-            VStack(spacing: 7) {
-                HStack(spacing: 7) {
+        HStack(alignment: .top, spacing: 10) {
+            VStack(spacing: 6) {
+                HStack(spacing: 6) {
                     gaugeCard(title: "CPU",
                               value: systemMonitorViewModel.cpuUsage,
                               valueText: "\(Int(systemMonitorViewModel.cpuUsage))%",
@@ -164,7 +164,7 @@ struct DashboardPanelView: View {
                               speed: systemMonitorViewModel.uploadSpeed,
                               label: "Upload")
                 }
-                HStack(spacing: 7) {
+                HStack(spacing: 6) {
                     gaugeCard(title: "DISK",
                               value: systemMonitorViewModel.diskUsage,
                               valueText: "\(Int(systemMonitorViewModel.diskUsage))%",
@@ -181,27 +181,32 @@ struct DashboardPanelView: View {
             }
             .frame(maxHeight: .infinity)
 
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 6) {
                 Text(macInfo?.modelName ?? "Mac")
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(.white.opacity(0.9))
                     .lineLimit(1)
 
-                macInfoRow("cpu",        macInfo?.chipName     ?? "\u{2013}")
-                macInfoRow("memorychip", macInfo?.ramText      ?? "\u{2013}")
-                macInfoRow("barcode",    macInfo?.serialNumber ?? "\u{2013}")
-                macInfoRow("apple.logo", macInfo?.macOSVersion ?? "\u{2013}")
+                VStack(spacing: 4) {
+                    macInfoRow("cpu",        macInfo?.chipName     ?? "\u{2013}")
+                    macInfoRow("memorychip", macInfo?.ramText      ?? "\u{2013}")
+                    macInfoRow("barcode",    macInfo?.serialNumber ?? "\u{2013}")
+                    macInfoRow("apple.logo", macInfo?.macOSVersion ?? "\u{2013}")
+                }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .padding(10)
+            .background(Color.white.opacity(0.07))
+            .clipShape(RoundedRectangle(cornerRadius: 10))
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private func gaugeCard(title: String, value: Double, valueText: String, color: Color) -> some View {
         ProgressRing(progress: value, color: color, label: title, valueText: valueText)
-            .padding(8)
+            .padding(6)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color.white.opacity(0.07))
             .clipShape(RoundedRectangle(cornerRadius: 10))
