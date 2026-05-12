@@ -19,6 +19,7 @@ enum SettingsWindowCoordinator {
 
     private static func focusWindow(attempts: Int) {
         if let window = NSApp.windows.first(where: { $0.identifier == identifier }) {
+            window.orderFrontRegardless()
             window.makeKeyAndOrderFront(nil)
             NSApp.activate(ignoringOtherApps: true)
             return
@@ -26,7 +27,8 @@ enum SettingsWindowCoordinator {
 
         guard attempts > 0 else { return }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(50))
             focusWindow(attempts: attempts - 1)
         }
     }

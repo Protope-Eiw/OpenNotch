@@ -1,16 +1,25 @@
 import SwiftUI
 import Combine
+import EventKit
 
 struct DebugSettingsView: View {
     @ObservedObject var viewModel: DebugSettingsViewModel
-    
+
+    @State private var calEventAuth = ""
+    @State private var calReminderAuth = ""
+    @State private var calCount = ""
+    @State private var calWarmupResult = ""
+    @State private var calWarmupError = ""
+
     var body: some View {
         SettingsPageScrollView {
             persistentPreviewsCard
             triggerEventsCard
             utilitiesCard
+            calendarDiagnosticCard
         }
         .accessibilityIdentifier("settings.debug.root")
+        .onAppear(perform: checkCalendarNow)
     }
     
     private var persistentPreviewsCard: some View {
@@ -325,6 +334,239 @@ struct DebugSettingsView: View {
                 color: .red,
                 action: viewModel.resetAllPreviews
             )
+        }
+    }
+
+    private var calendarDiagnosticCard: some View {
+        SettingsCard(title: "Calendar Permission Diagnostic") {
+            VStack(spacing: 4) {
+                statusRow(label: "Event Auth", value: calEventAuth)
+                statusRow(label: "Reminder Auth", value: calReminderAuth)
+                statusRow(label: "Calendars Found", value: calCount)
+            }
+            .padding(.vertical, 6)
+
+            if !calWarmupResult.isEmpty || !calWarmupError.isEmpty {
+                SettingsDivider()
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 6) {
+                        Image(systemName: calWarmupError.isEmpty ? "checkmark.circle" : "exclamationmark.triangle")
+                            .font(.system(size: 10))
+                            .foregroundStyle(calWarmupError.isEmpty ? .green : .red)
+                        Text(calWarmupResult)
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundStyle(calWarmupError.isEmpty ? .green : .red)
+                    }
+                    if !calWarmupError.isEmpty {
+                        Text(calWarmupError)
+                            .font(.system(size: 9, design: .monospaced))
+                            .foregroundStyle(.red)
+                            .lineLimit(3)
+                    }
+                }
+                .padding(.vertical, 4)
+            }
+
+            SettingsDivider()
+
+            DebugActionRow(
+                title: "Re-check Status",
+                description: "Read current EKEventStore authorization status.",
+                systemImage: "arrow.clockwise.circle.fill",
+                color: .gray,
+                buttonTitle: "Check",
+                action: checkCalendarNow
+            )
+
+            SettingsDivider()
+
+            DebugActionRow(
+                title: "Warm-up EventKit",
+                description: "Call requestFullAccessToEvents() to refresh TCC state.",
+                systemImage: "bolt.fill",
+                color: .orange,
+                buttonTitle: "Warm Up",
+                action: warmUpCalendar
+            )
+
+            SettingsDivider()
+
+            DebugActionRow(
+                title: "Force Read Calendar",
+                description: "Create fresh EKEventStore and attempt full calendar read.",
+                systemImage: "text.magnifyingglass",
+                color: .blue,
+                buttonTitle: "Test Read",
+                action: forceReadCalendar
+            )
+
+            SettingsDivider()
+
+            DebugActionRow(
+                title: "Open System Settings",
+                description: "Jump to Calendar privacy pane.",
+                systemImage: "gear",
+                color: .gray,
+                buttonTitle: "Open",
+                action: { NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Calendars")!) }
+            )
+
+            SettingsDivider()
+
+            DebugActionRow(
+                title: "Reset TCC Calendar Permission",
+                description: "Run 'tccutil reset Calendar' to clear stale permission entry.",
+                systemImage: "trash.circle.fill",
+                color: .red,
+                buttonTitle: "Reset",
+                action: resetCalendarTCC
+            )
+        }
+    }
+
+    @ViewBuilder
+    private func statusRow(label: String, value: String) -> some View {
+        HStack(spacing: 6) {
+            Text(label + ":")
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(.white.opacity(0.55))
+            Text(value)
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(
+                    value == "fullAccess ✓" ? Color.green :
+                    value == "notDetermined" ? Color.yellow :
+                    value == "denied" ? Color.red :
+                    .white.opacity(0.85)
+                )
+        }
+    }
+
+    private func statusString(_ s: EKAuthorizationStatus) -> String {
+        switch s {
+        case .notDetermined: return "notDetermined"
+        case .restricted:    return "restricted"
+        case .denied:        return "denied"
+        case .fullAccess:    return "fullAccess ✓"
+        case .writeOnly:     return "writeOnly"
+        @unknown default:    return "unknown"
+        }
+    }
+
+    private func checkCalendarNow() {
+        calEventAuth = statusString(EKEventStore.authorizationStatus(for: .event))
+        calReminderAuth = statusString(EKEventStore.authorizationStatus(for: .reminder))
+        let s = EKEventStore.authorizationStatus(for: .event)
+        if s == .fullAccess || s == .writeOnly {
+            calCount = "\(EKEventStore.app.calendars(for: .event).count)"
+        } else {
+            calCount = "—"
+        }
+    }
+
+    private func warmUpCalendar() {
+        calWarmupResult = "Trying async API…"
+        calWarmupError = ""
+        let store = EKEventStore()
+        Task {
+            do {
+                let granted = try await store.requestFullAccessToEvents()
+                calWarmupResult = "async API: \(granted ? "Granted" : "Denied")"
+                checkCalendarNow()
+            } catch {
+                let nsError = error as NSError
+                calWarmupResult = "async API threw"
+                calWarmupError = "domain=\(nsError.domain) code=\(nsError.code) desc=\(nsError.localizedDescription)"
+                tryCompletionAPI(store: store)
+            }
+        }
+    }
+
+    private func tryCompletionAPI(store: EKEventStore) {
+        calWarmupResult = "Trying completion API…"
+        store.requestAccess(to: .event) { [self] granted, error in
+            DispatchQueue.main.async {
+                if let err = error as? NSError {
+                    self.calWarmupResult = "completion API threw"
+                    self.calWarmupError = "domain=\(err.domain) code=\(err.code) desc=\(err.localizedDescription)"
+                } else if let err = error {
+                    self.calWarmupResult = "completion API threw"
+                    self.calWarmupError = String(describing: err)
+                } else {
+                    self.calWarmupResult = "completion API: \(granted ? "Granted" : "Denied")"
+                }
+                self.checkCalendarNow()
+            }
+        }
+    }
+
+    private func forceReadCalendar() {
+        calWarmupResult = "Trying fresh store…"
+        calWarmupError = ""
+        let store = EKEventStore()
+        Task {
+            do {
+                let granted = try await store.requestFullAccessToEvents()
+                if granted {
+                    readFromStore(store, label: "fresh+granted")
+                } else {
+                    calWarmupResult = "fresh store denied"
+                    readFromStore(store, label: "fresh+denied")
+                }
+            } catch {
+                let nsError = error as NSError
+                calWarmupResult = "fresh async API threw"
+                calWarmupError = "domain=\(nsError.domain) code=\(nsError.code) desc=\(nsError.localizedDescription)"
+                store.requestAccess(to: .event) { [self] granted, error in
+                    DispatchQueue.main.async {
+                        if let err = error as? NSError {
+                            self.calWarmupResult = "fresh+completion threw"
+                            self.calWarmupError = "domain=\(err.domain) code=\(err.code) desc=\(err.localizedDescription)"
+                        } else if let err = error {
+                            self.calWarmupResult = "fresh+completion threw"
+                            self.calWarmupError = String(describing: err)
+                        } else {
+                            self.calWarmupResult = "fresh+completion: \(granted ? "Granted" : "Denied")"
+                            if granted { self.readFromStore(store, label: "fresh+completion") }
+                        }
+                        self.checkCalendarNow()
+                    }
+                }
+            }
+        }
+    }
+
+    private func readFromStore(_ store: EKEventStore, label: String) {
+        let cals = store.calendars(for: .event)
+        let pred = store.predicateForEvents(
+            withStart: Date().addingTimeInterval(-86400 * 30),
+            end: Date().addingTimeInterval(86400),
+            calendars: nil
+        )
+        let events = store.events(matching: pred)
+        calWarmupResult = "\(label): \(cals.count) cals, \(events.count) events"
+    }
+
+    private func resetCalendarTCC() {
+        calWarmupResult = "Resetting TCC…"
+        calWarmupError = ""
+        let task = Process()
+        task.launchPath = "/usr/bin/env"
+        task.arguments = ["tccutil", "reset", "Calendar", "com.Jackson.OpenNotch"]
+        task.terminationHandler = { [self] process in
+            DispatchQueue.main.async {
+                if process.terminationStatus == 0 {
+                    calWarmupResult = "TCC reset OK. Try Check or Warm Up again."
+                } else {
+                    calWarmupResult = "TCC reset failed (status \(process.terminationStatus))"
+                    calWarmupError = "Run manually: tccutil reset Calendar com.Jackson.OpenNotch"
+                }
+            }
+        }
+        do {
+            try task.run()
+        } catch {
+            calWarmupResult = "Could not launch tccutil"
+            calWarmupError = error.localizedDescription
         }
     }
 }

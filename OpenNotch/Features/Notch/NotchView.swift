@@ -230,9 +230,7 @@ private extension NotchView {
                         ringSize: ringSize
                     )
                     .onTapGesture {
-                        if !SettingsWindowCoordinator.exists {
-                            openWindow(id: WindowsScene.settings)
-                        }
+                        openWindow(id: WindowsScene.settings)
                         SettingsWindowCoordinator.activate()
                     }
                     .contextMenu { contextMenuItem }
@@ -348,9 +346,7 @@ private extension NotchView {
                         .allowsHitTesting(!dashboardOpen)
 
                         Button {
-                            if !SettingsWindowCoordinator.exists {
-                                openWindow(id: WindowsScene.settings)
-                            }
+                            openWindow(id: WindowsScene.settings)
                             SettingsWindowCoordinator.activate()
                             if dashboardOpen && settingsViewModel.application.dashboardOpenMode != .hover {
                                 toggleDashboard()
@@ -631,9 +627,7 @@ private extension NotchView {
     @ViewBuilder
     var contextMenuItem: some View {
         Button {
-            if !SettingsWindowCoordinator.exists {
-                openWindow(id: WindowsScene.settings)
-            }
+            openWindow(id: WindowsScene.settings)
             SettingsWindowCoordinator.activate()
         } label: {
             Image(systemName: "gearshape")

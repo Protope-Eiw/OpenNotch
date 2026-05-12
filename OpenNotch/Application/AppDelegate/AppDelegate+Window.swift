@@ -12,7 +12,7 @@ extension AppDelegate {
         let displayLocation = settingsViewModel.application.displayLocation
 
         switch displayLocation {
-        case .auto:
+        case .auto, .builtIn:
             createAutoNotchWindow()
         case .manual:
             createManualNotchWindows()
@@ -24,7 +24,7 @@ extension AppDelegate {
         let displayLocation = settingsViewModel.application.displayLocation
 
         switch displayLocation {
-        case .auto:
+        case .auto, .builtIn:
             if !notchWindows.isEmpty {
                 destroyNotchWindows()
             }
@@ -76,7 +76,7 @@ extension AppDelegate {
         let displayLocation = settingsViewModel.application.displayLocation
 
         switch displayLocation {
-        case .auto:
+        case .auto, .builtIn:
             suspendAutoWindowForLock()
         case .manual:
             suspendManualWindowsForLock()
@@ -102,7 +102,8 @@ extension AppDelegate {
     // MARK: - Auto Mode
 
     private func createAutoNotchWindow() {
-        guard let screen = NSScreen.screenWithMouse ?? NSScreen.screens.first else { return }
+        guard let screen = NSScreen.preferredNotchScreen(for: settingsViewModel.application)
+                ?? NSScreen.screens.first else { return }
 
         lastMouseScreenID = screen.displayID
 
@@ -129,7 +130,8 @@ extension AppDelegate {
 
         notchViewModel.updateDimensionsForDisplayTransition()
 
-        guard let screen = NSScreen.screenWithMouse ?? NSScreen.screens.first else {
+        guard let screen = NSScreen.preferredNotchScreen(for: settingsViewModel.application)
+                ?? NSScreen.screens.first else {
             clearNowPlayingPrimaryWindowPresentationState()
             window.orderOut(nil)
             return
@@ -272,7 +274,7 @@ extension AppDelegate {
         guard !isPrimaryWindowSuspendedForLock else { return }
 
         switch settingsViewModel.application.displayLocation {
-        case .auto:
+        case .auto, .builtIn:
             applyPresentationState(viewModel: notchViewModel, window: window, on: screen)
         case .manual:
             guard let mouseScreen = NSScreen.screenWithMouse ?? NSScreen.screens.first,

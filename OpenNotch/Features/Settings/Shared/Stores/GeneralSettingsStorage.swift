@@ -99,7 +99,7 @@ enum GeneralSettingsStorage {
         Keys.notchWidth: 0,
         Keys.notchHeight: 0,
         Keys.menuBarIcon: true,
-        Keys.displayLocation: NotchDisplayLocation.auto.rawValue,
+        Keys.displayLocation: NotchDisplayLocation.builtIn.rawValue,
         Keys.enabledDisplayUUIDs: [],
         Keys.appLanguage: OpenNotchLanguage.system.rawValue,
         Keys.notchAnimationPreset: NotchAnimationPreset.balanced.rawValue,

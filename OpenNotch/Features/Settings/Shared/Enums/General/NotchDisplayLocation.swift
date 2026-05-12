@@ -10,12 +10,15 @@ import SwiftUI
 
 enum NotchDisplayLocation: String, CaseIterable {
     case auto
+    case builtIn
     case manual
 
     var title: String {
         switch self {
         case .auto:
             return "settings.general.display.auto"
+        case .builtIn:
+            return "settings.general.display.builtin"
         case .manual:
             return "settings.general.display.manual"
         }
@@ -25,6 +28,8 @@ enum NotchDisplayLocation: String, CaseIterable {
         switch self {
         case .auto:
             return "cursorarrow.motionlines"
+        case .builtIn:
+            return "macbook.gen2"
         case .manual:
             return "display.2"
         }

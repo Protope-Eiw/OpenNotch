@@ -44,6 +44,8 @@ final class DebugSettingsViewModel: ObservableObject {
 
     @Published private(set) var isPreviewSequenceRunning = false
 
+
+
     private static let sequenceContentPrefix = NotchContentRegistry.DebugSequence.prefix
     private static let sequenceFocusID = NotchContentRegistry.DebugSequence.focus
     private static let sequenceScreenRecordingID = NotchContentRegistry.DebugSequence.screenRecording

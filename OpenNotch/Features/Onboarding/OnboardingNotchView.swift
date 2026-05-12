@@ -9,6 +9,7 @@ import SwiftUI
 
 struct OnboardingNotchView: View {
     @Environment(\.openURL) private var openURL
+    @Environment(\.openWindow) private var openWindow
     
     let step: OnboardingSteps
     let onStepChange: (OnboardingSteps) -> Void
@@ -67,6 +68,7 @@ struct OnboardingNotchView: View {
             HStack {
                 Button(action: {
                     UserDefaults.standard.set("permissions", forKey: "settings.root.selection")
+                    openWindow(id: WindowsScene.settings)
                     SettingsWindowCoordinator.activate()
                 }) {
                     Text(verbatim: "Open Settings")

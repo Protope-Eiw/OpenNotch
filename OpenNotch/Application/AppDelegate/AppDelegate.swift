@@ -54,7 +54,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSRunningApplication.runningApplications(withBundleIdentifier: Bundle.main.bundleIdentifier ?? "")
             .filter { $0 != .current }
-            .forEach { $0.forceTerminate() }
+            .forEach { $0.terminate() }
 
         applyActivationPolicy(
             showsDockIcon: isRunningUITests || settingsViewModel.application.isDockIconVisible
