@@ -264,7 +264,9 @@ private extension NotchView {
                                                 dashboardTab = tab
                                             }
                                         } else {
-                                            dashboardTab = tab
+                                            var t = Transaction()
+                                            t.disablesAnimations = true
+                                            withTransaction(t) { dashboardTab = tab }
                                         }
                                     }
                                 } label: {
@@ -489,7 +491,7 @@ private extension NotchView {
         guard !notchExpandedDownward else { return }
 
         dashboardHoverTask = Task { @MainActor in
-            try? await Task.sleep(for: .milliseconds(200))
+            try? await Task.sleep(for: .milliseconds(100))
             guard !Task.isCancelled else { return }
             guard !notchExpandedDownward else { return }
             withAnimation(.spring(response: 0.42, dampingFraction: 0.8)) {

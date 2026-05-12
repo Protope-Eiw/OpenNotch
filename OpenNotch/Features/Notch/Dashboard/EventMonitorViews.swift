@@ -85,6 +85,7 @@ struct SwipeEventMonitor: NSViewRepresentable {
             }
             if event.phase == .ended || event.phase == .cancelled {
                 accumX = 0
+                didFire = false
                 return event
             }
 
@@ -94,19 +95,19 @@ struct SwipeEventMonitor: NSViewRepresentable {
 
             if didFire { return nil }
 
+            // Consume horizontal-dominant events during accumulation so inner views
+            // don't simultaneously scroll while we're deciding which tab to switch to.
             accumX += dx
-            if accumX < -55 {
+            if accumX < -35 {
                 didFire = true
                 accumX = 0
-                DispatchQueue.main.async { self.onSwipeLeft?() }
-                return nil
-            } else if accumX > 55 {
+                onSwipeLeft?()
+            } else if accumX > 35 {
                 didFire = true
                 accumX = 0
-                DispatchQueue.main.async { self.onSwipeRight?() }
-                return nil
+                onSwipeRight?()
             }
-            return event
+            return nil
         }
     }
 }
