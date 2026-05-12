@@ -93,6 +93,14 @@ final class NotchEngine: ObservableObject {
                 return
             }
 
+            // Remove any already-queued entries for the same content to prevent a
+            // double-transition (open→close→open) when IOKit fires multiple callbacks
+            // within a window that slips past PowerViewModel's debounce.
+            eventQueue.removeAll {
+                if case .showTemporaryNotification(let c, _) = $0 { return c.id == content.id }
+                return false
+            }
+
         case .showLiveActivity(let content):
             updateLiveActivityStack(with: content)
 
@@ -333,6 +341,12 @@ final class NotchEngine: ObservableObject {
             await showLiveContentTransition(highestPriorityVisibleActivity)
 
         case .showTemporaryNotification(let content, let duration):
+            // Re-check at execution time: a prior queued event may have already shown
+            // this content while this entry was waiting in the queue.
+            if notchModel.temporaryNotificationContent?.id == content.id {
+                restartTemporaryTimer(duration: duration)
+                return
+            }
             await showTemporaryTransition(content, duration: duration)
 
         case .hide:
