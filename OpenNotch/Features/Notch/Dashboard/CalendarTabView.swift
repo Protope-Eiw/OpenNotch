@@ -644,27 +644,21 @@ final class CalendarStore: ObservableObject {
         }
     }
 
-    /// macOS 15+ requires calling requestFullAccessToEvents() at least once
-    /// per session for authorizationStatus() to return the correct value.
-    /// Only activates when access was already granted — never shows a dialog.
+    /// macOS 15+ returns .notDetermined from authorizationStatus() until
+    /// requestFullAccessToEvents() is called at least once per session —
+    /// even when the user has already granted access. This call is always
+    /// silent for previously-granted permissions (no dialog). For genuinely
+    /// undetermined permissions it will show the system dialog.
     func warmUp() async {
         guard !hasWarmedUp else { return }
         hasWarmedUp = true
-        let preCheck = EKEventStore.authorizationStatus(for: .event)
-        guard preCheck == .fullAccess || preCheck == .writeOnly else {
-            await MainActor.run { authStatus = preCheck }
-            return
-        }
-        // Guard against concurrent requestAccess() call.
+        // Skip if requestAccess() is already in flight.
         guard await MainActor.run(body: { !isRequesting }) else { return }
         do {
             _ = try await ekStore.requestFullAccessToEvents()
-            let s = EKEventStore.authorizationStatus(for: .event)
-            await MainActor.run { authStatus = s }
-        } catch {
-            let s = EKEventStore.authorizationStatus(for: .event)
-            await MainActor.run { authStatus = s }
-        }
+        } catch {}
+        let s = EKEventStore.authorizationStatus(for: .event)
+        await MainActor.run { authStatus = s }
     }
 
     func openPrivacySettings() {
