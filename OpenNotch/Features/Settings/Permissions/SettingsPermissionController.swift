@@ -48,6 +48,7 @@ final class SettingsPermissionController: NSObject, ObservableObject, CBCentralM
 
     private var isPollingActive: Bool = false
     private var aggressiveRefreshTask: Task<Void, Never>?
+    private var pollingCancellable: AnyCancellable?
 
     private static let privacySettingsURL = URL(
         string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"
@@ -95,17 +96,31 @@ final class SettingsPermissionController: NSObject, ObservableObject, CBCentralM
         stopPolling()
         isPollingActive = true
 
-        Timer.publish(every: 2, on: .main, in: .common)
+        // macOS 15+ requires activation before authorizationStatus() is reliable,
+        // but only trigger the dialog if permission hasn't been determined yet.
+        let currentStatus = EKEventStore.authorizationStatus(for: .event)
+        if currentStatus == .notDetermined {
+            Task { @MainActor in
+                do {
+                    _ = try await ekStore.requestFullAccessToEvents()
+                } catch {}
+                // Re-read after the call: requestFullAccessToEvents may return false for
+                // both .denied and .restricted — authorizationStatus() returns the correct value.
+                calendarAuthStatus = EKEventStore.authorizationStatus(for: .event)
+            }
+        }
+
+        pollingCancellable = Timer.publish(every: 2, on: .main, in: .common)
             .autoconnect()
             .sink { [weak self] _ in
                 guard let self, self.isPollingActive else { return }
                 self.refresh()
             }
-            .store(in: &cancellables)
     }
 
     func stopPolling() {
         isPollingActive = false
+        pollingCancellable = nil
         aggressiveRefreshTask?.cancel()
         aggressiveRefreshTask = nil
     }
@@ -126,7 +141,21 @@ final class SettingsPermissionController: NSObject, ObservableObject, CBCentralM
         isAccessibilityTrusted = Self.currentAccessibilityTrustState()
         canPostMediaKeyEvents = Self.currentPostEventAccessState()
         canCaptureScreenAudio = Self.currentScreenCaptureAccessState()
-        calendarAuthStatus = EKEventStore.authorizationStatus(for: .event)
+        calendarAuthStatus = resolveCalendarAuthStatus()
+    }
+
+    private func resolveCalendarAuthStatus() -> EKAuthorizationStatus {
+        let status = EKEventStore.authorizationStatus(for: .event)
+        if status == .fullAccess || status == .writeOnly {
+            return status
+        }
+        // On macOS 15+, authorizationStatus() can be slow to update after the user
+        // grants access. Use calendars(for:) as a more reliable fallback signal —
+        // it only returns non-empty results when access has actually been granted.
+        if !ekStore.calendars(for: .event).isEmpty {
+            return .fullAccess
+        }
+        return status
     }
 
     var permissionItems: [PermissionItem] {
@@ -196,13 +225,13 @@ final class SettingsPermissionController: NSObject, ObservableObject, CBCentralM
                 assetImageName: nil,
                 systemImage: "calendar",
                 tintColor: .red,
-                isGranted: calendarAuthStatus == .fullAccess,
-                actionTitleKey: calendarAuthStatus == .fullAccess ? nil : (
+                isGranted: calendarAuthStatus == .fullAccess || calendarAuthStatus == .writeOnly,
+                actionTitleKey: calendarAuthStatus == .fullAccess || calendarAuthStatus == .writeOnly ? nil : (
                     calendarAuthStatus == .notDetermined ?
                     "settings.permissions.action.grantAccess" :
                     "settings.permissions.action.openPrivacySettings"
                 ),
-                fallbackActionTitle: calendarAuthStatus == .fullAccess ? nil : (
+                fallbackActionTitle: calendarAuthStatus == .fullAccess || calendarAuthStatus == .writeOnly ? nil : (
                     calendarAuthStatus == .notDetermined ? "Grant Access" : "Open Privacy Settings"
                 ),
                 accessibilityIdentifier: "settings.permissions.calendar"
@@ -324,6 +353,12 @@ final class SettingsPermissionController: NSObject, ObservableObject, CBCentralM
 
     private func requestCalendarAccess() {
         let status = EKEventStore.authorizationStatus(for: .event)
+        guard status != .fullAccess else { refresh(); return }
+        if status == .writeOnly {
+            refresh()
+            startAggressiveRefresh()
+            return
+        }
         guard status == .notDetermined else {
             Self.openCalendarPrivacySettings()
             refresh()
@@ -332,14 +367,12 @@ final class SettingsPermissionController: NSObject, ObservableObject, CBCentralM
         }
         Task { @MainActor in
             do {
-                let granted = try await ekStore.requestFullAccessToEvents()
-                calendarAuthStatus = granted ? .fullAccess : .denied
-                startAggressiveRefresh()
+                _ = try await ekStore.requestFullAccessToEvents()
             } catch {
                 Self.openCalendarPrivacySettings()
-                refresh()
-                startAggressiveRefresh()
             }
+            calendarAuthStatus = EKEventStore.authorizationStatus(for: .event)
+            startAggressiveRefresh()
         }
     }
 

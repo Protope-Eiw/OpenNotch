@@ -920,7 +920,7 @@ final class NotchViewModelIntegrationTests: XCTestCase {
             settings: settings,
             screenMetricsProvider: { settings in
                 switch settings.displayLocation {
-                case .auto:
+                case .auto, .builtIn:
                     return (width: 1512, topInset: 74, notchSize: CGSize(width: 206, height: 37))
                 case .manual:
                     return (width: 1728, topInset: 0, notchSize: nil)
@@ -953,7 +953,7 @@ final class NotchViewModelIntegrationTests: XCTestCase {
             settings: settings,
             screenMetricsProvider: { settings in
                 switch settings.screenSelectionPreferences.displayLocation {
-                case .auto:
+                case .auto, .builtIn:
                     return (width: 1512, topInset: 74, notchSize: CGSize(width: 206, height: 37))
                 case .manual:
                     return (width: 1920, topInset: 0, notchSize: nil)

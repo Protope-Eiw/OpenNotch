@@ -26,7 +26,7 @@ final class TestNotchSettings: NotchSettingsProviding {
     init(
         notchWidth: Int = 0,
         notchHeight: Int = 0,
-        displayLocation: NotchDisplayLocation = .main,
+        displayLocation: NotchDisplayLocation = .auto,
         screenSelectionPreferences: NotchScreenSelectionPreferences? = nil,
         notchAnimationPreset: NotchAnimationPreset = .balanced,
         isNotchTapToExpandEnabled: Bool = true,
@@ -226,25 +226,6 @@ final class FakeScreenRecordingMonitor: ScreenRecordingMonitoring {
     }
 }
 
-@MainActor
-final class FakeClipboardMonitor: ClipboardMonitoring {
-    var onClipboardChange: ((ClipboardSnapshot) -> Void)?
-
-    private(set) var startCalls = 0
-    private(set) var stopCalls = 0
-
-    func startMonitoring() {
-        startCalls += 1
-    }
-
-    func stopMonitoring() {
-        stopCalls += 1
-    }
-
-    func publish(_ snapshot: ClipboardSnapshot) {
-        onClipboardChange?(snapshot)
-    }
-}
 
 final class FakeLockScreenMonitoringService: LockScreenMonitoring {
     var onLockStateChange: ((Bool) -> Void)?
@@ -280,6 +261,9 @@ final class FakeLockScreenSoundPlayer: LockScreenSoundPlaying {
     func playUnlock() {
         playedSounds.append(.unlock)
     }
+
+    func stopAll() {}
+    func prewarm() {}
 }
 
 enum TestLifetime {

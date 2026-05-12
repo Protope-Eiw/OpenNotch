@@ -66,6 +66,12 @@ enum NotchScreenSelection {
         case .auto:
             return []
 
+        case .builtIn:
+            if let builtIn = candidates.first(where: { $0.isBuiltIn }) {
+                return [builtIn.displayID]
+            }
+            return candidates.first.map { [$0.displayID] } ?? []
+
         case .manual:
             let matching = candidates.filter { preferences.enabledDisplayUUIDs.contains($0.displayUUID.uppercased()) }
             if !matching.isEmpty {
@@ -116,6 +122,10 @@ extension NSScreen {
         switch preferences.displayLocation {
         case .auto:
             return screenWithMouse.map { [$0] } ?? []
+
+        case .builtIn:
+            return screens.first(where: { $0.isBuiltInDisplay }).map { [$0] }
+                ?? screenWithMouse.map { [$0] } ?? []
 
         case .manual:
             let selectedIDs = NotchScreenSelection.preferredDisplayIDs(

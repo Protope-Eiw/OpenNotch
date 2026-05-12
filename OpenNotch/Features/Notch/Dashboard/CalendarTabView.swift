@@ -12,16 +12,30 @@ struct CalendarTabView: View {
     @State private var showEditSheet = false
     @State private var editingEvent: EKEvent? = nil
     @State private var showDeleteConfirm = false
+    @State private var authStatus: EKAuthorizationStatus = EKEventStore.authorizationStatus(for: .event)
 
     var body: some View {
-        switch store.authStatus {
+        Group {
+            switch authStatus {
         case .notDetermined:
-            calendarPermissionView(
-                icon: "calendar",
-                message: L10n.app("calendar.needPermission", fallback: "Calendar access needed"),
-                buttonLabel: L10n.app("calendar.grantAccess", fallback: "Grant Access"),
-                action: { store.requestAccess() }
-            )
+            if store.isRequesting {
+                VStack(spacing: 10) {
+                    ProgressView()
+                        .controlSize(.small)
+                        .scaleEffect(0.8)
+                    Text(L10n.app("calendar.requesting", fallback: "Requesting access…"))
+                        .font(.system(size: 10))
+                        .foregroundStyle(.white.opacity(0.3))
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                calendarPermissionView(
+                    icon: "calendar",
+                    message: L10n.app("calendar.needPermission", fallback: "Calendar access needed"),
+                    buttonLabel: L10n.app("calendar.grantAccess", fallback: "Grant Access"),
+                    action: { store.requestAccess() }
+                )
+            }
         case .denied, .restricted:
             calendarPermissionView(
                 icon: "calendar.badge.exclamationmark",
@@ -81,6 +95,14 @@ struct CalendarTabView: View {
                     editingEvent = nil
                 }
             }
+            }
+        }
+        .onReceive(store.$authStatus) { newStatus in
+            authStatus = newStatus
+        }
+        .task {
+            await store.warmUp()
+            authStatus = store.authStatus
         }
     }
 
@@ -526,8 +548,8 @@ final class CalendarStore: ObservableObject {
     @Published var events: [EKEvent] = []
     @Published var reminders: [EKReminder] = []
     @Published var version: Int = 0
-    @Published var authStatus: EKAuthorizationStatus = EKEventStore.authorizationStatus(for: .event)
-    @Published var reminderAuthStatus: EKAuthorizationStatus = EKEventStore.authorizationStatus(for: .reminder)
+    @Published var authStatus: EKAuthorizationStatus = .notDetermined
+    @Published var reminderAuthStatus: EKAuthorizationStatus = .notDetermined
 
     var eventDates: Set<String> {
         Set(events.map { dateKey($0.startDate) })
@@ -547,8 +569,13 @@ final class CalendarStore: ObservableObject {
     private let ekStore = EKEventStore.app
     private var activeObserver: NSObjectProtocol?
     private var lastLoadedDate: Date?
+    @Published var isRequesting = false
+    private var hasWarmedUp = false
 
     init() {
+        reminderAuthStatus = EKEventStore.authorizationStatus(for: .reminder)
+        let status = EKEventStore.authorizationStatus(for: .event)
+        authStatus = status
         activeObserver = NotificationCenter.default.addObserver(
             forName: NSApplication.didBecomeActiveNotification,
             object: nil,
@@ -556,6 +583,12 @@ final class CalendarStore: ObservableObject {
         ) { [weak self] _ in
             guard let self else { return }
             Task { @MainActor in self.refresh() }
+        }
+    }
+
+    deinit {
+        if let activeObserver {
+            NotificationCenter.default.removeObserver(activeObserver)
         }
     }
 
@@ -568,7 +601,7 @@ final class CalendarStore: ObservableObject {
         lastLoadedDate = date
         let status = EKEventStore.authorizationStatus(for: .event)
         authStatus = status
-        guard isAuthorized(status) else { return }
+        guard status == .fullAccess || status == .writeOnly else { return }
         fetch(for: date)
     }
 
@@ -580,6 +613,20 @@ final class CalendarStore: ObservableObject {
     }
 
     func requestAccess() {
+        isRequesting = true
+        let status = EKEventStore.authorizationStatus(for: .event)
+        if status == .writeOnly {
+            authStatus = status
+            fetch(for: lastLoadedDate ?? Date())
+            loadReminders()
+            isRequesting = false
+            return
+        }
+        guard status == .notDetermined else {
+            openPrivacySettings()
+            isRequesting = false
+            return
+        }
         Task {
             do {
                 let granted = try await ekStore.requestFullAccessToEvents()
@@ -593,6 +640,30 @@ final class CalendarStore: ObservableObject {
             } catch {
                 openPrivacySettings()
             }
+            isRequesting = false
+        }
+    }
+
+    /// macOS 15+ requires calling requestFullAccessToEvents() at least once
+    /// per session for authorizationStatus() to return the correct value.
+    /// Only activates when access was already granted — never shows a dialog.
+    func warmUp() async {
+        guard !hasWarmedUp else { return }
+        hasWarmedUp = true
+        let preCheck = EKEventStore.authorizationStatus(for: .event)
+        guard preCheck == .fullAccess || preCheck == .writeOnly else {
+            await MainActor.run { authStatus = preCheck }
+            return
+        }
+        // Guard against concurrent requestAccess() call.
+        guard await MainActor.run(body: { !isRequesting }) else { return }
+        do {
+            _ = try await ekStore.requestFullAccessToEvents()
+            let s = EKEventStore.authorizationStatus(for: .event)
+            await MainActor.run { authStatus = s }
+        } catch {
+            let s = EKEventStore.authorizationStatus(for: .event)
+            await MainActor.run { authStatus = s }
         }
     }
 
@@ -627,7 +698,7 @@ final class CalendarStore: ObservableObject {
     private func refresh() {
         let status = EKEventStore.authorizationStatus(for: .event)
         authStatus = status
-        if isAuthorized(status), let date = lastLoadedDate {
+        if (status == .fullAccess || status == .writeOnly), let date = lastLoadedDate {
             fetch(for: date)
         }
         let reminderStatus = EKEventStore.authorizationStatus(for: .reminder)
@@ -635,9 +706,6 @@ final class CalendarStore: ObservableObject {
         if reminderStatus == .fullAccess { fetchReminders() }
     }
 
-    private func isAuthorized(_ status: EKAuthorizationStatus) -> Bool {
-        status == .fullAccess
-    }
 
     private func fetch(for date: Date) {
         let cal   = Calendar.current
