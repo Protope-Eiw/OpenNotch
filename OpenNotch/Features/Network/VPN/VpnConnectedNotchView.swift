@@ -60,8 +60,7 @@ struct VpnConnectedNotchView: View {
             }
             Spacer()
             
-            Text(verbatim: "Active")
-                .foregroundStyle(.white.opacity(0.8))
+            SWStatusBadge(text: "Active", style: .success)
         }
         .padding(.horizontal, 14.scaled(by: scale))
         .padding(.vertical, 10)
@@ -80,10 +79,7 @@ struct VpnConnectedNotchView: View {
                         .padding(.bottom, 10)
                     
                     VStack(alignment: .leading, spacing: 3) {
-                        Text(verbatim: "Connected")
-                            .lineLimit(1)
-                            .font(.system(size: 13))
-                            .foregroundStyle(.white.opacity(0.4))
+                        SWStatusBadge(text: "Connected", style: .success)
                         
                         MarqueeText(
                             Binding.constant(resolvedVPNName),

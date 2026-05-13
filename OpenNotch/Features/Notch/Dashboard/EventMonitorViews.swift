@@ -63,7 +63,7 @@ struct SwipeEventMonitor: NSViewRepresentable {
         var onSwipeRight: (() -> Void)?
         private var monitor: Any?
         private var accumX: CGFloat = 0
-        private var didFire = false
+        private static var swipeConsumed = false
 
         func start(left: @escaping () -> Void, right: @escaping () -> Void) {
             onSwipeLeft = left
@@ -79,13 +79,16 @@ struct SwipeEventMonitor: NSViewRepresentable {
         }
 
         private func handle(_ event: NSEvent) -> NSEvent? {
+            if !event.momentumPhase.isEmpty {
+                return event
+            }
+
             if event.phase == .began {
                 accumX = 0
-                didFire = false
+                Self.swipeConsumed = false
             }
             if event.phase == .ended || event.phase == .cancelled {
                 accumX = 0
-                didFire = false
                 return event
             }
 
@@ -93,17 +96,15 @@ struct SwipeEventMonitor: NSViewRepresentable {
             let dy = event.scrollingDeltaY
             guard abs(dx) > abs(dy) * 1.4, abs(dx) > 1 else { return event }
 
-            if didFire { return nil }
+            if Self.swipeConsumed { return nil }
 
-            // Consume horizontal-dominant events during accumulation so inner views
-            // don't simultaneously scroll while we're deciding which tab to switch to.
             accumX += dx
             if accumX < -35 {
-                didFire = true
+                Self.swipeConsumed = true
                 accumX = 0
                 onSwipeLeft?()
             } else if accumX > 35 {
-                didFire = true
+                Self.swipeConsumed = true
                 accumX = 0
                 onSwipeRight?()
             }

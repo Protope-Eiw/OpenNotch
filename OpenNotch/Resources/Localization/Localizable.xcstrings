@@ -100,6 +100,16 @@
         }
       }
     },
+    "%@%.1f%% %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@%2$.1f%% %3$@"
+          }
+        }
+      }
+    },
     "%@%%" : {
 
     },
@@ -1825,6 +1835,9 @@
           }
         }
       }
+    },
+    "Category" : {
+
     },
     "Change" : {
       "extractionState" : "stale",
@@ -3980,6 +3993,9 @@
     "Create fresh EKEventStore and attempt full calendar read." : {
 
     },
+    "Date" : {
+
+    },
     "Debug Ensemble" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -4613,6 +4629,9 @@
           }
         }
       }
+    },
+    "DSK %lld%%" : {
+
     },
     "Dynamic Notch" : {
       "extractionState" : "stale",
@@ -8546,6 +8565,9 @@
           }
         }
       }
+    },
+    "Reference" : {
+
     },
     "Remove the favorite button from the expanded player controls." : {
       "extractionState" : "stale",
@@ -18644,6 +18666,9 @@
           }
         }
       }
+    },
+    "Value" : {
+
     },
     "Version: %@" : {
       "extractionState" : "stale",

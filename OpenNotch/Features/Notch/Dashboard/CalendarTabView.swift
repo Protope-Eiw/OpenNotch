@@ -649,16 +649,21 @@ final class CalendarStore: ObservableObject {
     /// even when the user has already granted access. This call is always
     /// silent for previously-granted permissions (no dialog). For genuinely
     /// undetermined permissions it will show the system dialog.
+    /// Must run off the main actor to prevent main thread freeze
+    /// when the system permission dialog appears.
     func warmUp() async {
         guard !hasWarmedUp else { return }
         hasWarmedUp = true
-        // Skip if requestAccess() is already in flight.
         guard await MainActor.run(body: { !isRequesting }) else { return }
-        do {
-            _ = try await ekStore.requestFullAccessToEvents()
-        } catch {}
+        await Self.requestEventAccessOnce()
         let s = EKEventStore.authorizationStatus(for: .event)
         await MainActor.run { authStatus = s }
+    }
+
+    nonisolated private static func requestEventAccessOnce() async {
+        do {
+            _ = try await EKEventStore.app.requestFullAccessToEvents()
+        } catch {}
     }
 
     func openPrivacySettings() {

@@ -15,8 +15,12 @@ final class SystemMonitorViewModel: ObservableObject {
     @Published private(set) var diskUsedText: String = "–"
     @Published private(set) var diskTotalText: String = "–"
 
+    @Published private(set) var cpuHistory: [SWLineChart<String>.DataPoint] = []
+    @Published private(set) var memoryHistory: [SWAreaChart<String>.DataPoint] = []
+
     private var monitorTask: Task<Void, Never>?
     private var previousNetworkStats: NetworkStats?
+    private let maxHistory = 60
 
     private struct NetworkStats {
         var bytesSent: UInt64
@@ -40,11 +44,19 @@ final class SystemMonitorViewModel: ObservableObject {
     }
 
     private func refresh() {
-        cpuUsage = readCPUUsage()
-        memoryUsage = readMemoryUsage()
+        let cpu = readCPUUsage()
+        let mem = readMemoryUsage()
+        cpuUsage = cpu
+        memoryUsage = mem
         updateNetworkSpeed()
         readBattery()
         updateDiskUsage()
+
+        let now = Date()
+        cpuHistory.append(.init(date: now, value: cpu, category: "CPU"))
+        memoryHistory.append(.init(date: now, value: mem, category: "MEM"))
+        if cpuHistory.count > maxHistory { cpuHistory.removeFirst(cpuHistory.count - maxHistory) }
+        if memoryHistory.count > maxHistory { memoryHistory.removeFirst(memoryHistory.count - maxHistory) }
     }
 
     private func readBattery() {

@@ -10,10 +10,11 @@ The app is called **OpenNotch**.
 
 ## References
 
-OpenNotch is inspired by and references two open-source projects:
+OpenNotch references the following open-source projects for UI architecture and design inspiration:
 
-- **[DynamicNotch](https://github.com/MrKai77/DynamicNotch)** by MrKai77 — foundational notch overlay architecture and window management approach.
-- **[BoringNotch](https://github.com/TheBoredTeam/boring.notch)** by TheBoredTeam — UI patterns for music player, audio spectrum visualizer, HUD interception, and feature set inspiration.
+- **[ShipSwift](https://github.com/signerlabs/ShipSwift)** — animation components, chart components, icon components, UI components. LLM should reference this project as much as possible when building or modifying UI.
+- **[Stats](https://github.com/exelban/Stats)** (⭐38k) — macOS system monitor. Reference for system monitoring visualization (CPU, memory, disk, network charts), compact data display in constrained layouts, and threshold-based color schemes. Useful for Dashboard System tab and side widget beautification.
+- **[Ice](https://github.com/jordanbaird/Ice)** (⭐18k) — macOS menu bar manager. Reference for polished settings UI layout, card-based design patterns, and native macOS interaction patterns.
 
 ## Architecture overview
 
@@ -235,9 +236,67 @@ Artwork falls back to `NSWorkspace.shared.icon(forFile:)` when no `artworkData` 
 
 ---
 
+## System tab 向下抖动修复 — ZStack 稳定化
+
+**根因**：
+
+- `slideContent` 中的 `ForEach(slideTabs, id: \.self)` 在 tab 切换时会触发 ForEach diff：swipe right（system→calendar）时 `slideTabs` 从 `[overview, system, music]` 变成 `[music, calendar, apps]`，SwiftUI 移除 3 个旧 view、添加 3 个新 view，ZStack 重建布局
+- ZStack 重建期间，短 tab（173pt）的 center 对齐导致 content 的 Y 轴短暂偏移 — 表现为 ring chart 向下抖动
+- `alignment: .top` 只固定 content 在 HStack 内部的 Y 轴，无法阻止 ZStack 重建带来的偏移
+
+**修复方案（`DashboardPanelView.swift:75`）**：
+
+- `ForEach(slideTabs, id: \.self)` → `ForEach(enabledTabs, id: \.self)`：**所有 tab 始终渲染**，ForEach children 永不变化，ZStack 布局稳定
+- 移除 `slideTabs` 计算属性（不再需要）
+- Slide offset 计算 `slideOffset()` 已基于 `enabledTabs` 索引，适配此方案
+- 左间距 `.padding(.leading, 20)`（12→20）
+
+**关键点**：`enabledTabs` 在设置变更时仍可能变化（用户启用/禁用 tab），但设置变更不发生在滑动动画中，不影响稳定性。`fadeContent` 的 ForEach 已使用 `enabledTabs`，与此保持一致。
+
 ## TODOs
 
-### Dashboard 滑动溢出
+## Dashboard swipe bug — 永久修复规范
+
+**根因（三重原因叠加）：**
+
+1. **`NSEvent.addLocalMonitorForEvents` 特性**：所有注册的 local monitor 都会收到同一个 event，返回 `nil` 只阻止 event 送达视图层级，不影响其他 monitor
+2. **SwiftUI view reconciliation 导致 monitor 重叠**：tab 切换触发 body 重求值时，SwiftUI 可能短暂同时存在新旧两个 `NSViewRepresentable`，各自的 Coordinator 都持有一个 active monitor
+3. **动量滚动（momentum scroll）**：手指抬起后系统继续发送 momentum scroll events（`phase` 为空, `momentumPhase` 非空），积累的 delta 可能再次越过阈值
+
+**修复方案（`EventMonitorViews.swift:61-113`）：**
+
+| 防护层 | 实现 | 解决的问题 |
+|--------|------|-----------|
+| 静态消费锁 | `static var swipeConsumed` 跨所有 Coordinator 共享 | 多个 monitor 收到同一 event 时只触发一次 |
+| 阻止动量滚动 | `event.momentumPhase != .none` 时直接 `return event` | 手指抬起后的 momentum phase 不再积累 delta |
+| .ended 不重置锁 | `.ended`/`.cancelled` 只清 `accumX`，不清 `swipeConsumed` | 动量滚动期间锁保持 true，不触发二次跳转 |
+| .began 重置锁 | 新手势 `phase == .began` 才重置 `swipeConsumed = false` | 真正的新滑动手势正常工作 |
+
+**⚠️ 未来修改必须遵守的规则：**
+- `swipeConsumed` 必须是 `static var`（不能用实例变量）
+- 绝不能在 `.ended`/`.cancelled` 中重置 `swipeConsumed = false`
+- momentum phase 事件必须被跳过（`return event`），不能积累
+- 回调（`onSwipeLeft`/`onSwipeRight`）只能通过 `withAnimation` 修改 `selectedTab`，不能做其他副作用
+- 这三层防护缺一不可，去掉任何一层都可能复现
+
+**历史教训：** 本项目三次出现双指滑动双击问题，每次修复都因为后续修改不小心重置了 `swipeConsumed` 或移除了 momentum 跳过而复现。本次将此规范写入文档，作为项目级别的约束。如需修改 `handle()` 方法，必须完整保留上述三层防护。
+
+## SWRingChart 动画规范
+
+`SWRingChart` 使用 `@State private var ready` 标志控制首次出现的 0→value 动画：
+
+- **唯一一次动画**：`.onAppear { withAnimation(.easeOut(duration: 1.2).delay(0.2)) { ready = true } }`
+- `progress = ready ? value / maxValue : 0` — `ready` 从 `false` 变 `true` 时，所有环同步从 0 动画到目标值
+- **没有** `.onChange` handler
+- **没有** `.animation()` 修饰符
+- 后续数据更新（`data.value` 变化）直接 snap 到新值，**不触发任何 trim 动画**
+
+**为什么不能用 trim 动画：** slide tab 切换时，ZStack 上的 `.animation(.spring, value: selectedTab)` 会把 spring 动画施加到**所有**同时变化的 animatable 属性上。如果 monitor 数据恰好也在同一帧更新，trim 变化也被 spring 动画 → 抽搐。**快速切换时 data 没变 → 只有 offset 变化 → 正常。停顿久了 data 变了 → 抽搐。**
+
+**⚠️ 修改规则：**
+- slide tab 切片的 `.animation()` **只能放在 `.offset()` 上**，不能放在 ZStack 或更高层级
+- SWRingChart 内 trim 不能有 `.animation()` 或 `.onChange`（唯一允许用 `withAnimation` 的地方是 `.onAppear` 的 `ready` flag）
+- 具体位置：`DashboardPanelView.swift:79`（`.animation()` 在 `.offset()` 后），`SWRingChart.swift:85`（`.onAppear` withAnimation）<｜end▁of▁thinking｜>
 slide 模式下左右切换 tab 时，某些组件会从 dashboard 区域的左/右边缘露出。
 
 **溢出条件：**

@@ -16,10 +16,22 @@ struct AppLauncherView: View {
     var body: some View {
         Group {
             if store.isLoading {
-                ProgressView()
-                    .progressViewStyle(.circular)
-                    .scaleEffect(0.6)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                SWShimmer {
+                    VStack(spacing: 14) {
+                        ForEach(0..<4, id: \.self) { _ in
+                            HStack(spacing: 8) {
+                                ForEach(0..<5, id: \.self) { _ in
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(Color.white.opacity(0.08))
+                                        .frame(width: 60, height: 70)
+                                }
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if filteredApps.isEmpty {
                 VStack(spacing: 6) {
                     Image(systemName: "magnifyingglass")

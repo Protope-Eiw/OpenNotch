@@ -11,7 +11,7 @@ struct FocusOnNotchView: View {
     let style: FocusAppearanceStyle
 
     var body: some View {
-        FocusStatusNotchView(title: "On", tint: .indigo, style: style)
+        FocusStatusNotchView(title: "On", style: .info, tint: .indigo, focusStyle: style)
     }
 }
 
@@ -19,7 +19,7 @@ struct FocusOffNotchView: View {
     let style: FocusAppearanceStyle
 
     var body: some View {
-        FocusStatusNotchView(title: "Off", tint: .gray.opacity(0.6), style: style)
+        FocusStatusNotchView(title: "Off", style: .neutral, tint: .gray.opacity(0.6), focusStyle: style)
     }
 }
 
@@ -27,12 +27,20 @@ private struct FocusStatusNotchView: View {
     @Environment(\.notchScale) var scale
 
     let title: String
+    let badgeStyle: SWStatusBadgeStyle
     let tint: Color
-    let style: FocusAppearanceStyle
+    let focusStyle: FocusAppearanceStyle
+
+    init(title: String, style: SWStatusBadgeStyle, tint: Color, focusStyle: FocusAppearanceStyle) {
+        self.title = title
+        self.badgeStyle = style
+        self.tint = tint
+        self.focusStyle = focusStyle
+    }
 
     var body: some View {
         Group {
-            if style == .iconsOnly {
+            if focusStyle == .iconsOnly {
                 HStack {
                     Image(systemName: "moon.fill")
                         .font(.system(size: 16, weight: .bold))
@@ -46,7 +54,7 @@ private struct FocusStatusNotchView: View {
 
                     Spacer()
 
-                    Text(verbatim: title)
+                    SWStatusBadge(text: title, style: badgeStyle)
                 }
             }
         }

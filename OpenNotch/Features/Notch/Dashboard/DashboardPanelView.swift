@@ -72,24 +72,15 @@ struct DashboardPanelView: View {
     private var slideContent: some View {
         GeometryReader { geo in
             ZStack {
-                ForEach(slideTabs, id: \.self) { tab in
+                ForEach(enabledTabs, id: \.self) { tab in
                     tabPage(for: tab)
                         .frame(width: geo.size.width)
                         .clipShape(Rectangle())
                         .offset(x: slideOffset(for: tab, width: geo.size.width))
+                        .animation(.spring(response: 0.35, dampingFraction: 0.85), value: slideOffset(for: tab, width: geo.size.width))
                 }
             }
-            .animation(.spring(response: 0.35, dampingFraction: 0.85), value: selectedTab)
         }
-    }
-
-    private var slideTabs: [DashboardTab] {
-        let idx = selectedIndex
-        var tabs: [DashboardTab] = []
-        if idx > 0 { tabs.append(enabledTabs[idx - 1]) }
-        tabs.append(enabledTabs[idx])
-        if idx + 1 < enabledTabs.count { tabs.append(enabledTabs[idx + 1]) }
-        return tabs
     }
 
     private func slideOffset(for tab: DashboardTab, width: CGFloat) -> CGFloat {
@@ -149,98 +140,31 @@ struct DashboardPanelView: View {
     // MARK: System tab
 
     private var systemView: some View {
-        HStack(alignment: .top, spacing: 10) {
-            VStack(spacing: 6) {
-                HStack(spacing: 6) {
-                    gaugeCard(title: "CPU",
-                              value: systemMonitorViewModel.cpuUsage,
-                              valueText: "\(Int(systemMonitorViewModel.cpuUsage))%",
-                              color: Color.thresholdColor(systemMonitorViewModel.cpuUsage, warn: 50, danger: 80))
-                    gaugeCard(title: "MEM",
-                              value: systemMonitorViewModel.memoryUsage,
-                              valueText: "\(Int(systemMonitorViewModel.memoryUsage))%",
-                              color: Color.thresholdColor(systemMonitorViewModel.memoryUsage, warn: 70, danger: 85))
-                    speedCard(sfSymbol: "arrow.up",
-                              speed: systemMonitorViewModel.uploadSpeed,
-                              label: "Upload")
+        HStack(spacing: 0) {
+            SWRingChart(
+                data: [
+                    .init(label: "CPU", value: systemMonitorViewModel.cpuUsage, color: Color.green),
+                    .init(label: "MEM", value: systemMonitorViewModel.memoryUsage, color: .orange),
+                    .init(label: "DSK", value: systemMonitorViewModel.diskUsage, color: .cyan),
+                ],
+                maxValue: 100,
+                size: 140,
+                ringWidth: 12,
+                spacing: 6,
+                showLegend: false
+            ) {
+                VStack(spacing: 0) {
+                    Text("CPU \(Int(systemMonitorViewModel.cpuUsage))%").foregroundStyle(Color.green)
+                    Text("MEM \(Int(systemMonitorViewModel.memoryUsage))%").foregroundStyle(Color.orange)
+                    Text("DSK \(Int(systemMonitorViewModel.diskUsage))%").foregroundStyle(Color.cyan)
                 }
-                HStack(spacing: 6) {
-                    gaugeCard(title: "DISK",
-                              value: systemMonitorViewModel.diskUsage,
-                              valueText: "\(Int(systemMonitorViewModel.diskUsage))%",
-                              color: Color.thresholdColor(systemMonitorViewModel.diskUsage, warn: 80, danger: 90))
-                    gaugeCard(title: systemMonitorViewModel.isCharging ? "BAT\u{26A1}" : "BAT",
-                              value: Double(systemMonitorViewModel.batteryLevel),
-                              valueText: "\(systemMonitorViewModel.batteryLevel)%",
-                              color: Color.batteryColor(systemMonitorViewModel.batteryLevel,
-                                                  isCharging: systemMonitorViewModel.isCharging))
-                    speedCard(sfSymbol: "arrow.down",
-                              speed: systemMonitorViewModel.downloadSpeed,
-                              label: "Download")
-                }
+                .font(.system(size: 12, weight: .bold, design: .monospaced))
             }
-            .frame(maxHeight: .infinity)
+            .frame(width: 140, height: 150)
+            .padding(.leading, 20)
 
-            VStack(alignment: .leading, spacing: 6) {
-                Text(macInfo?.modelName ?? "Mac")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(.white.opacity(0.9))
-                    .lineLimit(1)
-
-                VStack(spacing: 4) {
-                    macInfoRow("cpu",        macInfo?.chipName     ?? "\u{2013}")
-                    macInfoRow("memorychip", macInfo?.ramText      ?? "\u{2013}")
-                    macInfoRow("barcode",    macInfo?.serialNumber ?? "\u{2013}")
-                    macInfoRow("apple.logo", macInfo?.macOSVersion ?? "\u{2013}")
-                }
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            .padding(10)
-            .background(Color.white.opacity(0.07))
-            .clipShape(RoundedRectangle(cornerRadius: 10))
-        }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-
-    private func gaugeCard(title: String, value: Double, valueText: String, color: Color) -> some View {
-        ProgressRing(progress: value, color: color, label: title, valueText: valueText)
-            .padding(6)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color.white.opacity(0.07))
-            .clipShape(RoundedRectangle(cornerRadius: 10))
-    }
-
-    private func speedCard(sfSymbol: String, speed: Double, label: String) -> some View {
-        VStack(spacing: 3) {
-            Image(systemName: sfSymbol)
-                .font(.system(size: 10, weight: .bold))
-                .foregroundStyle(Color.netSpeedColor(speed))
-            Text(systemMonitorViewModel.formattedSpeed(speed))
-                .font(.system(size: 13, weight: .semibold, design: .monospaced))
-                .foregroundStyle(Color.netSpeedColor(speed))
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
-            Text(label)
-                .font(.system(size: 8))
-                .foregroundStyle(.white.opacity(0.35))
+            Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.white.opacity(0.07))
-        .clipShape(RoundedRectangle(cornerRadius: 10))
-    }
-
-    private func macInfoRow(_ icon: String, _ text: String) -> some View {
-        HStack(spacing: 6) {
-            Image(systemName: icon)
-                .font(.system(size: 10))
-                .foregroundStyle(.white.opacity(0.35))
-                .frame(width: 13)
-            Text(text.trimmingCharacters(in: .whitespacesAndNewlines))
-                .font(.system(size: 12, design: .monospaced))
-                .foregroundStyle(.white.opacity(0.75))
-                .lineLimit(1)
-        }
     }
 }

@@ -39,6 +39,11 @@ like part of macOS rather than a web-style overlay.
 The notch engine is built from scratch — it completely replicates the logic, animations, and behavior
 of a real Dynamic Island on an iPhone, unlike projects that borrow from existing libraries.
 
+OpenNotch is inspired by and references two open-source projects:
+
+- **[DynamicNotch](https://github.com/MrKai77/DynamicNotch)** by MrKai77 — foundational notch overlay architecture and window management approach.
+- **[BoringNotch](https://github.com/TheBoredTeam/boring.notch)** by TheBoredTeam — UI patterns for music player, audio spectrum visualizer, HUD interception, and feature set inspiration.
+
 ## Highlights
 
 - **Live activities** for Now Playing, Downloads, AirDrop, Timer, Screen Recording, Focus, Personal Hotspot, and Lock Screen media surfaces
