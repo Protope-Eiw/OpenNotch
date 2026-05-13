@@ -478,7 +478,7 @@ private extension NotchView {
         if !hovered {
             guard settingsViewModel.application.dashboardOpenMode == .hover else { return }
             dashboardHoverTask = Task { @MainActor in
-                try? await Task.sleep(for: .milliseconds(120))
+                try? await Task.sleep(for: .milliseconds(0))
                 guard !Task.isCancelled else { return }
                 withAnimation(.spring(response: 0.45, dampingFraction: 1.0)) {
                     dashboardOpen = false
@@ -491,7 +491,7 @@ private extension NotchView {
         guard !notchExpandedDownward else { return }
 
         dashboardHoverTask = Task { @MainActor in
-            try? await Task.sleep(for: .milliseconds(100))
+            try? await Task.sleep(for: .milliseconds(0))
             guard !Task.isCancelled else { return }
             guard !notchExpandedDownward else { return }
             withAnimation(.spring(response: 0.42, dampingFraction: 0.8)) {
