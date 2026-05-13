@@ -33,57 +33,6 @@ extension BluetoothService {
         #endif
     }
 
-    func startPollingForChanges() {
-        #if DEBUG
-        print("🎧 [BluetoothAudioManager] Starting polling timer (\(pollingInterval)s interval)...")
-        #endif
-        pollingTimer = Timer.scheduledTimer(withTimeInterval: pollingInterval, repeats: true) { [weak self] _ in
-            self?.checkForDeviceChanges()
-        }
-        pollingTimer?.tolerance = pollingTolerance
-    }
-
-    func checkForDeviceChanges() {
-        guard IOBluetoothHostController.default()?.powerState == kBluetoothHCIPowerStateON else {
-            if !connectedDevices.isEmpty {
-                #if DEBUG
-                print("🎧 [BluetoothAudioManager] ⚠️ Bluetooth powered off - clearing connected devices")
-                #endif
-                connectedDevices.removeAll()
-                isBluetoothAudioConnected = false
-            }
-            return
-        }
-
-        guard let pairedDevices = IOBluetoothDevice.pairedDevices() as? [IOBluetoothDevice] else {
-            return
-        }
-
-        let currentlyConnectedAddresses = Set(
-            pairedDevices
-                .filter { $0.isConnected() && isAudioDevice($0) }
-                .compactMap { $0.addressString }
-        )
-
-        let previousAddresses = Set(connectedDevices.map { $0.address })
-
-        let newAddresses = currentlyConnectedAddresses.subtracting(previousAddresses)
-        if !newAddresses.isEmpty {
-            #if DEBUG
-            print("🎧 [BluetoothAudioManager] 🔍 Polling detected new connection(s)")
-            #endif
-            checkForNewlyConnectedDevices()
-        }
-
-        let removedAddresses = previousAddresses.subtracting(currentlyConnectedAddresses)
-        if !removedAddresses.isEmpty {
-            #if DEBUG
-            print("🎧 [BluetoothAudioManager] 🔍 Polling detected disconnection(s)")
-            #endif
-            updateConnectedDevices()
-        }
-    }
-
     func checkInitialDevices() {
         #if DEBUG
         print("🎧 [BluetoothAudioManager] Checking for initially connected devices...")
@@ -282,8 +231,6 @@ extension BluetoothService {
         #if DEBUG
         print("🎧 [BluetoothAudioManager] Cleaning up observers...")
         #endif
-        pollingTimer?.invalidate()
-        pollingTimer = nil
 
         let dnc = DistributedNotificationCenter.default()
         dnc.removeObserver(self)

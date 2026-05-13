@@ -18,9 +18,12 @@ final class SystemMonitorViewModel: ObservableObject {
     @Published private(set) var cpuHistory: [SWLineChart<String>.DataPoint] = []
     @Published private(set) var memoryHistory: [SWAreaChart<String>.DataPoint] = []
 
-    private var monitorTask: Task<Void, Never>?
+    private var cpuNetTask: Task<Void, Never>?
+    private var memTask: Task<Void, Never>?
+    private var diskTask: Task<Void, Never>?
     private var previousNetworkStats: NetworkStats?
     private let maxHistory = 60
+    private var powerSourceRunLoopSource: CFRunLoopSource?
 
     private struct NetworkStats {
         var bytesSent: UInt64
@@ -29,34 +32,84 @@ final class SystemMonitorViewModel: ObservableObject {
     }
 
     func startMonitoring() {
-        guard monitorTask == nil else { return }
-        monitorTask = Task { [weak self] in
+        guard cpuNetTask == nil else { return }
+
+        cpuNetTask = Task { [weak self] in
             while !Task.isCancelled {
-                await self?.refresh()
+                await self?.refreshCPU()
+                await self?.refreshNetwork()
                 try? await Task.sleep(nanoseconds: 1_000_000_000)
             }
         }
+
+        memTask = Task { [weak self] in
+            while !Task.isCancelled {
+                await self?.refreshMemory()
+                try? await Task.sleep(nanoseconds: 3_000_000_000)
+            }
+        }
+
+        diskTask = Task { [weak self] in
+            while !Task.isCancelled {
+                await self?.refreshDisk()
+                try? await Task.sleep(nanoseconds: 5_000_000_000)
+            }
+        }
+
+        setupPowerNotification()
+        refreshDisk()
     }
 
     func stopMonitoring() {
-        monitorTask?.cancel()
-        monitorTask = nil
+        cpuNetTask?.cancel()
+        cpuNetTask = nil
+        memTask?.cancel()
+        memTask = nil
+        diskTask?.cancel()
+        diskTask = nil
+
+        if let source = powerSourceRunLoopSource {
+            CFRunLoopRemoveSource(CFRunLoopGetMain(), source, .commonModes)
+            powerSourceRunLoopSource = nil
+        }
     }
 
-    private func refresh() {
-        let cpu = readCPUUsage()
-        let mem = readMemoryUsage()
-        cpuUsage = cpu
-        memoryUsage = mem
-        updateNetworkSpeed()
+    private func setupPowerNotification() {
+        let source = IOPSNotificationCreateRunLoopSource({ context in
+            guard let context else { return }
+            let unmanaged = Unmanaged<SystemMonitorViewModel>.fromOpaque(context)
+            unmanaged.takeUnretainedValue().readBattery()
+        }, Unmanaged.passUnretained(self).toOpaque()).takeRetainedValue()
+
+        powerSourceRunLoopSource = source
+        CFRunLoopAddSource(CFRunLoopGetMain(), source, .commonModes)
         readBattery()
-        updateDiskUsage()
+    }
+
+    private func refreshCPU() {
+        let cpu = readCPUUsage()
+        cpuUsage = cpu
 
         let now = Date()
         cpuHistory.append(.init(date: now, value: cpu, category: "CPU"))
-        memoryHistory.append(.init(date: now, value: mem, category: "MEM"))
         if cpuHistory.count > maxHistory { cpuHistory.removeFirst(cpuHistory.count - maxHistory) }
+    }
+
+    private func refreshMemory() {
+        let mem = readMemoryUsage()
+        memoryUsage = mem
+
+        let now = Date()
+        memoryHistory.append(.init(date: now, value: mem, category: "MEM"))
         if memoryHistory.count > maxHistory { memoryHistory.removeFirst(memoryHistory.count - maxHistory) }
+    }
+
+    private func refreshNetwork() {
+        updateNetworkSpeed()
+    }
+
+    private func refreshDisk() {
+        updateDiskUsage()
     }
 
     private func readBattery() {

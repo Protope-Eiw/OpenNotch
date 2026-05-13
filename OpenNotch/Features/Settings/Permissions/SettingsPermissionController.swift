@@ -42,13 +42,12 @@ final class SettingsPermissionController: NSObject, ObservableObject, CBCentralM
     @Published private(set) var canCaptureScreenAudio: Bool
     @Published private(set) var calendarAuthStatus: EKAuthorizationStatus
 
-    private var bluetoothPermissionRequester: CBCentralManager?
     private let ekStore = EKEventStore.app
     private var cancellables = Set<AnyCancellable>()
 
-    private var isPollingActive: Bool = false
     private var aggressiveRefreshTask: Task<Void, Never>?
-    private var pollingCancellable: AnyCancellable?
+
+    private let bluetoothManager: CBCentralManager
 
     private static let privacySettingsURL = URL(
         string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"
@@ -70,7 +69,15 @@ final class SettingsPermissionController: NSObject, ObservableObject, CBCentralM
         self.canCaptureScreenAudio = Self.currentScreenCaptureAccessState()
         self.calendarAuthStatus = EKEventStore.authorizationStatus(for: .event)
 
+        self.bluetoothManager = CBCentralManager(
+            delegate: nil,
+            queue: nil,
+            options: [CBCentralManagerOptionShowPowerAlertKey: false]
+        )
+
         super.init()
+
+        self.bluetoothManager.delegate = self
 
         notificationCenter.publisher(for: NSApplication.didBecomeActiveNotification)
             .receive(on: RunLoop.main)
@@ -82,47 +89,31 @@ final class SettingsPermissionController: NSObject, ObservableObject, CBCentralM
             }
             .store(in: &cancellables)
 
-        notificationCenter.publisher(for: NSWindow.didBecomeKeyNotification)
-            .receive(on: RunLoop.main)
-            .sink { [weak self] notif in
-                guard let window = notif.object as? NSWindow,
-                      window.identifier == SettingsWindowCoordinator.identifier else { return }
-                self?.refresh()
-            }
-            .store(in: &cancellables)
+        NSWorkspace.shared.notificationCenter.addObserver(
+            self,
+            selector: #selector(refresh),
+            name: NSWorkspace.didActivateApplicationNotification,
+            object: nil
+        )
+
+        DistributedNotificationCenter.default().addObserver(
+            self,
+            selector: #selector(refresh),
+            name: NSNotification.Name("com.apple.accessibility.api"),
+            object: nil
+        )
+
+        DistributedNotificationCenter.default().addObserver(
+            self,
+            selector: #selector(refresh),
+            name: NSNotification.Name("com.apple.bluetooth.status"),
+            object: nil
+        )
     }
 
-    func startPolling() {
-        stopPolling()
-        isPollingActive = true
-
-        // macOS 15+ requires activation before authorizationStatus() is reliable,
-        // but only trigger the dialog if permission hasn't been determined yet.
-        let currentStatus = EKEventStore.authorizationStatus(for: .event)
-        if currentStatus == .notDetermined {
-            Task { @MainActor in
-                do {
-                    _ = try await ekStore.requestFullAccessToEvents()
-                } catch {}
-                // Re-read after the call: requestFullAccessToEvents may return false for
-                // both .denied and .restricted — authorizationStatus() returns the correct value.
-                calendarAuthStatus = EKEventStore.authorizationStatus(for: .event)
-            }
-        }
-
-        pollingCancellable = Timer.publish(every: 2, on: .main, in: .common)
-            .autoconnect()
-            .sink { [weak self] _ in
-                guard let self, self.isPollingActive else { return }
-                self.refresh()
-            }
-    }
-
-    func stopPolling() {
-        isPollingActive = false
-        pollingCancellable = nil
-        aggressiveRefreshTask?.cancel()
-        aggressiveRefreshTask = nil
+    deinit {
+        NSWorkspace.shared.notificationCenter.removeObserver(self)
+        DistributedNotificationCenter.default().removeObserver(self)
     }
 
     private func startAggressiveRefresh() {
@@ -136,7 +127,7 @@ final class SettingsPermissionController: NSObject, ObservableObject, CBCentralM
         }
     }
 
-    func refresh() {
+    @objc func refresh() {
         bluetoothAuthorization = Self.currentBluetoothAuthorizationStatus()
         isAccessibilityTrusted = Self.currentAccessibilityTrustState()
         canPostMediaKeyEvents = Self.currentPostEventAccessState()
@@ -149,9 +140,6 @@ final class SettingsPermissionController: NSObject, ObservableObject, CBCentralM
         if status == .fullAccess || status == .writeOnly {
             return status
         }
-        // On macOS 15+, authorizationStatus() can be slow to update after the user
-        // grants access. Use calendars(for:) as a more reliable fallback signal —
-        // it only returns non-empty results when access has actually been granted.
         if !ekStore.calendars(for: .event).isEmpty {
             return .fullAccess
         }
@@ -322,13 +310,8 @@ final class SettingsPermissionController: NSObject, ObservableObject, CBCentralM
         case .allowedAlways:
             refresh()
         case .notDetermined:
-            if bluetoothPermissionRequester == nil {
-                bluetoothPermissionRequester = CBCentralManager(
-                    delegate: self,
-                    queue: nil,
-                    options: [CBCentralManagerOptionShowPowerAlertKey: false]
-                )
-            }
+            bluetoothManager.scanForPeripherals(withServices: nil, options: nil)
+            bluetoothManager.stopScan()
         case .restricted, .denied:
             Self.openBluetoothPrivacySettings()
         @unknown default:

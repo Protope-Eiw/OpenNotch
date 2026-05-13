@@ -33,7 +33,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     var lockScreenLiveActivityWindowManager: LockScreenLiveActivityWindowManager {
         container.lockScreenLiveActivityWindowManager
     }
-    
+
+    var schedulerCoordinator: SchedulerCoordinator {
+        container.schedulerCoordinator
+    }
+
     var window: OverlayPanelWindow!
     var notchWindows: [CGDirectDisplayID: OverlayPanelWindow] = [:]
     var notchViewModels: [CGDirectDisplayID: NotchViewModel] = [:]
@@ -97,22 +101,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         if !isRunningUITests {
             notchEventCoordinator.checkFirstLaunch()
-            container.systemMonitorViewModel.startMonitoring()
         }
 
-        lockScreenManager.startMonitoring()
+        schedulerCoordinator.startAll()
     }
 
     func applicationWillTerminate(_ notification: Notification) {
         NotificationCenter.default.removeObserver(self)
         NSWorkspace.shared.notificationCenter.removeObserver(self)
-        lockScreenManager.stopMonitoring()
-        nowPlayingViewModel.stopMonitoring()
-        downloadViewModel.stopMonitoring()
-        timerViewModel.stopMonitoring()
-        screenRecordingViewModel.stopMonitoring()
-        hardwareHUDMonitor.stopMonitoring()
-        container.systemMonitorViewModel.stopMonitoring()
+        schedulerCoordinator.stopAll()
         if !isRunningUITests {
             lockScreenPanelManager.invalidate()
             lockScreenLiveActivityWindowManager.invalidate()

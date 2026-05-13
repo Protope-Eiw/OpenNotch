@@ -20,7 +20,6 @@ final class BluetoothService: ObservableObject {
 
     var observers: [NSObjectProtocol] = []
     var cancellables = Set<AnyCancellable>()
-    var pollingTimer: Timer?
     let bluetoothPreferencesSuite = "/Library/Preferences/com.apple.Bluetooth"
     let batteryReader = BluetoothLEBatteryReader()
     var isLiveBatteryRefreshInFlight = false
@@ -53,8 +52,6 @@ final class BluetoothService: ObservableObject {
     var isPmsetRefreshInFlight = false
     var lastPmsetRefreshDate: Date?
     let pmsetRefreshCooldown: TimeInterval = 5
-    let pollingInterval: TimeInterval = 3.0
-    let pollingTolerance: TimeInterval = 1.0
     var hudBatteryWaitTasks: [UUID: Task<Void, Never>] = [:]
     var postConnectionBatteryRetryTasks: [UUID: Task<Void, Never>] = [:]
     let hudBatteryWaitInterval: TimeInterval = 0.3
@@ -67,7 +64,6 @@ final class BluetoothService: ObservableObject {
         #endif
         setupBluetoothObservers()
         checkInitialDevices()
-        startPollingForChanges()
     }
 
     deinit {

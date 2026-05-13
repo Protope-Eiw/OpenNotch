@@ -1,19 +1,13 @@
-//
-//  WifiMonitor.swift
-//  OpenNotch
-//
-//  Created by Евгений Петрукович on 2/26/26.
-//
-
 import Foundation
 import Network
-import CoreWLAN
 import SystemConfiguration
 
 final class NetworkMonitor: NetworkMonitoring {
     private let monitor = NWPathMonitor()
     private let queue = DispatchQueue(label: "NetworkMonitorQueue")
-    
+    private let wifiStoreKey = "State:/Network/Interface/en0/AirPort" as CFString
+    private let wifiStore: SCDynamicStore
+
     var onStatusChange: ((_ wifi: Bool, _ hotspot: Bool, _ vpn: Bool) -> Void)?
     private(set) var currentWiFiName: String?
     private(set) var currentVPNName: String?
@@ -21,6 +15,19 @@ final class NetworkMonitor: NetworkMonitoring {
 
     deinit {
         stopMonitoring()
+    }
+
+    init() {
+        let storeName = "OpenNotch.NetworkMonitor" as CFString
+        var dynamicStore: SCDynamicStore?
+        let pattern = ["State:/Network/Interface/en0/AirPort"] as CFArray
+
+        SCDynamicStoreCreate(nil, storeName, nil, nil).flatMap { store in
+            SCDynamicStoreSetNotificationKeys(store, nil, pattern)
+            dynamicStore = store
+        }
+
+        self.wifiStore = dynamicStore ?? SCDynamicStoreCreate(nil, storeName, nil, nil)!
     }
 
     func startMonitoring() {
@@ -60,8 +67,20 @@ final class NetworkMonitor: NetworkMonitoring {
     private func resolveWiFiName(isConnected: Bool) -> String? {
         guard isConnected else { return nil }
 
-        let name = CWWiFiClient.shared().interface()?.ssid()?.trimmingCharacters(in: .whitespacesAndNewlines)
-        return name?.isEmpty == false ? name : nil
+        if let info = SCDynamicStoreCopyValue(wifiStore, wifiStoreKey) as? [String: Any],
+           let ssidData = info["SSID"] as? Data,
+           let ssid = String(data: ssidData, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines),
+           !ssid.isEmpty {
+            return ssid
+        }
+
+        if let info = SCDynamicStoreCopyValue(wifiStore, wifiStoreKey) as? [String: Any],
+           let ssidStr = info["SSID_STR"] as? String {
+            let cleaned = ssidStr.trimmingCharacters(in: .whitespacesAndNewlines)
+            return cleaned.isEmpty ? nil : cleaned
+        }
+
+        return nil
     }
 
     private func resolveVPNName(isConnected: Bool) -> String? {

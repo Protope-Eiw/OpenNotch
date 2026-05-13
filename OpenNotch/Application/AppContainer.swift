@@ -64,6 +64,16 @@ final class AppContainer {
         settingsViewModel: settingsViewModel
     )
 
+    lazy var schedulerCoordinator = SchedulerCoordinator(
+        systemMonitorViewModel: systemMonitorViewModel,
+        nowPlayingViewModel: nowPlayingViewModel,
+        downloadViewModel: downloadViewModel,
+        timerViewModel: timerViewModel,
+        screenRecordingViewModel: screenRecordingViewModel,
+        hardwareHUDMonitor: hardwareHUDMonitor,
+        lockScreenManager: lockScreenManager
+    )
+
     init(isRunningUITests: Bool = ProcessInfo.processInfo.arguments.contains("-ui-testing")) {
         self.settingsViewModel = SettingsViewModel()
         self.networkViewModel = NetworkViewModel(settings: settingsViewModel.connectivity)

@@ -612,3 +612,103 @@ Current calendar tab is minimal. Suggested improvements:
 - Add `settings.dashboardDisabledTabs` handling in `InterfaceSettingsView`
 - Create new View in `Features/Notch/Dashboard/`
 - Tab content height: `dashboardPanelHeight` computed property (apps tab = 519pt, others = 173pt)
+
+---
+
+## 架构重构记录 — 2026-05-13 (status大改)
+
+> ⚠️ **重要：** 本次重构后，**权限刷新和系统调度不再使用轮询模式**。以后遇到权限状态刷新、系统监控调度等问题，**不要参考本文件之前的 `startPolling()` / Timer 相关记录**，直接按以下新模式处理。
+
+### 改动范围
+
+本次重构沿 [Stats](https://github.com/exelban/Stats) 项目的架构思路，将轮询模式全面替换为事件驱动，并引入中央调度器。
+
+### 1. 权限模块 (`SettingsPermissionController`)
+
+**旧模式（已废弃）：**
+- 2 秒 `Timer.publish` 轮询 + 授权后 500ms×20 次激进轮询
+- `CBCentralManager` 按需创建，用完即弃
+
+**新模式：**
+- `CBCentralManager` 在 `init` 中创建并持久持有，`centralManagerDidUpdateState` 回调自动刷新
+- 移除 `startPolling()` / `stopPolling()` 方法（已从 `PermissionsSettingsView` 中删除）
+- 使用 `DistributedNotificationCenter` 监听 `com.apple.accessibility.api` 和 `com.apple.bluetooth.status`
+- 使用 `NSWorkspace.shared.notificationCenter` 监听 `didActivateApplicationNotification`
+- 使用 `NSApplication.didBecomeActiveNotification`（已有，保留）
+
+**相关文件：**
+- `Features/Settings/Permissions/SettingsPermissionController.swift`
+- `Features/Settings/Application/PermissionsSettingsView.swift`
+
+### 2. 系统监控 (`SystemMonitorViewModel`)
+
+**旧模式（已废弃）：**
+- 单一 `while !Task.isCancelled` 循环，1 秒间隔刷新所有指标（CPU+MEM+NET+DSK+BAT）
+
+**新模式（分层刷新）：**
+- **CPU + 网络** — 1 秒间隔（高频变化）
+- **内存** — 3 秒间隔（中频变化）
+- **磁盘** — 5 秒间隔（极低频变化）
+- **电池** — `IOPSNotificationCreateRunLoopSource` 事件驱动（完全移除轮询）
+- 三条独立 Task，不互相阻塞
+
+**相关文件：**
+- `Features/SystemMonitor/SystemMonitorViewModel.swift`
+
+### 3. 蓝牙服务 (`BluetoothService`)
+
+**旧模式（已废弃）：**
+- 3 秒 polling timer（`startPollingForChanges()`）+ `DistributedNotificationCenter` 双重路径
+
+**新模式：**
+- 移除 `pollingTimer`、`pollingInterval`、`pollingTolerance`、`startPollingForChanges()`、`checkForDeviceChanges()`
+- 纯 `DistributedNotificationCenter` 事件驱动（`IOBluetoothDeviceConnectedNotification` / `IOBluetoothDeviceDisconnectedNotification`）
+
+**相关文件：**
+- `Core/Services/Bluetooth/BluetoothService.swift`
+- `Core/Services/Bluetooth/BluetoothService+Lifecycle.swift`
+
+### 4. 网络监控 (`NetworkService`)
+
+**旧模式（已废弃）：**
+- `CWWiFiClient.shared().interface()?.ssid()` （macOS 14+ deprecated）
+
+**新模式：**
+- `SCDynamicStoreCopyValue` 读取 `State:/Network/Interface/en0/AirPort` 的 `SSID_STR`
+
+**相关文件：**
+- `Core/Services/Network/NetworkService.swift`
+
+### 5. 中央调度器 (`SchedulerCoordinator`)
+
+**新增文件：** `Core/SchedulerCoordinator.swift`
+
+统一管理所有 monitor 的 start/stop 生命周期：
+- `systemMonitor`
+- `nowPlaying`
+- `downloads`
+- `timer`
+- `screenRecording`
+- `hardwareHUD`
+- `lockScreen`
+
+替代 `AppDelegate` 中分散的 `xxxViewModel.startMonitoring()` / `stopMonitoring()` 调用。
+
+**相关文件：**
+- `Core/SchedulerCoordinator.swift`（新文件）
+- `Application/AppDelegate/AppDelegate.swift`
+- `Application/AppDelegate/AppDelegate+Observers.swift`
+- `Application/AppContainer.swift`
+
+### 6. 电源事件 (`PowerViewModel`)
+
+**旧模式（已废弃）：**
+- 200ms 防抖 Task + 2s event suppression + pendingEvent 三重防护
+
+**新模式：**
+- PowerService 已使用 `IOPSNotificationCreateRunLoopSource`（事件驱动）
+- 简化：移除 `eventDebounceTask` 和 `pendingEvent`，只保留 2s suppression 防重复
+- 需要 debounce 时直接在事件回调处做时间门控
+
+**相关文件：**
+- `Features/Battery/PowerViewModel.swift`

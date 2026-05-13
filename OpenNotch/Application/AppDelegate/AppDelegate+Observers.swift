@@ -16,9 +16,9 @@ extension AppDelegate {
             guard let self else { return }
 
             if shouldMonitorNowPlaying {
-                nowPlayingViewModel.startMonitoring()
+                schedulerCoordinator.start(.nowPlaying)
             } else {
-                nowPlayingViewModel.stopMonitoring()
+                schedulerCoordinator.stop(.nowPlaying)
             }
         }
         .store(in: &cancellables)
@@ -29,9 +29,9 @@ extension AppDelegate {
                 guard let self else { return }
 
                 if isDownloadsLiveActivityEnabled {
-                    downloadViewModel.startMonitoring()
+                    schedulerCoordinator.start(.downloads)
                 } else {
-                    downloadViewModel.stopMonitoring()
+                    schedulerCoordinator.stop(.downloads)
                 }
             }
             .store(in: &cancellables)
@@ -42,9 +42,9 @@ extension AppDelegate {
                 guard let self else { return }
 
                 if isTimerLiveActivityEnabled {
-                    timerViewModel.startMonitoring()
+                    schedulerCoordinator.start(.timer)
                 } else {
-                    timerViewModel.stopMonitoring()
+                    schedulerCoordinator.stop(.timer)
                 }
             }
             .store(in: &cancellables)
@@ -55,9 +55,9 @@ extension AppDelegate {
                 guard let self else { return }
 
                 if isScreenRecordingLiveActivityEnabled {
-                    screenRecordingViewModel.startMonitoring()
+                    schedulerCoordinator.start(.screenRecording)
                 } else {
-                    screenRecordingViewModel.stopMonitoring()
+                    schedulerCoordinator.stop(.screenRecording)
                 }
             }
             .store(in: &cancellables)
