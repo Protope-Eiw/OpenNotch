@@ -42,125 +42,129 @@ struct CalendarEventCreatorView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            HStack {
-                Button(L10n.app("calendar.cancel", fallback: "Cancel")) { onDismiss?() }
-                    .font(.system(size: 12))
-                    .foregroundStyle(.white.opacity(0.55))
+        ZStack {
+            Color(white: 0.28)
+            VStack(spacing: 0) {
+                HStack {
+                    Button(L10n.app("calendar.cancel", fallback: "Cancel")) { onDismiss?() }
+                        .font(.system(size: 12))
+                    .foregroundStyle(.white.opacity(0.7))
                     .buttonStyle(.plain)
-                Spacer()
-                Text(editingEvent != nil
-                    ? L10n.app("calendar.editEvent", fallback: "Edit Event")
-                    : L10n.app("calendar.createEvent", fallback: "New Event"))
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(.white)
-                Spacer()
-                HStack(spacing: 6) {
-                    if editingEvent != nil {
-                        Button(action: { showDeleteConfirm = true }) {
-                            Image(systemName: "trash")
-                                .font(.system(size: 11))
-                                .foregroundStyle(.red.opacity(0.7))
-                        }
-                        .buttonStyle(.plain)
-                        .help(L10n.app("calendar.delete", fallback: "Delete"))
-                    }
-                    Button(L10n.app("calendar.save", fallback: "Save")) { save() }
+                    Spacer()
+                    Text(editingEvent != nil
+                        ? L10n.app("calendar.editEvent", fallback: "Edit Event")
+                        : L10n.app("calendar.createEvent", fallback: "New Event"))
                         .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(title.isEmpty ? .white.opacity(0.25) : .blue)
-                        .buttonStyle(.plain)
-                        .disabled(title.isEmpty || isSaving)
-                }
-            }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 10)
-
-            Divider().opacity(0.1)
-
-            ScrollView(.vertical, showsIndicators: false) {
-                VStack(spacing: 12) {
-                    formField(L10n.app("calendar.title", fallback: "Title")) {
-                        TextField(L10n.app("calendar.titlePlaceholder", fallback: "Event title"), text: $title)
-                            .textFieldStyle(.plain)
-                            .font(.system(size: 12))
-                            .foregroundStyle(.white)
-                    }
-
-                    formField(L10n.app("calendar.location", fallback: "Location")) {
-                        TextField(L10n.app("calendar.locationPlaceholder", fallback: "Optional"), text: $location)
-                            .textFieldStyle(.plain)
-                            .font(.system(size: 12))
-                            .foregroundStyle(.white)
-                    }
-
-                    Toggle(isOn: $isAllDay) {
-                        Text(L10n.app("calendar.allDay", fallback: "All-day"))
-                            .font(.system(size: 12))
-                            .foregroundStyle(.white)
-                    }
-                    .toggleStyle(.switch)
-                    .controlSize(.small)
-
-                    if !isAllDay {
-                        HStack(spacing: 8) {
-                            VStack(alignment: .leading, spacing: 3) {
-                                Text(L10n.app("calendar.starts", fallback: "Starts"))
-                                    .font(.system(size: 9))
-                                    .foregroundStyle(.white.opacity(0.35))
-                                DatePicker("", selection: $startDate, displayedComponents: [.date, .hourAndMinute])
-                                    .datePickerStyle(.compact)
-                                    .labelsHidden()
-                                    .scaleEffect(0.85)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
+                        .foregroundStyle(.white)
+                    Spacer()
+                    HStack(spacing: 6) {
+                        if editingEvent != nil {
+                            Button(action: { showDeleteConfirm = true }) {
+                                Image(systemName: "trash")
+                                    .font(.system(size: 11))
+                                    .foregroundStyle(.red.opacity(0.7))
                             }
-                            VStack(alignment: .leading, spacing: 3) {
-                                Text(L10n.app("calendar.ends", fallback: "Ends"))
-                                    .font(.system(size: 9))
-                                    .foregroundStyle(.white.opacity(0.35))
-                                DatePicker("", selection: $endDate, in: startDate..., displayedComponents: [.date, .hourAndMinute])
-                                    .datePickerStyle(.compact)
-                                    .labelsHidden()
-                                    .scaleEffect(0.85)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                            }
+                            .buttonStyle(.plain)
+                            .help(L10n.app("calendar.delete", fallback: "Delete"))
                         }
+                        Button(L10n.app("calendar.save", fallback: "Save")) { save() }
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(title.isEmpty ? .white.opacity(0.25) : .blue)
+                            .buttonStyle(.plain)
+                            .disabled(title.isEmpty || isSaving)
                     }
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 10)
 
-                    if !calendars.isEmpty {
-                        VStack(alignment: .leading, spacing: 3) {
-                            Text(L10n.app("calendar.calendar", fallback: "Calendar"))
-                                .font(.system(size: 9))
-                                .foregroundStyle(.white.opacity(0.35))
-                            Picker("", selection: $selectedCalendar) {
-                                ForEach(calendars, id: \.calendarIdentifier) { cal in
-                                    HStack(spacing: 6) {
-                                        Circle()
-                                            .fill(Color(cgColor: cal.cgColor))
-                                            .frame(width: 8, height: 8)
-                                        Text(cal.title)
-                                    }
-                                    .tag(cal as EKCalendar?)
+                Divider().opacity(0.1)
+
+                ScrollView(.vertical, showsIndicators: false) {
+                    VStack(spacing: 12) {
+                        formField(L10n.app("calendar.title", fallback: "Title")) {
+                            TextField(L10n.app("calendar.titlePlaceholder", fallback: "Event title"), text: $title)
+                                .textFieldStyle(.plain)
+                                .font(.system(size: 12))
+                                .foregroundStyle(.white)
+                        }
+
+                        formField(L10n.app("calendar.location", fallback: "Location")) {
+                            TextField(L10n.app("calendar.locationPlaceholder", fallback: "Optional"), text: $location)
+                                .textFieldStyle(.plain)
+                                .font(.system(size: 12))
+                                .foregroundStyle(.white)
+                        }
+
+                        Toggle(isOn: $isAllDay) {
+                            Text(L10n.app("calendar.allDay", fallback: "All-day"))
+                                .font(.system(size: 12))
+                                .foregroundStyle(.white)
+                        }
+                        .toggleStyle(.switch)
+                        .controlSize(.small)
+
+                        if !isAllDay {
+                            HStack(spacing: 8) {
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text(L10n.app("calendar.starts", fallback: "Starts"))
+                                        .font(.system(size: 9))
+                                        .foregroundStyle(.white.opacity(0.75))
+                                    DatePicker("", selection: $startDate, displayedComponents: [.date, .hourAndMinute])
+                                        .datePickerStyle(.compact)
+                                        .labelsHidden()
+                                        .scaleEffect(0.85)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text(L10n.app("calendar.ends", fallback: "Ends"))
+                                        .font(.system(size: 9))
+                                        .foregroundStyle(.white.opacity(0.75))
+                                    DatePicker("", selection: $endDate, in: startDate..., displayedComponents: [.date, .hourAndMinute])
+                                        .datePickerStyle(.compact)
+                                        .labelsHidden()
+                                        .scaleEffect(0.85)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
                                 }
                             }
-                            .labelsHidden()
-                            .pickerStyle(.menu)
-                            .tint(.white)
+                        }
+
+                        if !calendars.isEmpty {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(L10n.app("calendar.calendar", fallback: "Calendar"))
+                                    .font(.system(size: 9))
+                                    .foregroundStyle(.white.opacity(0.75))
+                                Picker("", selection: $selectedCalendar) {
+                                    ForEach(calendars, id: \.calendarIdentifier) { cal in
+                                        HStack(spacing: 6) {
+                                            Circle()
+                                                .fill(Color(cgColor: cal.cgColor))
+                                                .frame(width: 8, height: 8)
+                                            Text(cal.title)
+                                        }
+                                        .tag(cal as EKCalendar?)
+                                    }
+                                }
+                                .labelsHidden()
+                                .pickerStyle(.menu)
+                                .tint(.white)
+                            }
+                        }
+
+                        formField(L10n.app("calendar.notes", fallback: "Notes")) {
+                            TextEditor(text: $notes)
+                                .font(.system(size: 11))
+                                .foregroundStyle(.white)
+                                .scrollContentBackground(.hidden)
+                                .background(Color.white.opacity(0.06))
+                                .clipShape(RoundedRectangle(cornerRadius: 6))
+                                .frame(height: 60)
                         }
                     }
-
-                    formField(L10n.app("calendar.notes", fallback: "Notes")) {
-                        TextEditor(text: $notes)
-                            .font(.system(size: 11))
-                            .foregroundStyle(.white)
-                            .scrollContentBackground(.hidden)
-                            .background(Color.white.opacity(0.06))
-                            .clipShape(RoundedRectangle(cornerRadius: 6))
-                            .frame(height: 60)
-                    }
+                    .padding(14)
                 }
-                .padding(14)
             }
         }
+        .frame(width: 340, height: 420)
         .onAppear { loadCalendars() }
         .alert(L10n.app("calendar.error", fallback: "Could not save event"), isPresented: $showError) {
             Button("OK") { showError = false }
@@ -176,7 +180,7 @@ struct CalendarEventCreatorView: View {
         VStack(alignment: .leading, spacing: 4) {
             Text(label)
                 .font(.system(size: 9))
-                .foregroundStyle(.white.opacity(0.35))
+                .foregroundStyle(.white.opacity(0.75))
             content()
         }
     }

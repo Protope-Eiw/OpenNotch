@@ -13,6 +13,7 @@ struct SettingsToggleRow: View {
     let systemImage: String?
     let imageName: String?
     let color: Color
+    let showIcon: Bool
     let accessibilityIdentifier: String?
 
     @Binding var isOn: Bool
@@ -23,6 +24,7 @@ struct SettingsToggleRow: View {
         systemImage: String,
         color: Color,
         isOn: Binding<Bool>,
+        showIcon: Bool = true,
         accessibilityIdentifier: String? = nil
     ) {
         self.title = title
@@ -30,6 +32,7 @@ struct SettingsToggleRow: View {
         self.systemImage = systemImage
         self.imageName = nil
         self.color = color
+        self.showIcon = showIcon
         self._isOn = isOn
         self.accessibilityIdentifier = accessibilityIdentifier
     }
@@ -40,6 +43,7 @@ struct SettingsToggleRow: View {
         imageName: String,
         color: Color,
         isOn: Binding<Bool>,
+        showIcon: Bool = true,
         accessibilityIdentifier: String? = nil
     ) {
         self.title = title
@@ -47,6 +51,7 @@ struct SettingsToggleRow: View {
         self.systemImage = nil
         self.imageName = imageName
         self.color = color
+        self.showIcon = showIcon
         self._isOn = isOn
         self.accessibilityIdentifier = accessibilityIdentifier
     }
@@ -54,32 +59,28 @@ struct SettingsToggleRow: View {
     var body: some View {
         Toggle(isOn: $isOn) {
             HStack(alignment: .center, spacing: 12) {
-                if let systemImage {
-                    SettingsIconBadge(
-                        systemImage: systemImage,
-                        tint: color,
-                        size: 30,
-                        iconSize: 14,
-                        cornerRadius: 9
-                    )
-                } else if let imageName {
-                    SettingsIconBadge(
-                        imageName: imageName,
-                        tint: color,
-                        size: 30,
-                        iconSize: 14,
-                        cornerRadius: 9
-                    )
+                if showIcon {
+                    if let systemImage {
+                        SettingsIconBadge(
+                            systemImage: systemImage,
+                            tint: color,
+                            size: 30,
+                            iconSize: 14,
+                            cornerRadius: 9
+                        )
+                    } else if let imageName {
+                        SettingsIconBadge(
+                            imageName: imageName,
+                            tint: color,
+                            size: 30,
+                            iconSize: 14,
+                            cornerRadius: 9
+                        )
+                    }
                 }
                 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(title)
-                    if let description {
-                        Text(description)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
                 }
                 
                 Spacer()
@@ -87,5 +88,6 @@ struct SettingsToggleRow: View {
         }
         .toggleStyle(CustomToggleStyle())
         .modifier(SettingsAccessibilityModifier(identifier: accessibilityIdentifier))
+        .modifier(SettingsAnnotation(description: description))
     }
 }

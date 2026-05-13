@@ -40,10 +40,7 @@ struct GeneralSettingsView: View {
                 accessibilityIdentifier: "settings.general.launchAtLogin"
             )
 
-            Divider()
-                .opacity(0.6)
-                .padding(.leading, 43)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
+            SettingsDivider(indented: true)
 
             SettingsToggleRow(
                 title: localized("Show Dock icon"),
@@ -54,10 +51,7 @@ struct GeneralSettingsView: View {
                 accessibilityIdentifier: "settings.general.dockIcon"
             )
 
-            Divider()
-                .opacity(0.6)
-                .padding(.leading, 43)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
+            SettingsDivider(indented: true)
 
             VStack(alignment: .leading, spacing: 14) {
                 SettingsToggleRow(
@@ -114,8 +108,7 @@ struct GeneralSettingsView: View {
             .accessibilityIdentifier("settings.general.displayLocation")
 
             if applicationSettings.displayLocation == .manual {
-                Divider()
-                    .opacity(0.6)
+                SettingsDivider()
 
                 ManualDisplayPicker(
                     applicationSettings: applicationSettings,
@@ -123,8 +116,7 @@ struct GeneralSettingsView: View {
                 )
             }
 
-            Divider()
-                .opacity(0.6)
+            SettingsDivider()
 
             SettingsToggleRow(
                 title: localized("Hide live activity in full-screen mode"),

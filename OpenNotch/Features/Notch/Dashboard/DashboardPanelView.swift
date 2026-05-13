@@ -4,6 +4,8 @@ struct DashboardPanelView: View {
     @ObservedObject var systemMonitorViewModel: SystemMonitorViewModel
     @ObservedObject var nowPlayingViewModel: NowPlayingViewModel
     @ObservedObject var pomodoroViewModel: PomodoroViewModel
+    @ObservedObject var networkViewModel: NetworkViewModel
+    @ObservedObject var bluetoothViewModel: BluetoothViewModel
     @Binding var selectedTab: DashboardTab
     @Binding var appSearchText: String
     var enabledTabs: [DashboardTab]
@@ -140,31 +142,11 @@ struct DashboardPanelView: View {
     // MARK: System tab
 
     private var systemView: some View {
-        HStack(spacing: 0) {
-            SWRingChart(
-                data: [
-                    .init(label: "CPU", value: systemMonitorViewModel.cpuUsage, color: Color.green),
-                    .init(label: "MEM", value: systemMonitorViewModel.memoryUsage, color: .orange),
-                    .init(label: "DSK", value: systemMonitorViewModel.diskUsage, color: .cyan),
-                ],
-                maxValue: 100,
-                size: 140,
-                ringWidth: 12,
-                spacing: 6,
-                showLegend: false
-            ) {
-                VStack(spacing: 0) {
-                    Text("CPU \(Int(systemMonitorViewModel.cpuUsage))%").foregroundStyle(Color.green)
-                    Text("MEM \(Int(systemMonitorViewModel.memoryUsage))%").foregroundStyle(Color.orange)
-                    Text("DSK \(Int(systemMonitorViewModel.diskUsage))%").foregroundStyle(Color.cyan)
-                }
-                .font(.system(size: 12, weight: .bold, design: .monospaced))
-            }
-            .frame(width: 140, height: 150)
-            .padding(.leading, 20)
-
-            Spacer(minLength: 0)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        SystemStatusView(
+            systemMonitorViewModel: systemMonitorViewModel,
+            networkViewModel: networkViewModel,
+            bluetoothViewModel: bluetoothViewModel,
+            macInfo: macInfo
+        )
     }
 }

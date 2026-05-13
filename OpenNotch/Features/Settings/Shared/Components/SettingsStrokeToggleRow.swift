@@ -26,6 +26,7 @@ struct SettingsStrokeToggleRow: View {
             systemImage: "square.on.square.squareshape.controlhandles",
             color: .gray,
             isOn: $isOn,
+            showIcon: false,
             accessibilityIdentifier: accessibilityIdentifier
         )
     }

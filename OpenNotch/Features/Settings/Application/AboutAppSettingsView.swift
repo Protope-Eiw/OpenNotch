@@ -39,7 +39,7 @@ struct AboutAppSettingsView: View {
             VStack(spacing: 0) {
                 heroCard
                 
-                Divider().opacity(0.8)
+                SettingsDivider(opacity: 0.8)
                 
                 ScrollView(showsIndicators: false) {
                     highlightsCard

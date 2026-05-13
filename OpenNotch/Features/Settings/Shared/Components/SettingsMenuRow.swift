@@ -29,12 +29,6 @@ struct SettingsMenuRow<Option: Hashable>: View {
         HStack(alignment: .center, spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
-                if let description {
-                    Text(description)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
             }
 
             Spacer(minLength: 12)
@@ -64,5 +58,6 @@ struct SettingsMenuRow<Option: Hashable>: View {
                 }
         }
         .modifier(SettingsAccessibilityModifier(identifier: accessibilityIdentifier))
+        .modifier(SettingsAnnotation(description: description))
     }
 }

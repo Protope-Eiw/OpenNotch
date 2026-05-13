@@ -21,15 +21,7 @@ struct SettingsSliderRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .firstTextBaseline) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(title)
-                    if let description {
-                        Text(description)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                }
+                Text(title)
                 
                 Spacer()
                 
@@ -46,5 +38,6 @@ struct SettingsSliderRow: View {
         }
         .padding(.vertical, 6)
         .modifier(SettingsAccessibilityModifier(identifier: accessibilityIdentifier))
+        .modifier(SettingsAnnotation(description: description))
     }
 }

@@ -44,8 +44,6 @@ struct SettingsCard<Content: View>: View {
 }
 
 private struct SettingsCardGroupBoxStyle: GroupBoxStyle {
-    @Environment(\.colorScheme) private var colorScheme
-
     func makeBody(configuration: Configuration) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             configuration.label
@@ -54,8 +52,12 @@ private struct SettingsCardGroupBoxStyle: GroupBoxStyle {
                 .padding(6)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(colorScheme == .dark ? Color.gray.opacity(0.08) : .white)
+                    RoundedRectangle(cornerRadius: 6, style: .circular)
+                        .fill(.quinary)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 6, style: .circular)
+                                .strokeBorder(.quaternary)
+                        )
                 )
         }
         .frame(maxWidth: .infinity, alignment: .leading)

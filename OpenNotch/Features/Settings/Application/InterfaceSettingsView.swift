@@ -133,17 +133,23 @@ struct InterfaceSettingsView: View {
 
     private var musicSubSettings: some View {
         VStack(spacing: 0) {
-            Divider().opacity(0.4).padding(.leading, 43)
-            SubToggleRow(
+            SettingsDivider(indented: true, indentSize: 43, opacity: 0.4)
+            SettingsToggleRow(
                 title: localized("settings.interface.music.skipButtons", fallback: "15s Adjustment"),
+                systemImage: "gobackward.15",
+                color: .red,
                 isOn: $showSkipButtons,
+                showIcon: false,
                 accessibilityIdentifier: AppStorageKeys.Music.showSkipButtons
             )
 
-            Divider().opacity(0.4).padding(.leading, 43)
-            SubToggleRow(
+            SettingsDivider(indented: true, indentSize: 43, opacity: 0.4)
+            SettingsToggleRow(
                 title: localized("settings.interface.music.visualizer", fallback: "Audio Visualizer"),
+                systemImage: "waveform",
+                color: .red,
                 isOn: $showVisualizer,
+                showIcon: false,
                 accessibilityIdentifier: AppStorageKeys.Music.showVisualizer
             )
         }
@@ -158,26 +164,30 @@ struct InterfaceSettingsView: View {
     private var overviewSubSettings: some View {
         VStack(spacing: 0) {
             // App launcher
-            Divider().opacity(0.4).padding(.leading, 56)
+            SettingsDivider(indented: true, indentSize: 56, opacity: 0.4)
             SettingsToggleRow(
                 title: localized("settings.interface.overview.apps", fallback: "App Launcher"),
                 systemImage: "square.grid.2x2.fill",
                 color: .blue,
                 isOn: $showApps,
+                showIcon: false,
                 accessibilityIdentifier: AppStorageKeys.Overview.showApps
             )
             .padding(.leading, 16)
 
             if showApps {
-                Divider().opacity(0.3).padding(.leading, 72)
-                SubToggleRow(
+                SettingsDivider(indented: true, indentSize: 72, opacity: 0.3)
+                SettingsToggleRow(
                     title: localized("settings.interface.overview.hideAppNames", fallback: "Hide App Names"),
+                    systemImage: "eye.slash",
+                    color: .blue,
                     isOn: $hideAppNames,
+                    showIcon: false,
                     accessibilityIdentifier: AppStorageKeys.Overview.hideAppNames
                 )
                 .padding(.leading, 32)
 
-                Divider().opacity(0.3).padding(.leading, 72)
+                SettingsDivider(indented: true, indentSize: 72, opacity: 0.3)
                 PinnedAppsSettingsRow(
                     title: localized("settings.interface.pinnedApps.title", fallback: "Pinned Apps"),
                     description: localized("settings.interface.pinnedApps.description", fallback: "Quick-access apps in the overview."),
@@ -190,74 +200,58 @@ struct InterfaceSettingsView: View {
             }
 
             // Time & date
-            Divider().opacity(0.4).padding(.leading, 56)
+            SettingsDivider(indented: true, indentSize: 56, opacity: 0.4)
             SettingsToggleRow(
                 title: localized("settings.interface.overview.timeDate", fallback: "Time & Date"),
                 systemImage: "clock.fill",
                 color: .orange,
                 isOn: $showTimeDate,
+                showIcon: false,
                 accessibilityIdentifier: AppStorageKeys.Overview.showTimeDate
             )
             .padding(.leading, 16)
 
             if showTimeDate {
-                Divider().opacity(0.3).padding(.leading, 72)
-                SubToggleRow(
+                SettingsDivider(indented: true, indentSize: 72, opacity: 0.3)
+                SettingsToggleRow(
                     title: localized("settings.interface.overview.weather", fallback: "Weather"),
+                    systemImage: "cloud.fill",
+                    color: .orange,
                     isOn: $showWeather,
+                    showIcon: false,
                     accessibilityIdentifier: AppStorageKeys.Overview.showWeather
                 )
                 .padding(.leading, 32)
             }
 
             // System info
-            Divider().opacity(0.4).padding(.leading, 56)
+            SettingsDivider(indented: true, indentSize: 56, opacity: 0.4)
             SettingsToggleRow(
                 title: localized("settings.interface.overview.systemInfo", fallback: "System Info"),
                 systemImage: "cpu.fill",
                 color: .green,
                 isOn: $showSystemInfo,
+                showIcon: false,
                 accessibilityIdentifier: AppStorageKeys.Overview.showSystemInfo
             )
             .padding(.leading, 16)
 
             // Pomodoro
-            Divider().opacity(0.4).padding(.leading, 56)
+            SettingsDivider(indented: true, indentSize: 56, opacity: 0.4)
             SettingsToggleRow(
                 title: localized("settings.interface.overview.pomodoro", fallback: "Pomodoro"),
                 systemImage: "timer",
                 color: .red,
                 isOn: $showPomodoro,
+                showIcon: false,
                 accessibilityIdentifier: AppStorageKeys.Overview.showPomodoro
             )
             .padding(.leading, 16)
-
-
         }
         .background(Color.primary.opacity(0.03))
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .padding(.leading, 16)
         .padding(.top, 2)
-    }
-}
-
-// MARK: - Sub-level Toggle Row (no icon)
-
-private struct SubToggleRow: View {
-    let title: String
-    @Binding var isOn: Bool
-    var accessibilityIdentifier: String? = nil
-
-    var body: some View {
-        Toggle(isOn: $isOn) {
-            HStack(alignment: .center, spacing: 0) {
-                Text(title)
-                Spacer()
-            }
-            .frame(minHeight: 40)
-        }
-        .toggleStyle(CustomToggleStyle())
-        .modifier(SettingsAccessibilityModifier(identifier: accessibilityIdentifier))
     }
 }
 

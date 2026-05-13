@@ -419,6 +419,8 @@ private extension NotchView {
                     systemMonitorViewModel: systemMonitorViewModel,
                     nowPlayingViewModel: nowPlayingViewModel,
                     pomodoroViewModel: pomodoroViewModel,
+                    networkViewModel: networkViewModel,
+                    bluetoothViewModel: bluetoothViewModel,
                     selectedTab: $dashboardTab,
                     appSearchText: $appSearchText,
                     enabledTabs: enabledDashboardTabs

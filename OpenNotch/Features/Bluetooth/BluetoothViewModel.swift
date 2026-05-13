@@ -7,6 +7,7 @@
 
 import Foundation
 import Combine
+import IOBluetooth
 
 final class BluetoothViewModel: ObservableObject {
     @Published var deviceType: BluetoothAudioDeviceType = .generic
@@ -15,6 +16,10 @@ final class BluetoothViewModel: ObservableObject {
     @Published var deviceName: String = "Unknown"
     @Published var batteryLevel: Int? = nil
     
+    var isBluetoothOn: Bool {
+        IOBluetoothHostController.default()?.powerState == kBluetoothHCIPowerStateON
+    }
+
     var notchViewModel: NotchViewModel?
     
     private var cancellables = Set<AnyCancellable>()

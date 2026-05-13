@@ -25,8 +25,6 @@ final class NotchEngine: ObservableObject {
     private var currentTemporaryNotificationDuration: TimeInterval?
     private var eventQueue: [NotchState] = []
     private var isProcessingQueue = false
-    private var isTransitioning = false
-    private var transitionContinuation: CheckedContinuation<Void, Never>?
 
     init(
         animations: @escaping () -> NotchAnimations,
@@ -147,20 +145,22 @@ final class NotchEngine: ObservableObject {
         cancelTemporary()
         let contentToRestore = highestPriorityVisibleActivity
 
-        transition(
-            hide: {
-                withAnimation(self.animations.contentHide) {
-                    self.notchModel.temporaryNotificationContent = nil
-                    self.currentTemporaryNotificationDuration = nil
+        Task {
+            await transition(
+                hide: {
+                    withAnimation(self.animations.contentHide) {
+                        self.notchModel.temporaryNotificationContent = nil
+                        self.currentTemporaryNotificationDuration = nil
+                    }
+                },
+                show: {
+                    withAnimation(self.animations.contentShow) {
+                        self.notchModel.liveActivityContent = contentToRestore
+                        self.suspendedActivity = nil
+                    }
                 }
-            },
-            show: {
-                withAnimation(self.animations.contentShow) {
-                    self.notchModel.liveActivityContent = contentToRestore
-                    self.suspendedActivity = nil
-                }
-            }
-        )
+            )
+        }
     }
 
     func dismissActiveContent() {
@@ -232,19 +232,21 @@ final class NotchEngine: ObservableObject {
         guard notchModel.isLiveActivityExpanded,
               let liveActivityContent = notchModel.liveActivityContent else { return }
 
-        transition(
-            hide: {
-                withAnimation(self.animations.contentHide) {
-                    self.notchModel.isLiveActivityExpanded = false
-                    self.notchModel.liveActivityContent = nil
+        Task {
+            await transition(
+                hide: {
+                    withAnimation(self.animations.contentHide) {
+                        self.notchModel.isLiveActivityExpanded = false
+                        self.notchModel.liveActivityContent = nil
+                    }
+                },
+                show: {
+                    withAnimation(self.animations.contentShow) {
+                        self.notchModel.liveActivityContent = liveActivityContent
+                    }
                 }
-            },
-            show: {
-                withAnimation(self.animations.contentShow) {
-                    self.notchModel.liveActivityContent = liveActivityContent
-                }
-            }
-        )
+            )
+        }
     }
 
     func handleStrokeVisibility() {
@@ -307,12 +309,6 @@ final class NotchEngine: ObservableObject {
     }
 
     private func executeState(_ state: NotchState) async {
-        if isTransitioning {
-            await withCheckedContinuation { continuation in
-                transitionContinuation = continuation
-            }
-        }
-
         switch state {
         case .showLiveActivity(let content):
             if dismissedLiveActivityIDs.contains(content.id) {
@@ -364,73 +360,62 @@ final class NotchEngine: ObservableObject {
             return
         }
 
-        await withCheckedContinuation { continuation in
-            transition(
-                hide: {
-                    withAnimation(self.animations.contentHide) {
-                        self.notchModel.isLiveActivityExpanded = false
-                        self.notchModel.liveActivityContent = nil
-                    }
-                },
-                show: {
-                    withAnimation(self.animations.contentShow) {
-                        self.notchModel.liveActivityContent = content
-                    }
-                    continuation.resume()
+        await transition(
+            hide: {
+                withAnimation(self.animations.contentHide) {
+                    self.notchModel.isLiveActivityExpanded = false
+                    self.notchModel.liveActivityContent = nil
                 }
-            )
-        }
+            },
+            show: {
+                withAnimation(self.animations.contentShow) {
+                    self.notchModel.liveActivityContent = content
+                }
+            }
+        )
     }
 
     private func showTemporaryTransition(_ content: NotchContentProtocol, duration: TimeInterval) async {
-        await withCheckedContinuation { continuation in
-            transition(
-                hide: {
-                    self.cancelTemporary()
+        await transition(
+            hide: {
+                self.cancelTemporary()
 
-                    withAnimation(self.animations.contentHide) {
-                        if self.notchModel.liveActivityContent != nil {
-                            self.suspendedActivity = self.notchModel.liveActivityContent
-                            self.notchModel.isLiveActivityExpanded = false
-                            self.notchModel.liveActivityContent = nil
-                        }
-
-                        self.notchModel.temporaryNotificationContent = nil
-                    }
-                },
-                show: {
-                    withAnimation(self.animations.contentShow) {
-                        self.notchModel.temporaryNotificationContent = content
-                    }
-                    self.currentTemporaryNotificationDuration = duration
-
-                    if !duration.isInfinite {
-                        self.restartTemporaryTimer(duration: duration)
+                withAnimation(self.animations.contentHide) {
+                    if self.notchModel.liveActivityContent != nil {
+                        self.suspendedActivity = self.notchModel.liveActivityContent
+                        self.notchModel.isLiveActivityExpanded = false
+                        self.notchModel.liveActivityContent = nil
                     }
 
-                    continuation.resume()
+                    self.notchModel.temporaryNotificationContent = nil
                 }
-            )
-        }
+            },
+            show: {
+                withAnimation(self.animations.contentShow) {
+                    self.notchModel.temporaryNotificationContent = content
+                }
+                self.currentTemporaryNotificationDuration = duration
+
+                if !duration.isInfinite {
+                    self.restartTemporaryTimer(duration: duration)
+                }
+            }
+        )
     }
 
     private func hideAllTransition() async {
-        await withCheckedContinuation { continuation in
-            transition(
-                hide: {
-                    withAnimation(self.animations.contentHide) {
-                        self.notchModel.isLiveActivityExpanded = false
-                        self.notchModel.temporaryNotificationContent = nil
-                        self.notchModel.liveActivityContent = nil
-                        self.suspendedActivity = nil
-                        self.currentTemporaryNotificationDuration = nil
-                    }
-                },
-                show: {
-                    continuation.resume()
+        await transition(
+            hide: {
+                withAnimation(self.animations.contentHide) {
+                    self.notchModel.isLiveActivityExpanded = false
+                    self.notchModel.temporaryNotificationContent = nil
+                    self.notchModel.liveActivityContent = nil
+                    self.suspendedActivity = nil
+                    self.currentTemporaryNotificationDuration = nil
                 }
-            )
-        }
+            },
+            show: {}
+        )
     }
 
     private func updateLiveActivityStack(with content: NotchContentProtocol) {
@@ -453,22 +438,15 @@ final class NotchEngine: ObservableObject {
         }
     }
 
-    private func transition(customDelay: TimeInterval? = nil, hide: @escaping () -> Void, show: @escaping () -> Void) {
-        guard !isTransitioning else { return }
-
-        isTransitioning = true
+    private func transition(customDelay: TimeInterval? = nil, hide: @escaping () -> Void, show: @escaping () -> Void) async {
         let currentDelay = customDelay ?? hideDelay
+        hide()
 
-        DispatchQueue.main.async {
-            hide()
-
-            DispatchQueue.main.asyncAfter(deadline: .now() + currentDelay) {
-                show()
-                self.isTransitioning = false
-                self.transitionContinuation?.resume()
-                self.transitionContinuation = nil
-            }
+        if currentDelay > 0 {
+            try? await Task.sleep(nanoseconds: UInt64(currentDelay * 1_000_000_000))
         }
+
+        show()
     }
 
     private func cancelTemporary() {

@@ -12,7 +12,17 @@ The app is called **OpenNotch**.
 
 OpenNotch references the following open-source projects for UI architecture and design inspiration:
 
-- **[ShipSwift](https://github.com/signerlabs/ShipSwift)** — animation components, chart components, icon components, UI components. LLM should reference this project as much as possible when building or modifying UI.
+- **[ShipSwift](https://github.com/signerlabs/ShipSwift)** — 本项目仅使用了其 6 个纯 SwiftUI 组件（位于 `Vendor/ShipSwift/`）：
+  - `SWRingChart` — 环形图表（Dashboard 状态环）
+  - `SWLineChart` — 折线图（CPU 历史曲线）
+  - `SWAreaChart` — 面积图（内存历史曲线）
+  - `SWStatusBadge` — 状态徽章（Focus/ VPN 状态）
+  - `SWShimmer` — 骨架屏闪烁动画（App Launcher 加载）
+  - `SWKPICard` — KPI 指标卡片（暂未使用，保留）
+  
+  **注意：** ShipSwift 是 iOS 优先的项目，其 SWAnimation/SWChart/SWComponent/SWModule 等大量 iOS 专用组件不适用于本项目。UI 建模时**仅**参考以上 6 个文件，避免引入 iOS 专属代码。
+- **[Luminare](https://github.com/MrKai77/Luminare)** (⭐158) — macOS-first 磨砂半透明设计系统，作者同 DynamicNotch（OpenNotch 灵感来源）。设计 UI、动画和组件时优先参考此项目，尤其是磨砂玻璃效果、macOS 原生交互模式和组件架构。
+- **[SwiftUIX](https://github.com/SwiftUIX/SwiftUIX)** (⭐8k+) — 最全面的 SwiftUI 扩展库，补齐大量 UIKit/AppKit 桥接功能。当需要 SwiftUI 标准库未提供的组件、修饰符或交互能力时，优先查询此项目是否有现成实现。
 - **[Stats](https://github.com/exelban/Stats)** (⭐38k) — macOS system monitor. Reference for system monitoring visualization (CPU, memory, disk, network charts), compact data display in constrained layouts, and threshold-based color schemes. Useful for Dashboard System tab and side widget beautification.
 - **[Ice](https://github.com/jordanbaird/Ice)** (⭐18k) — macOS menu bar manager. Reference for polished settings UI layout, card-based design patterns, and native macOS interaction patterns.
 

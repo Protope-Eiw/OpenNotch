@@ -1,6 +1,7 @@
 import SwiftUI
 import Combine
 import EventKit
+internal import AppKit
 
 struct CalendarTabView: View {
     @StateObject private var store = CalendarStore()
@@ -13,6 +14,7 @@ struct CalendarTabView: View {
     @State private var editingEvent: EKEvent? = nil
     @State private var showDeleteConfirm = false
     @State private var authStatus: EKAuthorizationStatus = EKEventStore.authorizationStatus(for: .event)
+    private static var eventWindow: NSWindow?
 
     var body: some View {
         Group {
@@ -60,30 +62,31 @@ struct CalendarTabView: View {
                     .padding(.vertical, 10)
                     .padding(.leading, 12)
 
-                VStack(spacing: 6) {
-                    Image(systemName: "wrench.and.screwdriver.fill")
-                        .font(.system(size: 18))
-                        .foregroundStyle(.white.opacity(0.2))
-                    Text(L10n.app("calendar.comingSoon", fallback: "Under development, stay tuned"))
-                        .font(.system(size: 11))
-                        .foregroundStyle(.white.opacity(0.3))
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                CalendarEventPane(
+                    date: selectedDate,
+                    events: store.events,
+                    reminders: store.reminders,
+                    version: store.version,
+                    onNewEvent: { showEditSheet = true; editingEvent = nil },
+                    onEditEvent: { event in
+                        editingEvent = event
+                        showEditSheet = true
+                    },
+                    onDeleteEvent: { event in
+                        editingEvent = event
+                        showDeleteConfirm = true
+                    }
+                )
             }
             .onAppear {
                 store.load(for: selectedDate)
                 store.loadReminders()
             }
             .onChange(of: selectedDate) { _, d in store.load(for: d) }
-            .sheet(isPresented: $showEditSheet) {
-                CalendarEventCreatorView(
-                    store: store,
-                    defaultDate: selectedDate,
-                    editingEvent: editingEvent,
-                    onDismiss: { showEditSheet = false; editingEvent = nil }
-                )
-                .frame(width: 340, height: 420)
+            .onChange(of: showEditSheet) { _, show in
+                if show { presentEventWindow() } else { closeEventWindow() }
             }
+            .onDisappear { Self.eventWindow = nil }
             .alert(L10n.app("calendar.deleteConfirm", fallback: "Delete this event?"), isPresented: $showDeleteConfirm) {
                 Button(L10n.app("calendar.delete", fallback: "Delete"), role: .destructive) {
                     if let event = editingEvent {
@@ -104,6 +107,47 @@ struct CalendarTabView: View {
             await store.warmUp()
             authStatus = store.authStatus
         }
+    }
+
+    private func presentEventWindow() {
+        Self.eventWindow?.close()
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 340, height: 420),
+            styleMask: [.titled, .closable, .fullSizeContentView],
+            backing: .buffered,
+            defer: false
+        )
+        window.isReleasedWhenClosed = false
+        window.titlebarAppearsTransparent = true
+        window.titleVisibility = .hidden
+        window.backgroundColor = NSColor(Color(white: 0.28))
+        window.level = .floating
+        window.center()
+
+        window.delegate = Self.makeDelegate { Self.eventWindow = nil }
+        let view = CalendarEventCreatorView(
+            store: store,
+            defaultDate: selectedDate,
+            editingEvent: editingEvent,
+            onDismiss: {
+                window.close()
+                Self.eventWindow = nil
+            }
+        )
+        window.contentView = NSHostingView(rootView: view)
+        window.makeKeyAndOrderFront(nil)
+        Self.eventWindow = window
+    }
+
+    private func closeEventWindow() {
+        Self.eventWindow?.close()
+        Self.eventWindow = nil
+    }
+
+    private static func makeDelegate(onClose: @escaping () -> Void) -> EventWindowDelegate {
+        let d = EventWindowDelegate()
+        d.onClose = onClose
+        return d
     }
 
     private func calendarPermissionView(
@@ -302,6 +346,7 @@ struct CalendarEventPane: View {
     let events: [EKEvent]
     let reminders: [EKReminder]
     let version: Int
+    var onNewEvent: (() -> Void)? = nil
     var onEditEvent: ((EKEvent) -> Void)? = nil
     var onDeleteEvent: ((EKEvent) -> Void)? = nil
 
@@ -311,21 +356,43 @@ struct CalendarEventPane: View {
                 Text(dateLabel)
                     .font(.system(size: 10, weight: .semibold))
                     .foregroundStyle(.white.opacity(0.45))
-                    .padding(.leading, 12)
-                    .padding(.top, 8)
-                    .padding(.bottom, 5)
+                Spacer()
+                Button(action: { onNewEvent?() }) {
+                    Image(systemName: "plus")
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(.white.opacity(0.45))
+                        .frame(width: 20, height: 20)
+                        .background(Color.white.opacity(0.08))
+                        .clipShape(RoundedRectangle(cornerRadius: 4))
+                }
+                .buttonStyle(.plain)
+                .help(L10n.app("calendar.newEvent", fallback: "New event"))
             }
+            .padding(.leading, 12)
+            .padding(.trailing, 10)
+            .padding(.top, 8)
+            .padding(.bottom, 5)
 
             Divider().opacity(0.08)
 
             if events.isEmpty && reminders.isEmpty {
-                VStack(spacing: 5) {
+                VStack(spacing: 8) {
                     Image(systemName: "calendar.badge.checkmark")
-                        .font(.system(size: 16))
-                        .foregroundStyle(.white.opacity(0.15))
+                        .font(.system(size: 20))
+                        .foregroundStyle(.white.opacity(0.12))
                     Text(Calendar.current.isDateInToday(date) ? L10n.app("calendar.noEventsToday", fallback: "No events today") : L10n.app("calendar.noEvents", fallback: "No events"))
                         .font(.system(size: 10))
                         .foregroundStyle(.white.opacity(0.25))
+                    Button(action: { onNewEvent?() }) {
+                        Text(L10n.app("calendar.addEvent", fallback: "Add Event"))
+                            .font(.system(size: 10, weight: .medium))
+                            .foregroundStyle(.blue.opacity(0.7))
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 4)
+                            .background(Color.white.opacity(0.06))
+                            .clipShape(Capsule())
+                    }
+                    .buttonStyle(.plain)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
@@ -542,6 +609,13 @@ struct CalendarReminderRow: View {
 }
 
 // MARK: - CalendarStore
+
+private final class EventWindowDelegate: NSObject, NSWindowDelegate {
+    var onClose: (() -> Void)?
+    func windowWillClose(_ notification: Notification) {
+        onClose?()
+    }
+}
 
 @MainActor
 final class CalendarStore: ObservableObject {
