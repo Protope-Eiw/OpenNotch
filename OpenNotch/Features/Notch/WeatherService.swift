@@ -8,10 +8,7 @@ final class WeatherService: ObservableObject {
     @Published var fetchFailed: Bool = false
 
     private var lastFetch: Date = .distantPast
-    private var lastLat: Double?
-    private var lastLon: Double?
     private let cacheTTL: TimeInterval = 1800
-    private let coordinateThreshold: Double = 0.5
     private var refreshTimer: Timer?
 
     init() {
@@ -19,11 +16,11 @@ final class WeatherService: ObservableObject {
         symbolName = UserDefaults.standard.string(forKey: AppStorageKeys.Overview.weatherSymbolName) ?? "cloud"
         conditionText = UserDefaults.standard.string(forKey: AppStorageKeys.Overview.weatherConditionText) ?? ""
         lastFetch = UserDefaults.standard.object(forKey: AppStorageKeys.Overview.weatherLastFetch) as? Date ?? .distantPast
-        lastLat = UserDefaults.standard.object(forKey: AppStorageKeys.Overview.weatherLastLat) as? Double
-        lastLon = UserDefaults.standard.object(forKey: AppStorageKeys.Overview.weatherLastLon) as? Double
     }
 
     func requestAndFetch() {
+        guard lastFetch == .distantPast || Date().timeIntervalSince(lastFetch) >= cacheTTL else { return }
+
         fetchFailed = false
         Task { await fetch() }
     }
@@ -32,13 +29,6 @@ final class WeatherService: ObservableObject {
     private func fetch() async {
         guard let location = await resolveLocation() else {
             fetchFailed = true
-            return
-        }
-
-        if let lastLat, let lastLon,
-           abs(lastLat - location.lat) < coordinateThreshold,
-           abs(lastLon - location.lon) < coordinateThreshold,
-           Date().timeIntervalSince(lastFetch) < cacheTTL {
             return
         }
 
@@ -65,8 +55,6 @@ final class WeatherService: ObservableObject {
             }
 
             lastFetch = Date()
-            lastLat = location.lat
-            lastLon = location.lon
             fetchFailed = false
             temperature = resp.current.temperature2m
             (symbolName, conditionText) = info(for: resp.current.weatherCode)
@@ -78,19 +66,27 @@ final class WeatherService: ObservableObject {
     }
 
     private func resolveLocation() async -> (lat: Double, lon: Double)? {
-        guard let url = URL(string: "http://ip-api.com/json/") else { return nil }
+        let services = [
+            URL(string: "https://ipapi.co/json/"),
+            URL(string: "http://ip-api.com/json/"),
+        ]
 
-        do {
-            let (data, _) = try await URLSession.shared.data(from: url)
-            struct IPLocation: Decodable {
-                let lat: Double
-                let lon: Double
-            }
-            let location = try JSONDecoder().decode(IPLocation.self, from: data)
-            return (location.lat, location.lon)
-        } catch {
-            return nil
+        for serviceURL in services {
+            guard let url = serviceURL else { continue }
+            do {
+                let (data, _) = try await URLSession.shared.data(from: url)
+                struct IPLocation: Decodable {
+                    let latitude, lat: Double?
+                    let longitude, lon: Double?
+                }
+                let location = try JSONDecoder().decode(IPLocation.self, from: data)
+                if let lat = location.latitude ?? location.lat,
+                   let lon = location.longitude ?? location.lon {
+                    return (lat, lon)
+                }
+            } catch {}
         }
+        return nil
     }
 
     private func persist() {
@@ -98,8 +94,6 @@ final class WeatherService: ObservableObject {
         UserDefaults.standard.set(symbolName, forKey: AppStorageKeys.Overview.weatherSymbolName)
         UserDefaults.standard.set(conditionText, forKey: AppStorageKeys.Overview.weatherConditionText)
         UserDefaults.standard.set(lastFetch, forKey: AppStorageKeys.Overview.weatherLastFetch)
-        UserDefaults.standard.set(lastLat, forKey: AppStorageKeys.Overview.weatherLastLat)
-        UserDefaults.standard.set(lastLon, forKey: AppStorageKeys.Overview.weatherLastLon)
     }
 
     private func scheduleNextRefresh() {

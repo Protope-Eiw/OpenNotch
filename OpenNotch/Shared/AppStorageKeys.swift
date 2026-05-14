@@ -23,8 +23,6 @@ enum AppStorageKeys {
         static let weatherSymbolName   = "settings.overview.weatherSymbolName"
         static let weatherConditionText = "settings.overview.weatherConditionText"
         static let weatherLastFetch     = "settings.overview.weatherLastFetch"
-        static let weatherLastLat       = "settings.overview.weatherLastLat"
-        static let weatherLastLon       = "settings.overview.weatherLastLon"
     }
     enum Music {
         static let showSkipButtons = "settings.music.showSkipButtons"
