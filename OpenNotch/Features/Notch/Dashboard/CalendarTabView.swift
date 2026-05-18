@@ -620,6 +620,7 @@ private final class EventWindowDelegate: NSObject, NSWindowDelegate {
 @MainActor
 final class CalendarStore: ObservableObject {
     @Published var events: [EKEvent] = []
+    @Published var upcomingEvents: [EKEvent] = []
     @Published var reminders: [EKReminder] = []
     @Published var version: Int = 0
     @Published var authStatus: EKAuthorizationStatus = .notDetermined
@@ -677,6 +678,16 @@ final class CalendarStore: ObservableObject {
         authStatus = status
         guard status == .fullAccess || status == .writeOnly else { return }
         fetch(for: date)
+    }
+
+    func loadUpcoming(days: Int = 14) {
+        let status = EKEventStore.authorizationStatus(for: .event)
+        authStatus = status
+        guard status == .fullAccess else {
+            upcomingEvents = []
+            return
+        }
+        fetchUpcoming(days: days)
     }
 
     func loadReminders() {
@@ -774,6 +785,9 @@ final class CalendarStore: ObservableObject {
         if (status == .fullAccess || status == .writeOnly), let date = lastLoadedDate {
             fetch(for: date)
         }
+        if status == .fullAccess {
+            fetchUpcoming(days: 14)
+        }
         let reminderStatus = EKEventStore.authorizationStatus(for: .reminder)
         reminderAuthStatus = reminderStatus
         if reminderStatus == .fullAccess { fetchReminders() }
@@ -786,6 +800,17 @@ final class CalendarStore: ObservableObject {
         let end   = cal.date(byAdding: .day, value: 1, to: start) ?? start
         let pred  = ekStore.predicateForEvents(withStart: start, end: end, calendars: nil)
         events  = ekStore.events(matching: pred).sorted { $0.startDate < $1.startDate }
+        version += 1
+    }
+
+    private func fetchUpcoming(days: Int) {
+        let now = Date()
+        let start = Calendar.current.startOfDay(for: now)
+        let end = Calendar.current.date(byAdding: .day, value: days, to: now) ?? now
+        let pred = ekStore.predicateForEvents(withStart: start, end: end, calendars: nil)
+        upcomingEvents = ekStore.events(matching: pred)
+            .filter { $0.endDate > now }
+            .sorted { $0.startDate < $1.startDate }
         version += 1
     }
 

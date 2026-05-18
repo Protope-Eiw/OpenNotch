@@ -20,6 +20,7 @@ enum AppStorageKeys {
         static let hideAppNames      = "settings.overview.hideAppNames"
         static let pomodoroDuration  = "settings.overview.pomodoroDuration"
         static let weatherTemperature  = "settings.overview.weatherTemperature"
+        static let weatherCode         = "settings.overview.weatherCode"
         static let weatherSymbolName   = "settings.overview.weatherSymbolName"
         static let weatherConditionText = "settings.overview.weatherConditionText"
         static let weatherLastFetch     = "settings.overview.weatherLastFetch"

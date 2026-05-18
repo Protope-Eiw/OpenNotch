@@ -34,6 +34,7 @@ struct NotchView: View {
     @State private var dragSourceIndex: Int = 0
     @State private var dragTargetIndex: Int = 0
     @State private var appSearchText = ""
+    @FocusState private var appSearchFocused: Bool
     @StateObject private var pomodoroViewModel = PomodoroViewModel()
     @AppStorage(AppStorageKeys.NotchBar.leftWidgets)  private var leftWidgetsRaw  = NotchBarWidget.networkSpeed.rawValue
     @AppStorage(AppStorageKeys.NotchBar.rightWidgets) private var rightWidgetsRaw = "cpu,memory"
@@ -249,8 +250,10 @@ private extension NotchView {
                     .animation(spring, value: dashboardOpen)
                     // Tab indicators — overlay so speed arrows still drive the layout width
                     .overlay(alignment: .leading) {
-                        let iconSlot: CGFloat = 31
-                        HStack(spacing: 3) {
+                        let tabIconSize: CGFloat = 26
+                        let tabIconSpacing: CGFloat = 2
+                        let iconSlot = tabIconSize + tabIconSpacing
+                        HStack(spacing: tabIconSpacing) {
                             ForEach(Array(enabledDashboardTabs.enumerated()), id: \.element) { (tabIdx, tab) in
                                 let isDragging = draggingTab == tab
                                 let sideOffset: CGFloat = {
@@ -282,7 +285,7 @@ private extension NotchView {
                                     Image(systemName: tab.icon)
                                         .font(.system(size: 13, weight: .medium))
                                         .foregroundStyle(dashboardTab == tab ? .white : .white.opacity(0.5))
-                                        .frame(width: 28, height: 28)
+                                        .frame(width: tabIconSize, height: tabIconSize)
                                         .background(dashboardTab == tab ? Color.white.opacity(0.14) : .clear)
                                         .clipShape(RoundedRectangle(cornerRadius: 7))
                                         .contentShape(Rectangle())
@@ -393,6 +396,10 @@ private extension NotchView {
                                     .textFieldStyle(.plain)
                                     .font(.system(size: 12))
                                     .foregroundStyle(.white)
+                                    .focused($appSearchFocused)
+                                    .onAppear {
+                                        focusAppSearch()
+                                    }
                                 if !appSearchText.isEmpty {
                                     Button { appSearchText = "" } label: {
                                         Image(systemName: "xmark.circle.fill")
@@ -475,6 +482,20 @@ private extension NotchView {
             dashboardPopoverActive = notification.userInfo?["isPresented"] as? Bool ?? false
             handleHoverChange()
         }
+        .onChange(of: dashboardTab) { _, tab in
+            if dashboardOpen && tab == .apps {
+                focusAppSearch()
+            } else {
+                appSearchFocused = false
+            }
+        }
+        .onChange(of: dashboardOpen) { _, isOpen in
+            if isOpen && dashboardTab == .apps {
+                focusAppSearch()
+            } else if !isOpen {
+                appSearchFocused = false
+            }
+        }
     }
 
     private func toggleDashboard() {
@@ -508,7 +529,10 @@ private extension NotchView {
         if !hovered {
             guard settingsViewModel.application.dashboardOpenMode == .hover else { return }
             dashboardHoverTask = Task { @MainActor in
-                try? await Task.sleep(for: .milliseconds(0))
+                let delay = settingsViewModel.application.dashboardHoverDismissDelay
+                if delay > 0 {
+                    try? await Task.sleep(for: .milliseconds(Int(delay * 1000)))
+                }
                 guard !Task.isCancelled else { return }
                 withAnimation(.spring(response: 0.45, dampingFraction: 1.0)) {
                     dashboardOpen = false
@@ -527,6 +551,14 @@ private extension NotchView {
             withAnimation(.spring(response: 0.42, dampingFraction: 0.8)) {
                 dashboardOpen = true
             }
+        }
+    }
+
+    private func focusAppSearch() {
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(80))
+            guard dashboardOpen && dashboardTab == .apps else { return }
+            appSearchFocused = true
         }
     }
 

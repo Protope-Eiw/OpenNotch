@@ -59,6 +59,21 @@ struct InterfaceSettingsView: View {
 
             SettingsDivider()
 
+            SettingsSliderRow(
+                title: localized("settings.interface.hoverDismissDelay", fallback: "Hover Dismiss Delay"),
+                description: localized("settings.interface.hoverDismissDelay.description", fallback: "How long the dashboard stays open after the pointer leaves in Hover mode."),
+                range: ApplicationSettingsStore.dashboardHoverDismissDelayRange,
+                step: ApplicationSettingsStore.dashboardHoverDismissDelayStep,
+                fractionLength: 1,
+                suffix: "s",
+                accessibilityIdentifier: GeneralSettingsStorage.Keys.dashboardHoverDismissDelay,
+                value: $applicationSettings.dashboardHoverDismissDelay
+            )
+            .disabled(applicationSettings.dashboardOpenMode != .hover)
+            .opacity(applicationSettings.dashboardOpenMode == .hover ? 1 : 0.5)
+
+            SettingsDivider()
+
             SettingsMenuRow(
                 title: localized("settings.interface.defaultTab", fallback: "Default Tab"),
                 description: localized("settings.interface.defaultTab.description", fallback: "Default tab opened when dashboard opens."),
@@ -211,18 +226,17 @@ struct InterfaceSettingsView: View {
             )
             .padding(.leading, 16)
 
-            if showTimeDate {
-                SettingsDivider(indented: true, indentSize: 72, opacity: 0.3)
-                SettingsToggleRow(
-                    title: localized("settings.interface.overview.weather", fallback: "Weather"),
-                    systemImage: "cloud.fill",
-                    color: .orange,
-                    isOn: $showWeather,
-                    showIcon: false,
-                    accessibilityIdentifier: AppStorageKeys.Overview.showWeather
-                )
-                .padding(.leading, 32)
-            }
+            // Weather
+            SettingsDivider(indented: true, indentSize: 56, opacity: 0.4)
+            SettingsToggleRow(
+                title: localized("settings.interface.overview.weather", fallback: "Weather"),
+                systemImage: "cloud.fill",
+                color: .cyan,
+                isOn: $showWeather,
+                showIcon: false,
+                accessibilityIdentifier: AppStorageKeys.Overview.showWeather
+            )
+            .padding(.leading, 16)
 
             // System info
             SettingsDivider(indented: true, indentSize: 56, opacity: 0.4)

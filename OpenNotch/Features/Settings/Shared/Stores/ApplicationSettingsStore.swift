@@ -8,6 +8,8 @@ final class ApplicationSettingsStore: SettingsStoreBase, NotchSettingsProviding 
     static let notchPressHoldDurationRange: ClosedRange<Double> = 0.20...0.60
     static let notchPressHoldDurationStep: Double = 0.01
     static let defaultNotchPressHoldDuration: TimeInterval = 0.25
+    static let dashboardHoverDismissDelayRange: ClosedRange<Double> = 0.0...3.0
+    static let dashboardHoverDismissDelayStep: Double = 0.1
 
     @Published var isLaunchAtLoginEnabled: Bool {
         didSet {
@@ -101,6 +103,19 @@ final class ApplicationSettingsStore: SettingsStoreBase, NotchSettingsProviding 
     @Published var dashboardOpenMode: DashboardOpenMode {
         didSet {
             persist(dashboardOpenMode.rawValue, for: GeneralSettingsStorage.Keys.dashboardOpenMode)
+        }
+    }
+
+    @Published var dashboardHoverDismissDelay: Double {
+        didSet {
+            let clampedValue = Self.clampDashboardHoverDismissDelay(dashboardHoverDismissDelay)
+
+            if clampedValue != dashboardHoverDismissDelay {
+                dashboardHoverDismissDelay = clampedValue
+                return
+            }
+
+            persist(dashboardHoverDismissDelay, for: GeneralSettingsStorage.Keys.dashboardHoverDismissDelay)
         }
     }
 
@@ -244,6 +259,10 @@ final class ApplicationSettingsStore: SettingsStoreBase, NotchSettingsProviding 
         self.dashboardOpenMode = DashboardOpenMode.resolved(
             defaults.string(forKey: GeneralSettingsStorage.Keys.dashboardOpenMode)
         )
+        self.dashboardHoverDismissDelay = Self.clampDashboardHoverDismissDelay(
+            defaults.object(forKey: GeneralSettingsStorage.Keys.dashboardHoverDismissDelay) as? Double ??
+            (GeneralSettingsStorage.defaultValues[GeneralSettingsStorage.Keys.dashboardHoverDismissDelay] as? Double ?? 0.6)
+        )
         self.dashboardDisabledTabs = Set(
             defaults.stringArray(forKey: GeneralSettingsStorage.Keys.dashboardDisabledTabs) ?? []
         )
@@ -298,6 +317,7 @@ final class ApplicationSettingsStore: SettingsStoreBase, NotchSettingsProviding 
         dashboardOpenMode = DashboardOpenMode.resolved(
             defaultString(for: GeneralSettingsStorage.Keys.dashboardOpenMode)
         )
+        dashboardHoverDismissDelay = defaultDouble(for: GeneralSettingsStorage.Keys.dashboardHoverDismissDelay)
         dashboardDisabledTabs = []
     }
 
@@ -323,6 +343,13 @@ final class ApplicationSettingsStore: SettingsStoreBase, NotchSettingsProviding 
         )
         notchWidth = defaultInt(for: GeneralSettingsStorage.Keys.notchWidth)
         notchHeight = defaultInt(for: GeneralSettingsStorage.Keys.notchHeight)
+    }
+
+    private static func clampDashboardHoverDismissDelay(_ value: Double) -> Double {
+        min(
+            max(value, dashboardHoverDismissDelayRange.lowerBound),
+            dashboardHoverDismissDelayRange.upperBound
+        )
     }
 
     func reset() {

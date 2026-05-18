@@ -12390,6 +12390,105 @@
         }
       }
     },
+    "weather.clear" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Clear" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Despejado" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Ясно" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "晴朗" } }
+      }
+    },
+    "weather.fetching" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Fetching weather…" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cargando clima…" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Загрузка погоды…" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "正在获取天气…" } }
+      }
+    },
+    "weather.foggy" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Foggy" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Niebla" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Туман" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "有雾" } }
+      }
+    },
+    "weather.overcast" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Overcast" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cubierto" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Пасмурно" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "阴天" } }
+      }
+    },
+    "weather.partlyCloudy" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Partly Cloudy" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Parcialmente nublado" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Переменная облачность" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "多云" } }
+      }
+    },
+    "weather.rainy" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Rainy" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Lluvia" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Дождь" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "有雨" } }
+      }
+    },
+    "weather.showers" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Showers" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Chubascos" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Ливни" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "阵雨" } }
+      }
+    },
+    "weather.snowShowers" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Snow Showers" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Chubascos de nieve" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Снегопад" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "阵雪" } }
+      }
+    },
+    "weather.snowy" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Snowy" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Nieve" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Снег" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "有雪" } }
+      }
+    },
+    "weather.thunderstorm" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Thunderstorm" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Tormenta" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Гроза" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "雷暴" } }
+      }
+    },
+    "weather.unavailable" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Weather unavailable" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Clima no disponible" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Погода недоступна" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "天气不可用" } }
+      }
+    },
     "settings.interface.overview.weather" : {
       "extractionState" : "manual",
       "localizations" : {
