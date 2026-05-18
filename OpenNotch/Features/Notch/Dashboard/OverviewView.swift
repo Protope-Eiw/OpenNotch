@@ -178,14 +178,23 @@ struct OverviewView: View {
                 statBlock("\(Int(systemMonitorViewModel.diskUsage))%",  "DISK",
                           Color.thresholdColor(systemMonitorViewModel.diskUsage,  warn: 80, danger: 90))
             }
-            HStack(spacing: 3) {
-                Image(systemName: "internaldrive").font(.system(size: 9))
-                Text("\(systemMonitorViewModel.diskUsedText) / \(systemMonitorViewModel.diskTotalText)")
-                    .font(.system(size: 9, weight: .medium, design: .monospaced))
+            VStack(alignment: .leading, spacing: 2) {
+                resourceDetailRow(
+                    systemName: "memorychip",
+                    text: "\(systemMonitorViewModel.memoryUsedText) / \(systemMonitorViewModel.memoryTotalText)"
+                )
+                resourceDetailRow(
+                    systemName: "internaldrive",
+                    text: "\(systemMonitorViewModel.diskUsedText) / \(systemMonitorViewModel.diskTotalText)"
+                )
             }
-            .foregroundStyle(.white.opacity(0.3))
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            openActivityMonitor()
+        }
+        .help("Open Activity Monitor")
     }
 
     private func statBlock(_ value: String, _ label: String, _ color: Color) -> some View {
@@ -197,6 +206,21 @@ struct OverviewView: View {
                 .font(.system(size: 8, weight: .medium))
                 .foregroundStyle(.white.opacity(0.4))
         }
+    }
+
+    private func resourceDetailRow(systemName: String, text: String) -> some View {
+        HStack(spacing: 3) {
+            Image(systemName: systemName)
+                .font(.system(size: 9))
+            Text(text)
+                .font(.system(size: 9, weight: .medium, design: .monospaced))
+        }
+        .foregroundStyle(.white.opacity(0.3))
+    }
+
+    private func openActivityMonitor() {
+        let url = URL(fileURLWithPath: "/System/Applications/Utilities/Activity Monitor.app")
+        NSWorkspace.shared.open(url)
     }
 
     private var pomodoroColumn: some View {
@@ -238,37 +262,13 @@ struct OverviewView: View {
                     .buttonStyle(.plain)
 
                     VStack(spacing: 0) {
-                        Button {
-                            if isIdle {
-                                if workMinutes < 120 { workMinutes += 1 }
-                                pomodoroViewModel.syncWorkMinutes()
-                            } else {
-                                pomodoroViewModel.adjustTime(minutes: 1)
-                            }
-                        } label: {
-                            Image(systemName: "chevron.up")
-                                .font(.system(size: 7, weight: .semibold))
-                                .frame(width: 22, height: 14)
-                                .contentShape(Rectangle())
+                        PomodoroAdjustButton(systemName: "chevron.up") {
+                            adjustPomodoro(isIdle: isIdle, direction: 1)
                         }
-                        .buttonStyle(.plain)
-                        .foregroundStyle(.white.opacity(0.5))
 
-                        Button {
-                            if isIdle {
-                                if workMinutes > 1 { workMinutes -= 1 }
-                                pomodoroViewModel.syncWorkMinutes()
-                            } else {
-                                pomodoroViewModel.adjustTime(minutes: -1)
-                            }
-                        } label: {
-                            Image(systemName: "chevron.down")
-                                .font(.system(size: 7, weight: .semibold))
-                                .frame(width: 22, height: 14)
-                                .contentShape(Rectangle())
+                        PomodoroAdjustButton(systemName: "chevron.down") {
+                            adjustPomodoro(isIdle: isIdle, direction: -1)
                         }
-                        .buttonStyle(.plain)
-                        .foregroundStyle(.white.opacity(0.5))
                     }
 
                     Button { pomodoroViewModel.reset() } label: {
@@ -286,6 +286,64 @@ struct OverviewView: View {
         .frame(width: 116, height: 116)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .clipped()
+    }
+
+    private func adjustPomodoro(isIdle: Bool, direction: Int) {
+        if isIdle {
+            let step = 1
+            workMinutes = min(120, max(1, workMinutes + direction * step))
+            pomodoroViewModel.syncWorkMinutes()
+        } else {
+            pomodoroViewModel.adjustTime(minutes: direction)
+        }
+    }
+}
+
+private struct PomodoroAdjustButton: View {
+    let systemName: String
+    let action: () -> Void
+
+    @State private var isPressing = false
+    @State private var repeatTask: Task<Void, Never>?
+
+    var body: some View {
+        Image(systemName: systemName)
+            .font(.system(size: 7, weight: .semibold))
+            .foregroundStyle(.white.opacity(isPressing ? 0.85 : 0.5))
+            .frame(width: 22, height: 14)
+            .contentShape(Rectangle())
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { _ in
+                        guard !isPressing else { return }
+                        isPressing = true
+                        action()
+                        startRepeating()
+                    }
+                    .onEnded { _ in
+                        stopRepeating()
+                    }
+            )
+            .onDisappear {
+                stopRepeating()
+            }
+    }
+
+    private func startRepeating() {
+        repeatTask?.cancel()
+        repeatTask = Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(450))
+            while !Task.isCancelled {
+                action()
+                try? await Task.sleep(for: .milliseconds(140))
+            }
+        }
+    }
+
+    private func stopRepeating() {
+        isPressing = false
+        repeatTask?.cancel()
+        repeatTask = nil
     }
 }
 

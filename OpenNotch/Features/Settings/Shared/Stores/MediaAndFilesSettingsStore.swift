@@ -149,7 +149,8 @@ final class MediaAndFilesSettingsStore: SettingsStoreBase {
             defaults.object(forKey: GeneralSettingsStorage.Keys.nowPlayingPauseHideDelay) as? Int ??
             Self.defaultTemporaryActivityDuration(for: GeneralSettingsStorage.Keys.nowPlayingPauseHideDelay)
         )
-        self.nowPlayingIdleText = defaults.string(forKey: GeneralSettingsStorage.Keys.nowPlayingIdleText) ?? ""
+        self.nowPlayingIdleText = defaults.string(forKey: GeneralSettingsStorage.Keys.nowPlayingIdleText) ??
+            (GeneralSettingsStorage.defaultValues[GeneralSettingsStorage.Keys.nowPlayingIdleText] as? String ?? "")
         let hasLegacyDownloadsValue = defaults.object(forKey: GeneralSettingsStorage.Keys.legacyFileTransfersLiveActivityEnabled) != nil
         let downloadsSettingValue = defaults.object(forKey: GeneralSettingsStorage.Keys.downloadsLiveActivityEnabled) as? Bool
         self.isDownloadsLiveActivityEnabled = downloadsSettingValue ?? (

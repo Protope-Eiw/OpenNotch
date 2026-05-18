@@ -135,7 +135,7 @@ enum GeneralSettingsStorage {
         Keys.nowPlayingArtworkStrokeEnabled: false,
         Keys.nowPlayingPauseHideTimerEnabled: true,
         Keys.nowPlayingPauseHideDelay: 5,
-        Keys.nowPlayingIdleText: "",
+        Keys.nowPlayingIdleText: "OpenNotch",
         Keys.downloadsLiveActivityEnabled: false,
         Keys.downloadsDefaultStrokeEnabled: false,
         Keys.downloadsAppearanceStyle: DownloadAppearanceStyle.minimal.rawValue,

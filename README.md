@@ -50,9 +50,11 @@ OpenNotch is inspired by and references two open-source projects:
 - **Temporary alerts** for charging, low battery, full battery, Bluetooth, Wi-Fi, VPN, Focus-off, and notch resize feedback
 - **Custom hardware HUDs** replacing the default macOS overlays for brightness, keyboard brightness, and volume
 - **Interactive dashboard** that opens on notch hover — an expandable panel with app launcher, time/date, system stats, and pomodoro timer
+- **Dashboard resource drill-down** with CPU, memory, disk details and a tap target that opens Activity Monitor
 - **Adaptive app grid** that scales layout from 1×2 up to 3×4 depending on the number of pinned apps (up to 12)
 - **Pill widget bar** showing up to two live metrics (CPU, memory, disk, network speed) as compact progress rings or text
-- **Pomodoro inline editing** — adjust work duration directly from the dashboard using +/− controls without opening settings
+- **Pomodoro inline editing** — adjust work duration directly from the dashboard using +/− controls, including press-and-hold repeat
+- **External-display media text** showing centered track/artist text when media is playing, or a custom idle message that defaults to `OpenNotch`
 - **Full display placement control** — choose which display the notch overlay appears on
 - **Native interactions** including tap to expand, mouse drag gestures, trackpad swipes, swipe-to-dismiss, and swipe-to-restore
 - **Extensive personalization** for notch width, height, background style, stroke options, animation presets, fullscreen behavior, and app language
@@ -67,8 +69,8 @@ The dashboard opens when you hover over the notch. Inside it:
 |---|---|
 | App Launcher | Quick-launch pinned apps. Adaptive grid layout, optional hidden app names. |
 | Time & Date | Large clock and date display, with optional weather. |
-| System Info | Live CPU, RAM, and disk usage at a glance. |
-| Pomodoro Timer | Inline work session countdown with +/− duration controls. |
+| System Info | Live CPU, RAM, memory capacity, and disk usage at a glance. Click the section to open Activity Monitor. |
+| Pomodoro Timer | Inline work session countdown with +/− duration controls and press-and-hold repeat. Network speed remains visible during an active countdown when enabled. |
 
 Each section can be individually enabled or disabled in **Settings → Interface**.
 

@@ -95,7 +95,7 @@ struct NowPlayingSettingsView: View {
                 }
 
                 TextField(
-                    localized("Leave empty to hide", fallback: "Leave empty to hide"),
+                    localized("OpenNotch", fallback: "OpenNotch"),
                     text: $settings.nowPlayingIdleText
                 )
                 .textFieldStyle(.roundedBorder)

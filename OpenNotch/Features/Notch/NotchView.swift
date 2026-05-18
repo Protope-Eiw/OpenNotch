@@ -155,7 +155,14 @@ private extension NotchView {
     var ringSize:       CGFloat { max(0, baseHeight - 6) }
     var outerPad:       CGFloat { 10 }
     var notchClearance: CGFloat { ceil(notchViewModel.interactiveCornerRadius.top) + 3 }
-    var leftIntrinsicWidth:  CGFloat { outerPad + 65 }   // two-line speed text ~65pt wide
+    var leftIntrinsicWidth: CGFloat {
+        let widgets = leftWidgetsRaw.split(separator: ",").compactMap { NotchBarWidget(rawValue: String($0)) }
+        if pomodoroViewModel.state != .idle {
+            return outerPad + (widgets.contains(.networkSpeed) ? 132 : 58)
+        }
+
+        return outerPad + 65 // two-line speed text ~65pt wide
+    }
     var rightIntrinsicWidth: CGFloat { notchClearance + ringSize + 8 + ringSize + outerPad }
     var sideWidth: CGFloat { max(leftIntrinsicWidth, rightIntrinsicWidth) }
     var activeSideWidth: CGFloat { dashboardOpen ? sideWidth + pillExpandExtra : sideWidth }
