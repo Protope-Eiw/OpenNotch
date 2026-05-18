@@ -1,12 +1,15 @@
 import Foundation
+import CoreLocation
+import CoreWLAN
 import Network
 import SystemConfiguration
 
-final class NetworkMonitor: NetworkMonitoring {
+final class NetworkMonitor: NSObject, NetworkMonitoring, CLLocationManagerDelegate {
     private let monitor = NWPathMonitor()
     private let queue = DispatchQueue(label: "NetworkMonitorQueue")
     private let wifiStoreKey = "State:/Network/Interface/en0/AirPort" as CFString
     private let wifiStore: SCDynamicStore
+    private var locationManager: CLLocationManager?
 
     var onStatusChange: ((_ wifi: Bool, _ hotspot: Bool, _ vpn: Bool) -> Void)?
     private(set) var currentWiFiName: String?
@@ -17,7 +20,7 @@ final class NetworkMonitor: NetworkMonitoring {
         stopMonitoring()
     }
 
-    init() {
+    override init() {
         let storeName = "OpenNotch.NetworkMonitor" as CFString
         var dynamicStore: SCDynamicStore?
         let pattern = ["State:/Network/Interface/en0/AirPort"] as CFArray
@@ -28,6 +31,24 @@ final class NetworkMonitor: NetworkMonitoring {
         }
 
         self.wifiStore = dynamicStore ?? SCDynamicStoreCreate(nil, storeName, nil, nil)!
+        super.init()
+        if !Self.isRunningTests {
+            DispatchQueue.main.async { [weak self] in
+                self?.configureLocationManager()
+            }
+        }
+    }
+
+    private static var isRunningTests: Bool {
+        ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil ||
+            NSClassFromString("XCTestCase") != nil
+    }
+
+    private func configureLocationManager() {
+        let locationManager = CLLocationManager()
+        locationManager.delegate = self
+        self.locationManager = locationManager
+        requestLocationAuthorizationIfNeeded(locationManager)
     }
 
     func startMonitoring() {
@@ -37,18 +58,39 @@ final class NetworkMonitor: NetworkMonitoring {
         monitor.start(queue: queue)
     }
 
+    func refreshStatus() {
+        updateStatus(path: monitor.currentPath)
+    }
+
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        refreshStatus()
+    }
+
+    private func requestLocationAuthorizationIfNeeded(_ locationManager: CLLocationManager) {
+        guard CLLocationManager.locationServicesEnabled() else { return }
+
+        switch locationManager.authorizationStatus {
+        case .notDetermined:
+            locationManager.requestWhenInUseAuthorization()
+        case .authorizedAlways, .authorizedWhenInUse, .denied, .restricted:
+            break
+        @unknown default:
+            break
+        }
+    }
+
     private func updateStatus(path: NWPath) {
         let hasInternetConnection = path.status == .satisfied
-        let isWifi = hasInternetConnection && path.usesInterfaceType(.wifi)
-        
-        let isHotspot = isWifi && path.isExpensive
+        let pathUsesWiFi = hasInternetConnection && path.usesInterfaceType(.wifi)
+        let isHotspot = pathUsesWiFi && path.isExpensive
+        let wifiName = resolveWiFiName(isConnected: hasInternetConnection && !isHotspot)
+        let isWifi = pathUsesWiFi || wifiName != nil
         
         let isVpn = hasInternetConnection && path.availableInterfaces.contains { interface in
             let name = interface.name.lowercased()
             return name.hasPrefix("utun") || name.hasPrefix("ipsec") || name.hasPrefix("ppp")
         }
 
-        let wifiName = resolveWiFiName(isConnected: isWifi && !isHotspot)
         let vpnName = resolveVPNName(isConnected: isVpn)
 
         DispatchQueue.main.async {
@@ -67,20 +109,61 @@ final class NetworkMonitor: NetworkMonitoring {
     private func resolveWiFiName(isConnected: Bool) -> String? {
         guard isConnected else { return nil }
 
-        if let info = SCDynamicStoreCopyValue(wifiStore, wifiStoreKey) as? [String: Any],
-           let ssidData = info["SSID"] as? Data,
-           let ssid = String(data: ssidData, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines),
-           !ssid.isEmpty {
+        if let ssid = ssidFromDynamicStore() {
             return ssid
         }
 
-        if let info = SCDynamicStoreCopyValue(wifiStore, wifiStoreKey) as? [String: Any],
-           let ssidStr = info["SSID_STR"] as? String {
-            let cleaned = ssidStr.trimmingCharacters(in: .whitespacesAndNewlines)
-            return cleaned.isEmpty ? nil : cleaned
+        if let ssid = ssidFromCoreWLAN() {
+            return ssid
         }
 
         return nil
+    }
+
+    private func ssidFromDynamicStore() -> String? {
+        guard let info = SCDynamicStoreCopyValue(wifiStore, wifiStoreKey) as? [String: Any] else {
+            return nil
+        }
+
+        if let ssidData = info["SSID"] as? Data,
+           let ssid = cleanedSSID(String(data: ssidData, encoding: .utf8)) {
+            return ssid
+        }
+
+        if let ssid = cleanedSSID(info["SSID_STR"] as? String) {
+            return ssid
+        }
+
+        return nil
+    }
+
+    private func ssidFromCoreWLAN() -> String? {
+        let client = CWWiFiClient.shared()
+        let interfaceNames = [client.interface()?.interfaceName] + (client.interfaces()?.map(\.interfaceName) ?? [])
+
+        for interfaceName in interfaceNames.compactMap({ $0 }) {
+            guard let ssid = cleanedSSID(client.interface(withName: interfaceName)?.ssid()) else {
+                continue
+            }
+
+            return ssid
+        }
+
+        return nil
+    }
+
+    private func cleanedSSID(_ value: String?) -> String? {
+        guard let value else { return nil }
+
+        let cleaned = value
+            .unicodeScalars
+            .filter { !CharacterSet.controlCharacters.contains($0) }
+            .map(String.init)
+            .joined()
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard cleaned != "<redacted>" else { return nil }
+        return cleaned.isEmpty ? nil : cleaned
     }
 
     private func resolveVPNName(isConnected: Bool) -> String? {

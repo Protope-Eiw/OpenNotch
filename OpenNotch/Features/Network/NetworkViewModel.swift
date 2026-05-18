@@ -125,6 +125,16 @@ final class NetworkViewModel: ObservableObject {
             if self.isInitialCheck { self.isInitialCheck = false }
         }
         monitor.startMonitoring()
+        refreshStatus()
+
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(1))
+            refreshStatus()
+        }
+    }
+
+    func refreshStatus() {
+        monitor.refreshStatus()
     }
 
     private func shouldEmitConnectionNotification(

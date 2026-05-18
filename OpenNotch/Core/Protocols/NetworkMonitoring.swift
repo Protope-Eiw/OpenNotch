@@ -8,4 +8,5 @@ protocol NetworkMonitoring: AnyObject {
 
     func startMonitoring()
     func stopMonitoring()
+    func refreshStatus()
 }
