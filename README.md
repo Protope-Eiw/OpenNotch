@@ -5,6 +5,10 @@
 <h1 align="center">OpenNotch</h1>
 
 <p align="center">
+  English | <a href="README.zh-CN.md">简体中文</a>
+</p>
+
+<p align="center">
   <strong>Turn the MacBook notch into a living native surface.</strong>
 </p>
 
@@ -142,7 +146,7 @@ OpenNotch/
 └── Shared/             # Shared UI, helpers, and extensions
 
 OpenNotchTests/
-OpenNotchUITest/
+OpenNotchUITests/
 ```
 
 ## Architecture at a Glance
