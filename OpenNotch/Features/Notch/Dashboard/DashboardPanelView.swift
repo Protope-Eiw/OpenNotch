@@ -25,7 +25,10 @@ struct DashboardPanelView: View {
 
     var body: some View {
         pageContent
-            .task { if macInfo == nil { macInfo = await MacSystemInfo.load() } }
+            .task {
+                if macInfo == nil { macInfo = await MacSystemInfo.load() }
+                networkViewModel.refreshStatus()
+            }
             .background(
                 SwipeEventMonitor(
                     onSwipeLeft: {

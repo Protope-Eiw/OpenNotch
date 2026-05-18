@@ -54,6 +54,18 @@ final class MediaAndFilesSettingsStore: SettingsStoreBase {
         }
     }
 
+    @Published var nowPlayingIdleText: String {
+        didSet {
+            let clampedValue = String(nowPlayingIdleText.prefix(80))
+            if clampedValue != nowPlayingIdleText {
+                nowPlayingIdleText = clampedValue
+                return
+            }
+
+            persist(nowPlayingIdleText, for: GeneralSettingsStorage.Keys.nowPlayingIdleText)
+        }
+    }
+
     @Published var isDownloadsLiveActivityEnabled: Bool {
         didSet {
             persist(isDownloadsLiveActivityEnabled, for: GeneralSettingsStorage.Keys.downloadsLiveActivityEnabled)
@@ -137,6 +149,8 @@ final class MediaAndFilesSettingsStore: SettingsStoreBase {
             defaults.object(forKey: GeneralSettingsStorage.Keys.nowPlayingPauseHideDelay) as? Int ??
             Self.defaultTemporaryActivityDuration(for: GeneralSettingsStorage.Keys.nowPlayingPauseHideDelay)
         )
+        self.nowPlayingIdleText = defaults.string(forKey: GeneralSettingsStorage.Keys.nowPlayingIdleText) ??
+            (GeneralSettingsStorage.defaultValues[GeneralSettingsStorage.Keys.nowPlayingIdleText] as? String ?? "")
         let hasLegacyDownloadsValue = defaults.object(forKey: GeneralSettingsStorage.Keys.legacyFileTransfersLiveActivityEnabled) != nil
         let downloadsSettingValue = defaults.object(forKey: GeneralSettingsStorage.Keys.downloadsLiveActivityEnabled) as? Bool
         self.isDownloadsLiveActivityEnabled = downloadsSettingValue ?? (
@@ -181,6 +195,7 @@ final class MediaAndFilesSettingsStore: SettingsStoreBase {
         nowPlayingPauseHideDelay = Self.clampTemporaryActivityDuration(
             defaultInt(for: GeneralSettingsStorage.Keys.nowPlayingPauseHideDelay)
         )
+        nowPlayingIdleText = defaultString(for: GeneralSettingsStorage.Keys.nowPlayingIdleText)
     }
 
     func resetDownloads() {

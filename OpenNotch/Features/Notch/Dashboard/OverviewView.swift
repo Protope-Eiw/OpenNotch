@@ -1,5 +1,6 @@
 import SwiftUI
 import Combine
+import EventKit
 
 struct OverviewView: View {
     @ObservedObject var systemMonitorViewModel: SystemMonitorViewModel
@@ -15,8 +16,10 @@ struct OverviewView: View {
 
     @StateObject private var pinnedAppsStore = PinnedAppsStore()
     @StateObject private var weatherService  = WeatherService()
+    @StateObject private var calendarStore   = CalendarStore()
     @State private var now = Date()
     @State private var showAppPicker = false
+    @State private var lastCalendarRefreshMinute: Int?
 
     private let clock = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
@@ -24,10 +27,14 @@ struct OverviewView: View {
         HStack(spacing: 0) {
             if showApps {
                 appsColumn
-                if showTimeDate || showSystemInfo || showPomodoro { columnDivider }
+                if showTimeDate || showWeather || showSystemInfo || showPomodoro { columnDivider }
             }
             if showTimeDate {
                 timeDateColumn
+                if showWeather || showSystemInfo || showPomodoro { columnDivider }
+            }
+            if showWeather {
+                weatherColumn
                 if showSystemInfo || showPomodoro { columnDivider }
             }
             if showSystemInfo {
@@ -39,15 +46,36 @@ struct OverviewView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .onReceive(clock) { now = $0 }
+        .onReceive(clock) { date in
+            now = date
+            refreshUpcomingScheduleIfNeeded(for: date)
+        }
         .onReceive(NotificationCenter.default.publisher(for: .pinnedAppsDidChange)) { _ in
             pinnedAppsStore.load()
         }
         .onAppear {
             if showWeather { weatherService.requestAndFetch() }
+            if showTimeDate { calendarStore.loadUpcoming() }
         }
         .onChange(of: showWeather) { _, on in
             if on { weatherService.requestAndFetch() }
+        }
+        .onChange(of: showTimeDate) { _, on in
+            if on { calendarStore.loadUpcoming() }
+        }
+        .onChange(of: showAppPicker) { _, isPresented in
+            NotificationCenter.default.post(
+                name: .dashboardPopoverPresentationDidChange,
+                object: nil,
+                userInfo: ["isPresented": isPresented]
+            )
+        }
+        .onDisappear {
+            NotificationCenter.default.post(
+                name: .dashboardPopoverPresentationDidChange,
+                object: nil,
+                userInfo: ["isPresented": false]
+            )
         }
     }
 
@@ -138,34 +166,138 @@ struct OverviewView: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
 
-            if showWeather {
-                if let temp = weatherService.temperature {
-                    HStack(spacing: 3) {
-                        Image(systemName: weatherService.symbolName)
-                            .font(.system(size: 10))
-                        Text(weatherService.conditionText.isEmpty
-                             ? String(format: "%.0f\u{00B0}", temp)
-                             : String(format: "%@ %.0f\u{00B0}", weatherService.conditionText, temp))
-                            .font(.system(size: 10, weight: .medium))
-                    }
-                    .foregroundStyle(Color.orange.opacity(0.8))
-                } else if weatherService.fetchFailed {
-                    HStack(spacing: 3) {
-                        Image(systemName: "wifi.slash").font(.system(size: 9))
-                        Text(L10n.app("weather.unavailable", fallback: "Weather unavailable")).font(.system(size: 9))
-                    }
-                    .foregroundStyle(.white.opacity(0.2))
-                } else {
-                    HStack(spacing: 3) {
-                        Image(systemName: "cloud").font(.system(size: 9))
-                        Text(L10n.app("weather.fetching", fallback: "Fetching weather\u{2026}")).font(.system(size: 9))
-                    }
-                    .foregroundStyle(.white.opacity(0.2))
+            if shouldShowLunarDate, let lunarDateText {
+                HStack(spacing: 3) {
+                    Image(systemName: "moonphase.waxing.crescent")
+                        .font(.system(size: 9))
+                    Text(lunarDateText)
+                        .font(.system(size: 9, weight: .medium))
+                        .lineLimit(1)
                 }
+                .foregroundStyle(.white.opacity(0.34))
+            }
+
+            if let nextScheduleText {
+                HStack(spacing: 3) {
+                    Image(systemName: "calendar.badge.clock")
+                        .font(.system(size: 9))
+                    Text(nextScheduleText)
+                        .font(.system(size: 9, weight: .medium))
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                }
+                .foregroundStyle(.white.opacity(0.34))
+            }
+
+        }
+        .padding(.horizontal, 10)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private var weatherColumn: some View {
+        VStack(spacing: 4) {
+            if let temp = weatherService.temperature {
+                Image(systemName: weatherService.symbolName)
+                    .font(.system(size: 18, weight: .medium))
+                    .foregroundStyle(Color.orange.opacity(0.9))
+
+                Text(String(format: "%.0f\u{00B0}", temp))
+                    .font(.system(size: 22, weight: .bold, design: .rounded))
+                    .foregroundStyle(Color.orange)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+
+                if !weatherService.conditionText.isEmpty {
+                    Text(weatherService.conditionText)
+                        .font(.system(size: 9, weight: .medium))
+                        .foregroundStyle(.white.opacity(0.34))
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                }
+            } else if weatherService.fetchFailed {
+                Image(systemName: "wifi.slash")
+                    .font(.system(size: 16))
+                    .foregroundStyle(.white.opacity(0.18))
+                Text(L10n.app("weather.unavailable", fallback: "Weather unavailable"))
+                    .font(.system(size: 9, weight: .medium))
+                    .foregroundStyle(.white.opacity(0.24))
+                    .lineLimit(2)
+                    .multilineTextAlignment(.center)
+            } else {
+                ProgressView()
+                    .controlSize(.small)
+                    .scaleEffect(0.7)
+                Text(L10n.app("weather.fetching", fallback: "Fetching weather\u{2026}"))
+                    .font(.system(size: 9, weight: .medium))
+                    .foregroundStyle(.white.opacity(0.24))
+                    .lineLimit(1)
             }
         }
         .padding(.horizontal, 10)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private var shouldShowLunarDate: Bool {
+        let identifier = L10n.appLanguageIdentifier
+            .replacingOccurrences(of: "_", with: "-")
+            .lowercased()
+        return identifier == "zh"
+            || identifier.hasPrefix("zh-hans")
+            || identifier.hasPrefix("zh-cn")
+            || identifier.hasPrefix("zh-sg")
+    }
+
+    private var lunarDateText: String? {
+        var calendar = Calendar(identifier: .chinese)
+        calendar.locale = Locale(identifier: "zh-Hans")
+        let components = calendar.dateComponents([.month, .day, .isLeapMonth], from: now)
+        guard let month = components.month, let day = components.day,
+              (1...12).contains(month), (1...30).contains(day) else {
+            return nil
+        }
+
+        let months = ["正月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "冬月", "腊月"]
+        let days = [
+            "初一", "初二", "初三", "初四", "初五", "初六", "初七", "初八", "初九", "初十",
+            "十一", "十二", "十三", "十四", "十五", "十六", "十七", "十八", "十九", "二十",
+            "廿一", "廿二", "廿三", "廿四", "廿五", "廿六", "廿七", "廿八", "廿九", "三十"
+        ]
+        let leapPrefix = components.isLeapMonth == true ? "闰" : ""
+        return "农历 \(leapPrefix)\(months[month - 1])\(days[day - 1])"
+    }
+
+    private var nextScheduleText: String? {
+        guard let event = calendarStore.upcomingEvents.first else { return nil }
+        let title = event.title?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let resolvedTitle = (title?.isEmpty == false) ? title! : L10n.app("calendar.untitledEvent", fallback: "Untitled")
+        return "\(scheduleStartText(for: event)) \(resolvedTitle)"
+    }
+
+    private func scheduleStartText(for event: EKEvent) -> String {
+        if event.isAllDay {
+            return L10n.app("calendar.allDay", fallback: "All-day")
+        }
+
+        guard let date = event.startDate else {
+            return L10n.app("calendar.upcoming", fallback: "Upcoming")
+        }
+        let calendar = Calendar.current
+        let time = date.formatted(.dateTime.hour().minute())
+        if calendar.isDateInToday(date) {
+            return time
+        }
+        if calendar.isDateInTomorrow(date) {
+            return "\(L10n.app("calendar.tomorrow", fallback: "Tomorrow")) \(time)"
+        }
+        return date.formatted(.dateTime.month().day().hour().minute())
+    }
+
+    private func refreshUpcomingScheduleIfNeeded(for date: Date) {
+        guard showTimeDate else { return }
+        let minute = Calendar.current.component(.minute, from: date)
+        guard lastCalendarRefreshMinute != minute else { return }
+        lastCalendarRefreshMinute = minute
+        calendarStore.loadUpcoming()
     }
 
     private var systemInfoColumn: some View {
@@ -178,14 +310,23 @@ struct OverviewView: View {
                 statBlock("\(Int(systemMonitorViewModel.diskUsage))%",  "DISK",
                           Color.thresholdColor(systemMonitorViewModel.diskUsage,  warn: 80, danger: 90))
             }
-            HStack(spacing: 3) {
-                Image(systemName: "internaldrive").font(.system(size: 9))
-                Text("\(systemMonitorViewModel.diskUsedText) / \(systemMonitorViewModel.diskTotalText)")
-                    .font(.system(size: 9, weight: .medium, design: .monospaced))
+            VStack(alignment: .leading, spacing: 2) {
+                resourceDetailRow(
+                    systemName: "memorychip",
+                    text: "\(systemMonitorViewModel.memoryUsedText) / \(systemMonitorViewModel.memoryTotalText)"
+                )
+                resourceDetailRow(
+                    systemName: "internaldrive",
+                    text: "\(systemMonitorViewModel.diskUsedText) / \(systemMonitorViewModel.diskTotalText)"
+                )
             }
-            .foregroundStyle(.white.opacity(0.3))
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            openActivityMonitor()
+        }
+        .help("Open Activity Monitor")
     }
 
     private func statBlock(_ value: String, _ label: String, _ color: Color) -> some View {
@@ -197,6 +338,21 @@ struct OverviewView: View {
                 .font(.system(size: 8, weight: .medium))
                 .foregroundStyle(.white.opacity(0.4))
         }
+    }
+
+    private func resourceDetailRow(systemName: String, text: String) -> some View {
+        HStack(spacing: 3) {
+            Image(systemName: systemName)
+                .font(.system(size: 9))
+            Text(text)
+                .font(.system(size: 9, weight: .medium, design: .monospaced))
+        }
+        .foregroundStyle(.white.opacity(0.3))
+    }
+
+    private func openActivityMonitor() {
+        let url = URL(fileURLWithPath: "/System/Applications/Utilities/Activity Monitor.app")
+        NSWorkspace.shared.open(url)
     }
 
     private var pomodoroColumn: some View {
@@ -238,37 +394,13 @@ struct OverviewView: View {
                     .buttonStyle(.plain)
 
                     VStack(spacing: 0) {
-                        Button {
-                            if isIdle {
-                                if workMinutes < 120 { workMinutes += 1 }
-                                pomodoroViewModel.syncWorkMinutes()
-                            } else {
-                                pomodoroViewModel.adjustTime(minutes: 1)
-                            }
-                        } label: {
-                            Image(systemName: "chevron.up")
-                                .font(.system(size: 7, weight: .semibold))
-                                .frame(width: 22, height: 14)
-                                .contentShape(Rectangle())
+                        PomodoroAdjustButton(systemName: "chevron.up") {
+                            adjustPomodoro(isIdle: isIdle, direction: 1)
                         }
-                        .buttonStyle(.plain)
-                        .foregroundStyle(.white.opacity(0.5))
 
-                        Button {
-                            if isIdle {
-                                if workMinutes > 1 { workMinutes -= 1 }
-                                pomodoroViewModel.syncWorkMinutes()
-                            } else {
-                                pomodoroViewModel.adjustTime(minutes: -1)
-                            }
-                        } label: {
-                            Image(systemName: "chevron.down")
-                                .font(.system(size: 7, weight: .semibold))
-                                .frame(width: 22, height: 14)
-                                .contentShape(Rectangle())
+                        PomodoroAdjustButton(systemName: "chevron.down") {
+                            adjustPomodoro(isIdle: isIdle, direction: -1)
                         }
-                        .buttonStyle(.plain)
-                        .foregroundStyle(.white.opacity(0.5))
                     }
 
                     Button { pomodoroViewModel.reset() } label: {
@@ -286,6 +418,64 @@ struct OverviewView: View {
         .frame(width: 116, height: 116)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .clipped()
+    }
+
+    private func adjustPomodoro(isIdle: Bool, direction: Int) {
+        if isIdle {
+            let step = 1
+            workMinutes = min(120, max(1, workMinutes + direction * step))
+            pomodoroViewModel.syncWorkMinutes()
+        } else {
+            pomodoroViewModel.adjustTime(minutes: direction)
+        }
+    }
+}
+
+private struct PomodoroAdjustButton: View {
+    let systemName: String
+    let action: () -> Void
+
+    @State private var isPressing = false
+    @State private var repeatTask: Task<Void, Never>?
+
+    var body: some View {
+        Image(systemName: systemName)
+            .font(.system(size: 7, weight: .semibold))
+            .foregroundStyle(.white.opacity(isPressing ? 0.85 : 0.5))
+            .frame(width: 22, height: 14)
+            .contentShape(Rectangle())
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { _ in
+                        guard !isPressing else { return }
+                        isPressing = true
+                        action()
+                        startRepeating()
+                    }
+                    .onEnded { _ in
+                        stopRepeating()
+                    }
+            )
+            .onDisappear {
+                stopRepeating()
+            }
+    }
+
+    private func startRepeating() {
+        repeatTask?.cancel()
+        repeatTask = Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(450))
+            while !Task.isCancelled {
+                action()
+                try? await Task.sleep(for: .milliseconds(140))
+            }
+        }
+    }
+
+    private func stopRepeating() {
+        isPressing = false
+        repeatTask?.cancel()
+        repeatTask = nil
     }
 }
 
@@ -378,7 +568,7 @@ struct OverviewAppPickerView: View {
             Divider()
 
             HStack {
-                Text(L10n.app("appLauncher.pinned", fallback: "Pinned \(store.apps.count) / 12 apps"))
+                Text(L10n.appFormat("appLauncher.pinned", fallback: "Pinned %lld / 12 apps", Int64(store.apps.count)))
                     .font(.system(size: 10))
                     .foregroundStyle(.secondary)
                 Spacer()

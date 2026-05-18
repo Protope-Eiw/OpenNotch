@@ -25,6 +25,7 @@ struct NotchView: View {
     @State private var dashboardTab: DashboardTab = .system
     @State private var pillHovered = false
     @State private var notchHovered = false
+    @State private var dashboardPopoverActive = false
     @State private var dashboardHoverTask: Task<Void, Never>? = nil
     @State private var notchTapFired = false
     @State private var tabDisplayOrder: [DashboardTab] = DashboardTab.allCases
@@ -33,6 +34,7 @@ struct NotchView: View {
     @State private var dragSourceIndex: Int = 0
     @State private var dragTargetIndex: Int = 0
     @State private var appSearchText = ""
+    @FocusState private var appSearchFocused: Bool
     @StateObject private var pomodoroViewModel = PomodoroViewModel()
     @AppStorage(AppStorageKeys.NotchBar.leftWidgets)  private var leftWidgetsRaw  = NotchBarWidget.networkSpeed.rawValue
     @AppStorage(AppStorageKeys.NotchBar.rightWidgets) private var rightWidgetsRaw = "cpu,memory"
@@ -52,6 +54,7 @@ struct NotchView: View {
 
             notchBody
                 .environment(\.notchScale, notchViewModel.notchModel.scale)
+                .environment(\.notchHasHardwareNotch, notchViewModel.hasHardwareNotch)
                 .background(
                     NotchEventHandlersView(
                         notchEventCoordinator: notchEventCoordinator,
@@ -154,7 +157,14 @@ private extension NotchView {
     var ringSize:       CGFloat { max(0, baseHeight - 6) }
     var outerPad:       CGFloat { 10 }
     var notchClearance: CGFloat { ceil(notchViewModel.interactiveCornerRadius.top) + 3 }
-    var leftIntrinsicWidth:  CGFloat { outerPad + 65 }   // two-line speed text ~65pt wide
+    var leftIntrinsicWidth: CGFloat {
+        let widgets = leftWidgetsRaw.split(separator: ",").compactMap { NotchBarWidget(rawValue: String($0)) }
+        if pomodoroViewModel.state != .idle {
+            return outerPad + (widgets.contains(.networkSpeed) ? 132 : 58)
+        }
+
+        return outerPad + 65 // two-line speed text ~65pt wide
+    }
     var rightIntrinsicWidth: CGFloat { notchClearance + ringSize + 8 + ringSize + outerPad }
     var sideWidth: CGFloat { max(leftIntrinsicWidth, rightIntrinsicWidth) }
     var activeSideWidth: CGFloat { dashboardOpen ? sideWidth + pillExpandExtra : sideWidth }
@@ -240,8 +250,10 @@ private extension NotchView {
                     .animation(spring, value: dashboardOpen)
                     // Tab indicators — overlay so speed arrows still drive the layout width
                     .overlay(alignment: .leading) {
-                        let iconSlot: CGFloat = 31
-                        HStack(spacing: 3) {
+                        let tabIconSize: CGFloat = 26
+                        let tabIconSpacing: CGFloat = 2
+                        let iconSlot = tabIconSize + tabIconSpacing
+                        HStack(spacing: tabIconSpacing) {
                             ForEach(Array(enabledDashboardTabs.enumerated()), id: \.element) { (tabIdx, tab) in
                                 let isDragging = draggingTab == tab
                                 let sideOffset: CGFloat = {
@@ -273,7 +285,7 @@ private extension NotchView {
                                     Image(systemName: tab.icon)
                                         .font(.system(size: 13, weight: .medium))
                                         .foregroundStyle(dashboardTab == tab ? .white : .white.opacity(0.5))
-                                        .frame(width: 28, height: 28)
+                                        .frame(width: tabIconSize, height: tabIconSize)
                                         .background(dashboardTab == tab ? Color.white.opacity(0.14) : .clear)
                                         .clipShape(RoundedRectangle(cornerRadius: 7))
                                         .contentShape(Rectangle())
@@ -332,7 +344,7 @@ private extension NotchView {
                 // Bridge: hidden under the notch — notch body handles its own tap
                 Color.clear.frame(width: notchBridgeWidth, height: baseHeight)
 
-                // Right: CPU + MEM rings ↔ settings button (same notch-bar level)
+                // Right: CPU + MEM rings ↔ dashboard controls (same notch-bar level)
                 HStack(spacing: 0) {
                     Color.clear.frame(width: notchClearance)
                     Spacer(minLength: 0)
@@ -347,30 +359,32 @@ private extension NotchView {
                         .scaleEffect(dashboardOpen ? 0.72 : 1, anchor: .trailing)
                         .allowsHitTesting(!dashboardOpen)
 
-                        Button {
-                            openWindow(id: WindowsScene.settings)
-                            SettingsWindowCoordinator.activate()
-                            if dashboardOpen && settingsViewModel.application.dashboardOpenMode != .hover {
-                                toggleDashboard()
-                            }
-                        } label: {
-                            Image(systemName: "gearshape")
-                                .font(.system(size: 13, weight: .medium))
-                                .foregroundStyle(.white.opacity(0.55))
-                                .frame(width: 28, height: 28)
-                                .background(Color.white.opacity(0.09))
-                                .clipShape(RoundedRectangle(cornerRadius: 7))
-                                .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
-                        .opacity(dashboardOpen && dashboardTab != .apps ? 1 : 0)
-                        .scaleEffect(dashboardOpen && dashboardTab != .apps ? 1 : 0.72, anchor: .trailing)
-                        .allowsHitTesting(dashboardOpen && dashboardTab != .apps)
+                        if dashboardOpen && dashboardTab != .apps {
+                            HStack(spacing: 6) {
+                                dashboardControlButton(systemName: "gearshape") {
+                                    openWindow(id: WindowsScene.settings)
+                                    SettingsWindowCoordinator.activate()
+                                    if settingsViewModel.application.dashboardOpenMode != .hover {
+                                        toggleDashboard()
+                                    }
+                                }
 
-                        // Placeholder — maintains ZStack width for layout
-                        Color.clear
-                            .frame(maxWidth: 220, minHeight: 28)
-                            .opacity(dashboardOpen ? 1 : 0)
+                                dashboardControlButton(systemName: "arrow.trianglehead.2.counterclockwise.rotate.90") {
+                                    AppRelauncher.restartApp()
+                                }
+
+                                dashboardControlButton(systemName: "xmark") {
+                                    NSApp.terminate(nil)
+                                }
+                            }
+                            .transition(.opacity)
+                        }
+
+                        if dashboardOpen {
+                            // Placeholder — maintains ZStack width for layout
+                            Color.clear
+                                .frame(maxWidth: 220, minHeight: 28)
+                        }
 
                         // Search bar — only in view hierarchy when apps tab is active (avoids NSTextField I-beam cursor on other tabs)
                         if dashboardOpen && dashboardTab == .apps {
@@ -382,6 +396,10 @@ private extension NotchView {
                                     .textFieldStyle(.plain)
                                     .font(.system(size: 12))
                                     .foregroundStyle(.white)
+                                    .focused($appSearchFocused)
+                                    .onAppear {
+                                        focusAppSearch()
+                                    }
                                 if !appSearchText.isEmpty {
                                     Button { appSearchText = "" } label: {
                                         Image(systemName: "xmark.circle.fill")
@@ -460,6 +478,24 @@ private extension NotchView {
             pillHovered = hovering
             handleHoverChange()
         }
+        .onReceive(NotificationCenter.default.publisher(for: .dashboardPopoverPresentationDidChange)) { notification in
+            dashboardPopoverActive = notification.userInfo?["isPresented"] as? Bool ?? false
+            handleHoverChange()
+        }
+        .onChange(of: dashboardTab) { _, tab in
+            if dashboardOpen && tab == .apps {
+                focusAppSearch()
+            } else {
+                appSearchFocused = false
+            }
+        }
+        .onChange(of: dashboardOpen) { _, isOpen in
+            if isOpen && dashboardTab == .apps {
+                focusAppSearch()
+            } else if !isOpen {
+                appSearchFocused = false
+            }
+        }
     }
 
     private func toggleDashboard() {
@@ -473,14 +509,30 @@ private extension NotchView {
         }
     }
 
+    private func dashboardControlButton(systemName: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: systemName)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundStyle(.white.opacity(0.55))
+                .frame(width: 28, height: 28)
+                .background(Color.white.opacity(0.09))
+                .clipShape(RoundedRectangle(cornerRadius: 7))
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+
     private func handleHoverChange() {
-        let hovered = pillHovered || notchHovered
+        let hovered = pillHovered || notchHovered || dashboardPopoverActive
         dashboardHoverTask?.cancel()
 
         if !hovered {
             guard settingsViewModel.application.dashboardOpenMode == .hover else { return }
             dashboardHoverTask = Task { @MainActor in
-                try? await Task.sleep(for: .milliseconds(0))
+                let delay = settingsViewModel.application.dashboardHoverDismissDelay
+                if delay > 0 {
+                    try? await Task.sleep(for: .milliseconds(Int(delay * 1000)))
+                }
                 guard !Task.isCancelled else { return }
                 withAnimation(.spring(response: 0.45, dampingFraction: 1.0)) {
                     dashboardOpen = false
@@ -502,8 +554,13 @@ private extension NotchView {
         }
     }
 
-
-
+    private func focusAppSearch() {
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(80))
+            guard dashboardOpen && dashboardTab == .apps else { return }
+            appSearchFocused = true
+        }
+    }
 
 
     private func applyDashboardTabPolicy() {
@@ -612,6 +669,10 @@ private extension NotchView {
                         isCompactRemovalForExpansion: notchViewModel.isExpandingLiveActivityTransition
                     )
                 )
+        } else if !notchViewModel.hasHardwareNotch,
+                  !settingsViewModel.mediaAndFiles.nowPlayingIdleText.trimmed.isEmpty {
+            CompactNowPlayingIdleTextView(text: settingsViewModel.mediaAndFiles.nowPlayingIdleText.trimmed)
+                .transition(.opacity)
         }
     }
     
@@ -655,8 +716,3 @@ private extension NotchView {
         settingsViewModel.application.appLanguage.locale.dn(key, fallback: fallback)
     }
 }
-
-
-
-
-

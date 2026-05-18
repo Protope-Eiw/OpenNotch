@@ -15,3 +15,15 @@ enum NotchBarWidget: String, CaseIterable, Hashable {
         }
     }
 }
+
+enum NetworkSpeedColorMode: String, CaseIterable, Hashable {
+    case directional
+    case unifiedWhite
+
+    var titleKey: String {
+        switch self {
+        case .directional:  return "settings.notch.networkSpeedColor.directional"
+        case .unifiedWhite: return "settings.notch.networkSpeedColor.unifiedWhite"
+        }
+    }
+}

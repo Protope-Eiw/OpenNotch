@@ -44,6 +44,7 @@ final class NotchViewModel: ObservableObject {
     @Published private(set) var stagedNotchHeight: CGFloat = NotchModel().baseHeight
     @Published private(set) var isExpandingLiveActivityTransition = false
     @Published private(set) var isActivityPresentationHidden = false
+    @Published private(set) var hasHardwareNotch = true
     
     @Published var showNotch = false
     @Published var isPressed = false
@@ -286,6 +287,8 @@ final class NotchViewModel: ObservableObject {
         guard let screenMetrics else {
             return
         }
+
+        hasHardwareNotch = screenMetrics.notchSize != nil
         
         let screenWidth = screenMetrics.width
         let baseScreenWidth: CGFloat = 1440.0

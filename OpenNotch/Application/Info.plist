@@ -6,6 +6,10 @@
     <string>OpenNotch needs calendar access to show your events in the dashboard.</string>
     <key>NSBluetoothAlwaysUsageDescription</key>
     <string>OpenNotch uses Bluetooth to detect connected audio devices and read battery levels from supported accessories.</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>OpenNotch uses location permission to read the current Wi-Fi network name for connectivity status.</string>
+    <key>NSLocationUsageDescription</key>
+    <string>OpenNotch uses location permission to read the current Wi-Fi network name for connectivity status.</string>
     <key>NSSystemAdministrationUsageDescription</key>
     <string>OpenNotch needs Accessibility access to control HUD overlays and media keys.</string>
     <key>NSAppTransportSecurity</key>

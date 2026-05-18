@@ -84,6 +84,7 @@ final class FakeNetworkMonitor: NetworkMonitoring {
 
     private(set) var startCalls = 0
     private(set) var stopCalls = 0
+    private(set) var refreshCalls = 0
 
     func startMonitoring() {
         startCalls += 1
@@ -91,6 +92,10 @@ final class FakeNetworkMonitor: NetworkMonitoring {
 
     func stopMonitoring() {
         stopCalls += 1
+    }
+
+    func refreshStatus() {
+        refreshCalls += 1
     }
 
     func send(

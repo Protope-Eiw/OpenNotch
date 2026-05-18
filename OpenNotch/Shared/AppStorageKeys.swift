@@ -7,9 +7,10 @@ enum AppStorageKeys {
         static let dashboardTransitionStyle = "settings.general.dashboardTransitionStyle"
     }
     enum NotchBar {
-        static let leftWidgets  = "settings.notchBar.leftWidgets"
-        static let rightWidgets = "settings.notchBar.rightWidgets"
-        static let hideWidgets  = "settings.notchBar.hideWidgets"
+        static let leftWidgets            = "settings.notchBar.leftWidgets"
+        static let rightWidgets           = "settings.notchBar.rightWidgets"
+        static let hideWidgets            = "settings.notchBar.hideWidgets"
+        static let networkSpeedColorMode  = "settings.notchBar.networkSpeedColorMode"
     }
     enum Overview {
         static let showApps          = "settings.overview.showApps"
@@ -20,6 +21,7 @@ enum AppStorageKeys {
         static let hideAppNames      = "settings.overview.hideAppNames"
         static let pomodoroDuration  = "settings.overview.pomodoroDuration"
         static let weatherTemperature  = "settings.overview.weatherTemperature"
+        static let weatherCode         = "settings.overview.weatherCode"
         static let weatherSymbolName   = "settings.overview.weatherSymbolName"
         static let weatherConditionText = "settings.overview.weatherConditionText"
         static let weatherLastFetch     = "settings.overview.weatherLastFetch"

@@ -12,6 +12,7 @@ enum GeneralSettingsStorage {
         static let notchAnimationPreset = "settings.general.notchAnimationPreset"
         static let hideNotchInFullscreenEnabled = "settings.general.hideNotchInFullscreen"
         static let dashboardOpenMode = "settings.general.dashboardOpenMode"
+        static let dashboardHoverDismissDelay = "settings.general.dashboardHoverDismissDelay"
         static let dashboardDisabledTabs = "settings.general.dashboard.disabledTabs"
         static let overviewPomodoroDuration = "settings.overview.pomodoroDuration"
         static let notchTapToExpandEnabled = "settings.notch.gestures.tapToExpand"
@@ -42,6 +43,7 @@ enum GeneralSettingsStorage {
         static let nowPlayingArtworkStrokeEnabled = "settings.nowPlaying.artworkStrokeEnabled"
         static let nowPlayingPauseHideTimerEnabled = "settings.nowPlaying.pauseHideTimerEnabled"
         static let nowPlayingPauseHideDelay = "settings.nowPlaying.pauseHideDelay"
+        static let nowPlayingIdleText = "settings.nowPlaying.idleText"
         static let downloadsLiveActivityEnabled = "settings.live.downloads"
         static let downloadsDefaultStrokeEnabled = "settings.live.downloads.defaultStroke"
         static let downloadsAppearanceStyle = "settings.live.downloads.appearanceStyle"
@@ -105,6 +107,7 @@ enum GeneralSettingsStorage {
         Keys.notchAnimationPreset: NotchAnimationPreset.balanced.rawValue,
         Keys.hideNotchInFullscreenEnabled: false,
         Keys.dashboardOpenMode: DashboardOpenMode.hover.rawValue,
+        Keys.dashboardHoverDismissDelay: 0.6,
         Keys.overviewPomodoroDuration: 25,
         Keys.notchTapToExpandEnabled: true,
         Keys.notchExpandInteraction: NotchExpandInteraction.pressAndHold.rawValue,
@@ -134,6 +137,7 @@ enum GeneralSettingsStorage {
         Keys.nowPlayingArtworkStrokeEnabled: false,
         Keys.nowPlayingPauseHideTimerEnabled: true,
         Keys.nowPlayingPauseHideDelay: 5,
+        Keys.nowPlayingIdleText: "OpenNotch",
         Keys.downloadsLiveActivityEnabled: false,
         Keys.downloadsDefaultStrokeEnabled: false,
         Keys.downloadsAppearanceStyle: DownloadAppearanceStyle.minimal.rawValue,

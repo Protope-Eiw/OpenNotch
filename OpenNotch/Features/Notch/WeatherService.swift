@@ -3,6 +3,7 @@ import Foundation
 
 final class WeatherService: ObservableObject {
     @Published var temperature: Double? = nil
+    @Published var weatherCode: Int? = nil
     @Published var symbolName: String = "cloud"
     @Published var conditionText: String = ""
     @Published var fetchFailed: Bool = false
@@ -10,19 +11,50 @@ final class WeatherService: ObservableObject {
     private var lastFetch: Date = .distantPast
     private let cacheTTL: TimeInterval = 1800
     private var refreshTimer: Timer?
+    private var cancellables = Set<AnyCancellable>()
 
     init() {
         temperature = UserDefaults.standard.object(forKey: AppStorageKeys.Overview.weatherTemperature) as? Double
+        weatherCode = UserDefaults.standard.object(forKey: AppStorageKeys.Overview.weatherCode) as? Int
         symbolName = UserDefaults.standard.string(forKey: AppStorageKeys.Overview.weatherSymbolName) ?? "cloud"
         conditionText = UserDefaults.standard.string(forKey: AppStorageKeys.Overview.weatherConditionText) ?? ""
         lastFetch = UserDefaults.standard.object(forKey: AppStorageKeys.Overview.weatherLastFetch) as? Date ?? .distantPast
+        refreshLocalizedCondition()
+        observeLocalizationChanges()
     }
 
     func requestAndFetch() {
-        guard lastFetch == .distantPast || Date().timeIntervalSince(lastFetch) >= cacheTTL else { return }
+        refreshLocalizedCondition()
+        guard temperature == nil ||
+              weatherCode == nil ||
+              lastFetch == .distantPast ||
+              Date().timeIntervalSince(lastFetch) >= cacheTTL else { return }
 
         fetchFailed = false
         Task { await fetch() }
+    }
+
+    func refreshLocalizedCondition() {
+        guard let weatherCode else { return }
+        (symbolName, conditionText) = info(for: weatherCode)
+    }
+
+    private func observeLocalizationChanges() {
+        NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)
+            .sink { [weak self] _ in
+                DispatchQueue.main.async {
+                    self?.refreshLocalizedCondition()
+                }
+            }
+            .store(in: &cancellables)
+
+        NotificationCenter.default.publisher(for: NSLocale.currentLocaleDidChangeNotification)
+            .sink { [weak self] _ in
+                DispatchQueue.main.async {
+                    self?.refreshLocalizedCondition()
+                }
+            }
+            .store(in: &cancellables)
     }
 
     @MainActor
@@ -57,6 +89,7 @@ final class WeatherService: ObservableObject {
             lastFetch = Date()
             fetchFailed = false
             temperature = resp.current.temperature2m
+            weatherCode = resp.current.weatherCode
             (symbolName, conditionText) = info(for: resp.current.weatherCode)
             persist()
             scheduleNextRefresh()
@@ -91,6 +124,7 @@ final class WeatherService: ObservableObject {
 
     private func persist() {
         UserDefaults.standard.set(temperature, forKey: AppStorageKeys.Overview.weatherTemperature)
+        UserDefaults.standard.set(weatherCode, forKey: AppStorageKeys.Overview.weatherCode)
         UserDefaults.standard.set(symbolName, forKey: AppStorageKeys.Overview.weatherSymbolName)
         UserDefaults.standard.set(conditionText, forKey: AppStorageKeys.Overview.weatherConditionText)
         UserDefaults.standard.set(lastFetch, forKey: AppStorageKeys.Overview.weatherLastFetch)

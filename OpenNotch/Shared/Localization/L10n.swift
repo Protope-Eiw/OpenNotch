@@ -11,6 +11,14 @@ enum L10n {
         )
     }
 
+    static func appFormat(_ key: String, fallback: String? = nil, _ arguments: CVarArg...) -> String {
+        let language = OpenNotchLanguage.resolved(
+            UserDefaults.standard.string(forKey: GeneralSettingsStorage.Keys.appLanguage)
+        )
+        let format = string(key, language: language, fallback: fallback)
+        return String(format: format, locale: Locale(identifier: appLanguageIdentifier), arguments: arguments)
+    }
+
     static var appLanguageIdentifier: String {
         let language = OpenNotchLanguage.resolved(
             UserDefaults.standard.string(forKey: GeneralSettingsStorage.Keys.appLanguage)

@@ -14,6 +14,8 @@ final class SystemMonitorViewModel: ObservableObject {
     @Published private(set) var diskUsage: Double = 0
     @Published private(set) var diskUsedText: String = "–"
     @Published private(set) var diskTotalText: String = "–"
+    @Published private(set) var memoryUsedText: String = "–"
+    @Published private(set) var memoryTotalText: String = "–"
 
     @Published private(set) var cpuHistory: [SWLineChart<String>.DataPoint] = []
     @Published private(set) var memoryHistory: [SWAreaChart<String>.DataPoint] = []
@@ -24,6 +26,12 @@ final class SystemMonitorViewModel: ObservableObject {
     private var previousNetworkStats: NetworkStats?
     private let maxHistory = 60
     private var powerSourceRunLoopSource: CFRunLoopSource?
+
+    private struct MemoryStats {
+        var usage: Double
+        var usedBytes: UInt64
+        var totalBytes: UInt64
+    }
 
     private struct NetworkStats {
         var bytesSent: UInt64
@@ -96,8 +104,11 @@ final class SystemMonitorViewModel: ObservableObject {
     }
 
     private func refreshMemory() {
-        let mem = readMemoryUsage()
+        let stats = readMemoryStats()
+        let mem = stats.usage
         memoryUsage = mem
+        memoryUsedText = formatGB(Int64(stats.usedBytes))
+        memoryTotalText = formatGB(Int64(stats.totalBytes))
 
         let now = Date()
         memoryHistory.append(.init(date: now, value: mem, category: "MEM"))
@@ -152,7 +163,7 @@ final class SystemMonitorViewModel: ObservableObject {
         return (totalUsage / Double(numCPUs)) * 100.0
     }
 
-    private func readMemoryUsage() -> Double {
+    private func readMemoryStats() -> MemoryStats {
         var vmStats = vm_statistics64_data_t()
         var infoCount = mach_msg_type_number_t(
             MemoryLayout<vm_statistics64_data_t>.size / MemoryLayout<integer_t>.size
@@ -163,7 +174,9 @@ final class SystemMonitorViewModel: ObservableObject {
                 host_statistics64(mach_host_self(), HOST_VM_INFO64, $0, &infoCount)
             }
         }
-        guard result == KERN_SUCCESS else { return memoryUsage }
+        guard result == KERN_SUCCESS else {
+            return MemoryStats(usage: memoryUsage, usedBytes: 0, totalBytes: 0)
+        }
 
         let pageSize = UInt64(vm_page_size)
         let used = (UInt64(vmStats.active_count) + UInt64(vmStats.wire_count)) * pageSize
@@ -172,7 +185,8 @@ final class SystemMonitorViewModel: ObservableObject {
         var size = MemoryLayout<UInt64>.size
         sysctlbyname("hw.memsize", &totalMemory, &size, nil, 0)
 
-        return totalMemory > 0 ? Double(used) / Double(totalMemory) * 100.0 : memoryUsage
+        let usage = totalMemory > 0 ? Double(used) / Double(totalMemory) * 100.0 : memoryUsage
+        return MemoryStats(usage: usage, usedBytes: used, totalBytes: totalMemory)
     }
 
     private func updateNetworkSpeed() {

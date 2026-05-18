@@ -3,6 +3,7 @@ import Foundation
 
 extension Notification.Name {
     static let pinnedAppsDidChange = Notification.Name("com.opennotch.pinnedAppsDidChange")
+    static let dashboardPopoverPresentationDidChange = Notification.Name("com.opennotch.dashboardPopoverPresentationDidChange")
 }
 
 final class PinnedAppsStore: ObservableObject {

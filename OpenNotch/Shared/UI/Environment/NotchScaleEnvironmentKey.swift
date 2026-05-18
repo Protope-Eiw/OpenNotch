@@ -11,9 +11,18 @@ struct NotchScaleKey: EnvironmentKey {
     static let defaultValue: CGFloat = 1.0
 }
 
+struct NotchHasHardwareNotchKey: EnvironmentKey {
+    static let defaultValue = true
+}
+
 extension EnvironmentValues {
     var notchScale: CGFloat {
         get { self[NotchScaleKey.self] }
         set { self[NotchScaleKey.self] = newValue }
+    }
+
+    var notchHasHardwareNotch: Bool {
+        get { self[NotchHasHardwareNotchKey.self] }
+        set { self[NotchHasHardwareNotchKey.self] = newValue }
     }
 }

@@ -14,6 +14,7 @@ struct NotchSettingsView: View {
     @AppStorage(AppStorageKeys.NotchBar.leftWidgets)   private var leftWidgetsRaw   = NotchBarWidget.networkSpeed.rawValue
     @AppStorage(AppStorageKeys.NotchBar.rightWidgets)  private var rightWidgetsRaw  = "cpu,memory"
     @AppStorage(AppStorageKeys.NotchBar.hideWidgets)   private var hideWidgets      = false
+    @AppStorage(AppStorageKeys.NotchBar.networkSpeedColorMode) private var networkSpeedColorModeRaw = NetworkSpeedColorMode.directional.rawValue
 
     var body: some View {
         SettingsPageScrollView {
@@ -47,6 +48,21 @@ struct NotchSettingsView: View {
                 widgetSelector(label: localized("settings.notch.leftSide", fallback: "Left"), storage: $leftWidgetsRaw)
                 SettingsDivider()
                 widgetSelector(label: localized("settings.notch.rightSide", fallback: "Right"), storage: $rightWidgetsRaw, topPadding: 4)
+
+                if showsNetworkSpeedWidget {
+                    SettingsDivider()
+                    SettingsSegmentedRow(
+                        title: localized("settings.notch.networkSpeedColor.title", fallback: "Network Speed Color"),
+                        description: localized("settings.notch.networkSpeedColor.description", fallback: "Choose whether the network speed uses upload/download colors or one white color."),
+                        options: Array(NetworkSpeedColorMode.allCases),
+                        optionTitle: { localized($0.titleKey) },
+                        accessibilityIdentifier: AppStorageKeys.NotchBar.networkSpeedColorMode,
+                        selection: Binding(
+                            get: { NetworkSpeedColorMode(rawValue: networkSpeedColorModeRaw) ?? .directional },
+                            set: { networkSpeedColorModeRaw = $0.rawValue }
+                        )
+                    )
+                }
             }
             .opacity(hideWidgets ? 0 : 1)
             .frame(maxHeight: hideWidgets ? 0 : .infinity, alignment: .top)
@@ -68,15 +84,15 @@ struct NotchSettingsView: View {
                         VStack(alignment: .leading, spacing: 2) {
                             HStack(spacing: 3) {
                                 Image(systemName: "arrowtriangle.up.fill").font(.system(size: 5))
-                                    .foregroundStyle(.blue)
+                                    .foregroundStyle(networkSpeedPreviewColor.upload)
                                 Text(verbatim: "1.2 MB").font(.system(size: 8, design: .monospaced))
-                                    .foregroundStyle(.blue)
+                                    .foregroundStyle(networkSpeedPreviewColor.upload)
                             }
                             HStack(spacing: 3) {
                                 Image(systemName: "arrowtriangle.down.fill").font(.system(size: 5))
-                                    .foregroundStyle(.green)
+                                    .foregroundStyle(networkSpeedPreviewColor.download)
                                 Text(verbatim: "3.8 MB").font(.system(size: 8, design: .monospaced))
-                                    .foregroundStyle(.green)
+                                    .foregroundStyle(networkSpeedPreviewColor.download)
                             }
                         }
                     case .cpu:
@@ -102,6 +118,24 @@ struct NotchSettingsView: View {
         }
     }
 
+    private var showsNetworkSpeedWidget: Bool {
+        selectedWidgets(from: leftWidgetsRaw).contains(.networkSpeed) ||
+        selectedWidgets(from: rightWidgetsRaw).contains(.networkSpeed)
+    }
+
+    private var networkSpeedPreviewColor: (upload: Color, download: Color) {
+        switch NetworkSpeedColorMode(rawValue: networkSpeedColorModeRaw) ?? .directional {
+        case .directional:
+            return (.blue, .green)
+        case .unifiedWhite:
+            return (.white, .white)
+        }
+    }
+
+    private func selectedWidgets(from rawValue: String) -> [NotchBarWidget] {
+        rawValue.split(separator: ",").compactMap { NotchBarWidget(rawValue: String($0)) }
+    }
+
     private func miniRingPreview(label: String, fraction: Double, color: Color) -> some View {
         ZStack {
             Circle().stroke(Color.primary.opacity(0.15), lineWidth: 2)
@@ -118,7 +152,7 @@ struct NotchSettingsView: View {
 
     @ViewBuilder
     private func widgetSelector(label: String, storage: Binding<String>, topPadding: CGFloat = 0) -> some View {
-        let active = storage.wrappedValue.split(separator: ",").compactMap { NotchBarWidget(rawValue: String($0)) }
+        let active = selectedWidgets(from: storage.wrappedValue)
         Text(label)
             .font(.system(size: 12, weight: .medium))
             .padding(.top, topPadding)

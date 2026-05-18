@@ -10,6 +10,11 @@ import SwiftUI
 struct WifiConnectedNotchView: View {
     @Environment(\.notchScale) var scale
     @ObservedObject var networkViewModel: NetworkViewModel
+
+    private var displayName: String {
+        let name = networkViewModel.wifiName.trimmingCharacters(in: .whitespacesAndNewlines)
+        return name.isEmpty ? "Wi-Fi" : name
+    }
     
     var body: some View {
         HStack(spacing: 0) {
@@ -26,8 +31,10 @@ struct WifiConnectedNotchView: View {
             
             Spacer()
             
-            Text(verbatim: "Active")
+            Text(verbatim: displayName)
                 .foregroundStyle(.white.opacity(0.8))
+                .lineLimit(1)
+                .truncationMode(.tail)
         }
         .font(.system(size: 14))
         .padding(.horizontal, 14.scaled(by: scale))
