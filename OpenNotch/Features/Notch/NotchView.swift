@@ -25,6 +25,7 @@ struct NotchView: View {
     @State private var dashboardTab: DashboardTab = .system
     @State private var pillHovered = false
     @State private var notchHovered = false
+    @State private var dashboardPopoverActive = false
     @State private var dashboardHoverTask: Task<Void, Never>? = nil
     @State private var notchTapFired = false
     @State private var tabDisplayOrder: [DashboardTab] = DashboardTab.allCases
@@ -470,6 +471,10 @@ private extension NotchView {
             pillHovered = hovering
             handleHoverChange()
         }
+        .onReceive(NotificationCenter.default.publisher(for: .dashboardPopoverPresentationDidChange)) { notification in
+            dashboardPopoverActive = notification.userInfo?["isPresented"] as? Bool ?? false
+            handleHoverChange()
+        }
     }
 
     private func toggleDashboard() {
@@ -497,7 +502,7 @@ private extension NotchView {
     }
 
     private func handleHoverChange() {
-        let hovered = pillHovered || notchHovered
+        let hovered = pillHovered || notchHovered || dashboardPopoverActive
         dashboardHoverTask?.cancel()
 
         if !hovered {

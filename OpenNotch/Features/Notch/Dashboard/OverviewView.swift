@@ -49,6 +49,20 @@ struct OverviewView: View {
         .onChange(of: showWeather) { _, on in
             if on { weatherService.requestAndFetch() }
         }
+        .onChange(of: showAppPicker) { _, isPresented in
+            NotificationCenter.default.post(
+                name: .dashboardPopoverPresentationDidChange,
+                object: nil,
+                userInfo: ["isPresented": isPresented]
+            )
+        }
+        .onDisappear {
+            NotificationCenter.default.post(
+                name: .dashboardPopoverPresentationDidChange,
+                object: nil,
+                userInfo: ["isPresented": false]
+            )
+        }
     }
 
     private var columnDivider: some View {
