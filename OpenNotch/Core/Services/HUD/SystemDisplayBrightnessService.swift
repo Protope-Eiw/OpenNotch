@@ -12,13 +12,19 @@ final class SystemDisplayBrightnessService {
 
     func adjust(direction: MediaKeyDirection, granularity: MediaKeyGranularity) -> Int {
         let delta = stepSize(for: granularity) * (direction == .increase ? 1 : -1)
-        return setBrightness(currentBrightness + delta)
+        let displayID = targetDisplayID()
+        let brightness = brightness(for: displayID) ?? 0.5
+        return setBrightness(brightness + delta, displayID: displayID)
     }
 
     @discardableResult
     func setBrightness(_ value: Float) -> Int {
+        setBrightness(value, displayID: targetDisplayID())
+    }
+
+    @discardableResult
+    private func setBrightness(_ value: Float, displayID: CGDirectDisplayID) -> Int {
         let clampedValue = max(0, min(1, value))
-        let displayID = targetDisplayID()
 
         if let result = displayServicesBridge.setBrightness(displayID: displayID, value: clampedValue),
            result == kIOReturnSuccess {
@@ -45,15 +51,17 @@ final class SystemDisplayBrightnessService {
     }
 
     var currentBrightness: Float {
-        let displayID = targetDisplayID()
+        brightness(for: targetDisplayID()) ?? 0.5
+    }
 
+    private func brightness(for displayID: CGDirectDisplayID) -> Float? {
         if let brightnessResult = displayServicesBridge.getBrightness(displayID: displayID),
            brightnessResult.status == kIOReturnSuccess {
             return max(0, min(1, brightnessResult.value))
         }
 
         guard let service = matchingDisplayService(for: displayID) else {
-            return 0.5
+            return nil
         }
 
         var brightness: Float = 0.5
@@ -66,24 +74,74 @@ final class SystemDisplayBrightnessService {
         IOObjectRelease(service)
 
         guard status == kIOReturnSuccess else {
-            return 0.5
+            return nil
         }
 
         return max(0, min(1, brightness))
     }
 
     private func targetDisplayID() -> CGDirectDisplayID {
+        let displays = onlineDisplayIDs()
+
+        guard !displays.isEmpty else {
+            return CGMainDisplayID()
+        }
+
+        let preferredDisplays = orderedPreferredDisplayIDs(from: displays)
+        return preferredDisplays.first(where: { brightness(for: $0) != nil })
+            ?? preferredDisplays.first(where: { CGDisplayIsBuiltin($0) != 0 })
+            ?? CGMainDisplayID()
+    }
+
+    private func onlineDisplayIDs() -> [CGDirectDisplayID] {
         var displayCount: UInt32 = 0
         CGGetOnlineDisplayList(0, nil, &displayCount)
 
         guard displayCount > 0 else {
-            return CGMainDisplayID()
+            return []
         }
 
         var displays = Array(repeating: CGDirectDisplayID(), count: Int(displayCount))
-        CGGetOnlineDisplayList(displayCount, &displays, &displayCount)
+        let status = CGGetOnlineDisplayList(displayCount, &displays, &displayCount)
 
-        return displays.first(where: { CGDisplayIsBuiltin($0) != 0 }) ?? CGMainDisplayID()
+        guard status == .success else {
+            return []
+        }
+
+        return Array(displays.prefix(Int(displayCount)))
+    }
+
+    private func orderedPreferredDisplayIDs(from displays: [CGDirectDisplayID]) -> [CGDirectDisplayID] {
+        var ordered: [CGDirectDisplayID] = []
+
+        if let cursorDisplay = displayContainingCursor(in: displays) {
+            ordered.append(cursorDisplay)
+        }
+
+        ordered.append(CGMainDisplayID())
+
+        if let builtinDisplay = displays.first(where: { CGDisplayIsBuiltin($0) != 0 }) {
+            ordered.append(builtinDisplay)
+        }
+
+        ordered.append(contentsOf: displays)
+        return ordered.reduce(into: []) { result, displayID in
+            guard displays.contains(displayID), !result.contains(displayID) else {
+                return
+            }
+
+            result.append(displayID)
+        }
+    }
+
+    private func displayContainingCursor(in displays: [CGDirectDisplayID]) -> CGDirectDisplayID? {
+        guard let cursorLocation = CGEvent(source: nil)?.location else {
+            return nil
+        }
+
+        return displays.first { displayID in
+            CGDisplayBounds(displayID).contains(cursorLocation)
+        }
     }
 
     private func matchingDisplayService(for displayID: CGDirectDisplayID) -> io_service_t? {
