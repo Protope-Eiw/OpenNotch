@@ -52,6 +52,7 @@ struct NotchView: View {
 
             notchBody
                 .environment(\.notchScale, notchViewModel.notchModel.scale)
+                .environment(\.notchHasHardwareNotch, notchViewModel.hasHardwareNotch)
                 .background(
                     NotchEventHandlersView(
                         notchEventCoordinator: notchEventCoordinator,
@@ -624,6 +625,10 @@ private extension NotchView {
                         isCompactRemovalForExpansion: notchViewModel.isExpandingLiveActivityTransition
                     )
                 )
+        } else if !notchViewModel.hasHardwareNotch,
+                  !settingsViewModel.mediaAndFiles.nowPlayingIdleText.trimmed.isEmpty {
+            CompactNowPlayingIdleTextView(text: settingsViewModel.mediaAndFiles.nowPlayingIdleText.trimmed)
+                .transition(.opacity)
         }
     }
     
@@ -667,5 +672,3 @@ private extension NotchView {
         settingsViewModel.application.appLanguage.locale.dn(key, fallback: fallback)
     }
 }
-
-

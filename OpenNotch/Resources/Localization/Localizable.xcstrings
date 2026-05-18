@@ -6009,6 +6009,34 @@
         }
       }
     },
+    "Custom idle text" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Custom idle text"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Texto inactivo personalizado"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пользовательский текст ожидания"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自定义空闲文字"
+          }
+        }
+      }
+    },
     "Hide output device" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -6352,6 +6380,34 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "体积"
+          }
+        }
+      }
+    },
+    "Idle display" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Idle display"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pantalla inactiva"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Экран ожидания"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "空闲显示"
           }
         }
       }
@@ -6818,6 +6874,34 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "本地化"
+          }
+        }
+      }
+    },
+    "Leave empty to hide" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leave empty to hide"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Déjalo vacío para ocultarlo"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Оставьте пустым, чтобы скрыть"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "留空则隐藏"
           }
         }
       }
@@ -16993,6 +17077,34 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "当您将文件拖过凹口时显示 AirDrop 放置目标。"
+          }
+        }
+      }
+    },
+    "Shown in the notch on external displays when no media is playing." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shown in the notch on external displays when no media is playing."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se muestra en el notch en pantallas externas cuando no se reproduce ningún medio."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показывается в вырезе на внешних дисплеях, когда медиа не воспроизводится."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未播放媒体时，在外接屏的刘海栏中显示。"
           }
         }
       }

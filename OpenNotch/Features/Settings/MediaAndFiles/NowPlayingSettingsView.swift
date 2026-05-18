@@ -22,6 +22,7 @@ struct NowPlayingSettingsView: View {
     @ViewBuilder var cards: some View {
         playbackActivity
         pausedPlaybackBehavior
+        idleDisplay
         playerAppearance
     }
 
@@ -70,6 +71,37 @@ struct NowPlayingSettingsView: View {
             )
             .disabled(!settings.isNowPlayingPauseHideTimerEnabled || !settings.isNowPlayingLiveActivityEnabled)
             .opacity(settings.isNowPlayingPauseHideTimerEnabled && settings.isNowPlayingLiveActivityEnabled ? 1 : 0.5)
+        }
+    }
+
+    private var idleDisplay: some View {
+        SettingsCard(title: localized("Idle display", fallback: "Idle display")) {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 12) {
+                    Image(systemName: "text.quote")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundStyle(.purple)
+                        .frame(width: 28, height: 28)
+
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(localized("Custom idle text", fallback: "Custom idle text"))
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundStyle(.primary)
+
+                        Text(localized("Shown in the notch on external displays when no media is playing.", fallback: "Shown in the notch on external displays when no media is playing."))
+                            .font(.system(size: 11))
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                TextField(
+                    localized("Leave empty to hide", fallback: "Leave empty to hide"),
+                    text: $settings.nowPlayingIdleText
+                )
+                .textFieldStyle(.roundedBorder)
+                .font(.system(size: 12))
+                .accessibilityIdentifier("settings.activities.live.nowPlaying.idleText")
+            }
         }
     }
     
