@@ -332,7 +332,7 @@ private extension NotchView {
                 // Bridge: hidden under the notch — notch body handles its own tap
                 Color.clear.frame(width: notchBridgeWidth, height: baseHeight)
 
-                // Right: CPU + MEM rings ↔ settings button (same notch-bar level)
+                // Right: CPU + MEM rings ↔ dashboard controls (same notch-bar level)
                 HStack(spacing: 0) {
                     Color.clear.frame(width: notchClearance)
                     Spacer(minLength: 0)
@@ -347,30 +347,32 @@ private extension NotchView {
                         .scaleEffect(dashboardOpen ? 0.72 : 1, anchor: .trailing)
                         .allowsHitTesting(!dashboardOpen)
 
-                        Button {
-                            openWindow(id: WindowsScene.settings)
-                            SettingsWindowCoordinator.activate()
-                            if dashboardOpen && settingsViewModel.application.dashboardOpenMode != .hover {
-                                toggleDashboard()
-                            }
-                        } label: {
-                            Image(systemName: "gearshape")
-                                .font(.system(size: 13, weight: .medium))
-                                .foregroundStyle(.white.opacity(0.55))
-                                .frame(width: 28, height: 28)
-                                .background(Color.white.opacity(0.09))
-                                .clipShape(RoundedRectangle(cornerRadius: 7))
-                                .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
-                        .opacity(dashboardOpen && dashboardTab != .apps ? 1 : 0)
-                        .scaleEffect(dashboardOpen && dashboardTab != .apps ? 1 : 0.72, anchor: .trailing)
-                        .allowsHitTesting(dashboardOpen && dashboardTab != .apps)
+                        if dashboardOpen && dashboardTab != .apps {
+                            HStack(spacing: 6) {
+                                dashboardControlButton(systemName: "gearshape") {
+                                    openWindow(id: WindowsScene.settings)
+                                    SettingsWindowCoordinator.activate()
+                                    if settingsViewModel.application.dashboardOpenMode != .hover {
+                                        toggleDashboard()
+                                    }
+                                }
 
-                        // Placeholder — maintains ZStack width for layout
-                        Color.clear
-                            .frame(maxWidth: 220, minHeight: 28)
-                            .opacity(dashboardOpen ? 1 : 0)
+                                dashboardControlButton(systemName: "arrow.trianglehead.2.counterclockwise.rotate.90") {
+                                    AppRelauncher.restartApp()
+                                }
+
+                                dashboardControlButton(systemName: "xmark") {
+                                    NSApp.terminate(nil)
+                                }
+                            }
+                            .transition(.opacity)
+                        }
+
+                        if dashboardOpen {
+                            // Placeholder — maintains ZStack width for layout
+                            Color.clear
+                                .frame(maxWidth: 220, minHeight: 28)
+                        }
 
                         // Search bar — only in view hierarchy when apps tab is active (avoids NSTextField I-beam cursor on other tabs)
                         if dashboardOpen && dashboardTab == .apps {
@@ -473,6 +475,19 @@ private extension NotchView {
         }
     }
 
+    private func dashboardControlButton(systemName: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: systemName)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundStyle(.white.opacity(0.55))
+                .frame(width: 28, height: 28)
+                .background(Color.white.opacity(0.09))
+                .clipShape(RoundedRectangle(cornerRadius: 7))
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+
     private func handleHoverChange() {
         let hovered = pillHovered || notchHovered
         dashboardHoverTask?.cancel()
@@ -501,9 +516,6 @@ private extension NotchView {
             }
         }
     }
-
-
-
 
 
     private func applyDashboardTabPolicy() {
@@ -655,8 +667,5 @@ private extension NotchView {
         settingsViewModel.application.appLanguage.locale.dn(key, fallback: fallback)
     }
 }
-
-
-
 
 
