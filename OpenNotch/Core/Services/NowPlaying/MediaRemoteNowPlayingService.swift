@@ -516,7 +516,8 @@ private extension MediaRemoteNowPlayingService {
             refreshedAt: .now
         )
 
-        if let applicationPlaybackState = snapshot.resolvedApplicationPlaybackState(
+        if payload.playing != false,
+           let applicationPlaybackState = snapshot.resolvedApplicationPlaybackState(
             from: applicationPlaybackStates
         ) {
             snapshot = snapshot.applying(applicationPlaybackState: applicationPlaybackState)
@@ -581,7 +582,11 @@ private extension MediaRemoteNowPlayingService.AdapterPayload {
     }
 
     var resolvedPlaybackRate: Double {
-        playbackRate ?? (playing == true ? 1 : 0)
+        if playing == false {
+            return 0
+        }
+
+        return playbackRate ?? (playing == true ? 1 : 0)
     }
 
     func resolvedShuffleState(previousSnapshot: NowPlayingSnapshot?) -> Bool {
