@@ -5,6 +5,8 @@ struct PillRingView: View {
     let widget: NotchBarWidget
     let ringSize: CGFloat
 
+    @AppStorage(AppStorageKeys.NotchBar.networkSpeedColorMode) private var networkSpeedColorModeRaw = NetworkSpeedColorMode.directional.rawValue
+
     var body: some View {
         switch widget {
         case .networkSpeed:
@@ -12,16 +14,16 @@ struct PillRingView: View {
                 HStack(spacing: 3) {
                     Image(systemName: "arrowtriangle.up.fill")
                         .font(.system(size: 6))
-                        .foregroundStyle(.blue)
+                        .foregroundStyle(networkSpeedColor.upload)
                     Text(systemMonitorViewModel.formattedSpeed(systemMonitorViewModel.uploadSpeed))
-                        .foregroundStyle(.blue)
+                        .foregroundStyle(networkSpeedColor.upload)
                 }
                 HStack(spacing: 3) {
                     Image(systemName: "arrowtriangle.down.fill")
                         .font(.system(size: 6))
-                        .foregroundStyle(.green)
+                        .foregroundStyle(networkSpeedColor.download)
                     Text(systemMonitorViewModel.formattedSpeed(systemMonitorViewModel.downloadSpeed))
-                        .foregroundStyle(.green)
+                        .foregroundStyle(networkSpeedColor.download)
                 }
             }
             .font(.system(size: 10, weight: .medium, design: .monospaced))
@@ -40,6 +42,15 @@ struct PillRingView: View {
                          color: Color.pillColor(systemMonitorViewModel.diskUsage, warn: 80, danger: 90),
                          label: "DSK")
                 .frame(width: ringSize, height: ringSize)
+        }
+    }
+
+    private var networkSpeedColor: (upload: Color, download: Color) {
+        switch NetworkSpeedColorMode(rawValue: networkSpeedColorModeRaw) ?? .directional {
+        case .directional:
+            return (.blue, .green)
+        case .unifiedWhite:
+            return (.white, .white)
         }
     }
 }

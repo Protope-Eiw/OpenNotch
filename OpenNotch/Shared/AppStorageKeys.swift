@@ -7,9 +7,10 @@ enum AppStorageKeys {
         static let dashboardTransitionStyle = "settings.general.dashboardTransitionStyle"
     }
     enum NotchBar {
-        static let leftWidgets  = "settings.notchBar.leftWidgets"
-        static let rightWidgets = "settings.notchBar.rightWidgets"
-        static let hideWidgets  = "settings.notchBar.hideWidgets"
+        static let leftWidgets            = "settings.notchBar.leftWidgets"
+        static let rightWidgets           = "settings.notchBar.rightWidgets"
+        static let hideWidgets            = "settings.notchBar.hideWidgets"
+        static let networkSpeedColorMode  = "settings.notchBar.networkSpeedColorMode"
     }
     enum Overview {
         static let showApps          = "settings.overview.showApps"

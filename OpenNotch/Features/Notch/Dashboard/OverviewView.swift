@@ -568,7 +568,7 @@ struct OverviewAppPickerView: View {
             Divider()
 
             HStack {
-                Text(L10n.app("appLauncher.pinned", fallback: "Pinned \(store.apps.count) / 12 apps"))
+                Text(L10n.appFormat("appLauncher.pinned", fallback: "Pinned %lld / 12 apps", Int64(store.apps.count)))
                     .font(.system(size: 10))
                     .foregroundStyle(.secondary)
                 Spacer()
